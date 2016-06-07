@@ -1,0 +1,15 @@
+{
+    "plugins": [
+        "ace",
+        "-adsense",
+        "-baidu",
+        "gist",
+        "github-buttons",
+        "github"
+    ],
+    "pluginsConfig": {
+        "github": {
+            "url": "https://github.com/devnaga/gists"
+        }
+    }
+}
