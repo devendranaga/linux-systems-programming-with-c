@@ -2,25 +2,25 @@
 
 ###1. select system call
 
-```select``` system call is used to wait on multiple file descriptors at the same time. The file descriptors can be a file, socket, pipe, message queue etc.
+`select` system call is used to wait on multiple file descriptors at the same time. The file descriptors can be a file, socket, pipe, message queue etc.
 
-```FD_SET``` is used to set the corresponding file descriptor in the given fd_set.
+`FD_SET` is used to set the corresponding file descriptor in the given `fd_set`.
 
-```FD_ISSET``` is used to test if the corresponding file descriptor is set in the given fd_set.
+`FD_ISSET` is used to test if the corresponding file descriptor is set in the given `fd_set`.
 
-```FD_ZERO``` resets a given fd_set.
+`FD_ZERO` resets a given `fd_set`.
 
-```FD_CLR``` clears an fd in the fd_set.
+`FD_CLR` clears an fd in the `fd_set`.
 
 
-```select``` can also be used to perform millisecond timeout. This can also be used to selective wait for an event or a delay.
+`select` can also be used to perform millisecond timeout. This can also be used to selective wait for an event or a delay.
 
-the ```select``` from the manual page looks like below:
+the `select` from the manual page looks like below:
 
-    int select(int nfd, FD_SET *rdfd, FD_SET *wrfd, FD_SET *exfd, struct timeval *timeout)
-    
 
-The select returns number of file descriptors contained in the three returned file descriptor sets and returns ```0``` if there is a timeout.
+`int select(int nfd, FD_SET *rdfd, FD_SET *wrfd, FD_SET *exfd, struct timeval *timeout);`
+
+The select returns number of file descriptors contained in the three returned file descriptor sets and returns `0` if there is a timeout.
 
 A TCP server using the select loop is demonstrated below:
 
@@ -30,7 +30,7 @@ The select when returned (and with no error), the above fdsets should be tested 
 
 The below two programs can be downloaded here: [Server](https://github.com/DevNaga/gists/blob/master/tcp_select_server.c) and [Client](https://github.com/DevNaga/gists/blob/master/tcp_client.c)
 
-```
+```c
 #include <stdio.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -143,7 +143,7 @@ int main(int argc, char **argv)
 
 The tcp sample client is defined below:
 
-```
+```c
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -192,12 +192,14 @@ The above two programs are only demonstratable programs. They have many errors. 
 
 The timeout argument used for the timer events or used as a timer callback.
 
-    struct timeval timeout = {
-        .tv_sec = 0,
-        .tv_usec = 250 * 1000,
-    };
+```c
+struct timeval timeout = {
+    .tv_sec = 0,
+    .tv_usec = 250 * 1000,
+};
     
-    select(1, NULL, NULL, NULL, &timeout);
+select(1, NULL, NULL, NULL, &timeout);
+```
 
 The above code waits for the timeout of 250 milliseconds and the `select` call returns 0. The `select` may not wait for the exact timeout and for this, more accurate timing APIs must be used. such as the `timer_create`, `setitimer`, or `timerfd_create` set of system calls. We will read more on the timers in the **Time and Timers** chapter.
 
