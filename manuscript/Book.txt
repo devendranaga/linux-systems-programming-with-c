@@ -45,6 +45,7 @@ chroot.md
 readlink.md
 symlink.md
 backtracing.md
+popen_and_pclose.md
 prctl.md
 seventh_chapter.md
 posix_threads_programming.md
