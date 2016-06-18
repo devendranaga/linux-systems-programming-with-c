@@ -24,7 +24,7 @@
    * [waiting for child processes](waiting_for_child_processes.md)
    * [sigchld handling](sigchld_handling.md)
    * [process manager](process_manager.md)
-   * dup2
+   * [dup2](dup.md)
 * [Socket programming](fourth_chapter.md)
    * [select and epoll](select_and_epoll.md)
    * [socket library](socket_library.md)
