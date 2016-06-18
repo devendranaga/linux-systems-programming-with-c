@@ -5,7 +5,6 @@ For any systems level programs, tools are at most important for validation, simu
 
 The tools may range from a simple program that gets transmitted and received packet counts to a tool that performs dynamic changing of configuration items in the system daemons without the need of a restart.
 
-
 ## Basics and starting up
 
 
@@ -39,7 +38,7 @@ int main(int argc, char **argv)
         program_usage(argv[0]);
         return -1;
     }
-    
+
     if (!strcmp(argv[1], "add")) {
         printf("add result %d\n", add(atoi(argv[2]), atoi(argv[3])));
     } else if (!strcmp(argv[1], "sub")) {
@@ -48,7 +47,7 @@ int main(int argc, char **argv)
         program_usage(argv[0]);
         return -1;
     }
-    
+
     return 0;
 }
 ```
@@ -77,7 +76,7 @@ def sub(a, b):
 
 def program_usage():
     print sys.argv[0] + " add/sub num1 num2"
-    
+
 if len(sys.argv) != 4:
     program_usage()
     exit(1)

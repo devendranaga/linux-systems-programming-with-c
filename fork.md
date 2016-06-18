@@ -17,22 +17,27 @@ The below program gives an example of `fork` system call.
 int main(void)
 {
     pid_t pid;
-    
+
     pid = fork();
     if (pid > 0) {
-        printf("parent process\n");
+        printf("parent process - my pid %d child pid %d\n",
+                            getpid(), pid);
     } else {
-        printf("child process\n");
+        printf("child process - my pid %d parent pid %d\n",
+                            getpid(), pid);
     }
     sleep(2);
 }
 ```
+**Example: demonstration of fork system call**
 
 notice that when you run the above program several times, the print statements "parent process" and "child process" never come exactly one after the another for ex: parent first and then the child. This is because of the scheduling job that is done internally in the kernel.
 
-After a child process is created the parent can continue its execution of the remaining code or can exit by calling the `exit` system call. When the parent exits before the child could run, the child becomes an orphan. This process is then parented by the init process (pid 1).
+After a child process is created the parent can continue its execution of the remaining code or can exit by calling the `exit` system call. When the parent exits before the child could run, the child becomes an orphan. This process is then parented by the init process (pid 1). This method is one of the step in creating the system daemon.
 
-In an other case where in the child gets stopped or exited before the parent. In this case, the parent must cleanup the resources that are allocated to the child by calling one of the functions `wait`, `waitpid`. In some cases, when the parent process does not perform the task of cleanup, the child process will then go into a state called zombie state.
+In an other case where in the child gets stopped or exited before the parent. In this case, the parent must cleanup the resources that are allocated to the child by calling one of the functions `wait`, `waitpid`. In some cases, when the parent process does not perform the task of cleanup, the child process will then go into a state called zombie state. In the zombie state, the child process although is not running, its memory is never get cleaned up by the parent process. Notice the "Z" symbol in the `ps -aux` command.
+
+fork system call is mostly used in the creation of system daemons.
 
 ## wait
 
