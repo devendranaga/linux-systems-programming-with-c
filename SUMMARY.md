@@ -24,7 +24,7 @@
    * [waiting for child processes](waiting_for_child_processes.md)
    * [sigchld handling](sigchld_handling.md)
    * [process manager](process_manager.md)
-   * [dup2](dup.md)
+   * [dup2](dup2.md)
 * [Socket programming](fourth_chapter.md)
    * [select and epoll](select_and_epoll.md)
    * [socket library](socket_library.md)
@@ -61,6 +61,6 @@
    * [mbedtls](mbedtls.md)
    * [docker](docker.md)
    * [syslogd](syslogd.md)
+* [Software development Practices](software_development_practices.md)
 * [Programming problems](programming_problems.md)
    * [C programming](c_programming.md)
-

@@ -4,27 +4,29 @@ The stat system call is very useful in knowing the information about the file. T
 
 The `stat` looks like below:
 
-    int stat(const char *path, struct stat *s);
+`int stat(const char *path, struct stat *s);`
 
 stat returns 0 on success. So we should only access the structure returned in the stat call if it returns 0.
 
 The most common usage of `stat` is to know if the given file is a regular file or directory.
 
-    char *path = "/home/dev/work/test.c"
-    struct stat s;
-    
-    if (stat(path, s) < 0) {
-        fprintf(stderr, "failed to stat %s\n", s);
-        perror("stat:");
-        return -1;
-    }
-    
-    if (s.st_mode & S_IFREG) {
-        fprintf(stderr, "regular file\n");
-    } else {
-        fprintf(stderr, "unknown or un-tested file type\n");
-    }
-    
+```c
+char *path = "/home/dev/work/test.c"
+struct stat s;
+
+if (stat(path, s) < 0) {
+    fprintf(stderr, "failed to stat %s\n", s);
+    perror("stat:");
+    return -1;
+}
+
+if (s.st_mode & S_IFREG) {
+    fprintf(stderr, "regular file\n");
+} else {
+    fprintf(stderr, "unknown or un-tested file type\n");
+}
+```
+
 **Example: basic stat example**
 
 

@@ -47,17 +47,17 @@ We compile it with ```gcc -Wall errno_strings.c```. It will generate an ```a.out
 Then we run our binary with the correct option as below:
 
         ./a.out errno_string.c
-        
+
         fopen: Success
         opened file errno_strings.c [0xeb1018]
-        
+
 
 The ```perror``` gives us that the file has been opened successfully. The filepointer is then printed on to the screen.
 
 Then we run our binary with the incorrect option as below:
 
         ./a.out errno_string.c.1
-        
+
         failed to open errno_string.c.1
         fopen: No such file or directory
 
@@ -74,9 +74,17 @@ During the execution of the function, the `SIGCHLD` will be blocked and `SIGINT`
 
 The `system` function returns -1 on error and returns the value returned by command. The return code is actually the value left shifted by 7. We should be using the `WEXITSTATUS(status)`.
 
+However the `system` system call has some serious vulnerabilities and should not be used. [Here](https://www.securecoding.cert.org/confluence/pages/viewpage.action?pageId=2130132) is the link.
+
 ### Exec family of calls
 
 The exec family of functions create a new process image from the given binary file or a script and replaces the contents of the original program with the contents of the given binary file or a script. These functions only return in case of a failure such as when the path to the binary / script file is not found.
+
+the following are the exec functions.
+
+```c
+
+```
 
 ### system variables
 
@@ -85,7 +93,7 @@ The exec family of functions create a new process image from the given binary fi
 The API prototype is the following
 
     long sysconf(int name);
-    
+
 symbolic constants for each of the variables is found at include file `<unistd.h>`. The `name` argument specifies the system variable to be queried.
 
 sysconf() example on the max opened files:
@@ -97,12 +105,11 @@ sysconf() example on the max opened files:
 int main(void)
 {
     int maxfd;
-    
+
     maxfd = sysconf(_SC_OPEN_MAX);
     printf("maxfd %d\n", maxfd);
-    
+
     return 0;
 }
 
 ```
-

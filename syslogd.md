@@ -9,7 +9,7 @@ The `syslog` API packs the message into the format that is understandable by the
 
 The syslogs are also called system logs and are stored under `/var/log/` with a common name of either `syslog` or `messages`.
 
-With the systemd in the latest linux operating systems, the functionality of syslogd is faded. However, the syslogd is still an important gem in the embedded environment.
+With the systemd in the latest linux operating systems, the functionality of syslogd has faded. However, the syslogd is still an important gem in the embedded environment.
 
 With different operating systems providing the same syslog API behavior and support the syslog API may become generic and portable.
 
@@ -54,3 +54,6 @@ The linux kernel prints all its messages to the ring buffer. The ring buffer can
 
 Some of syslog implementations read the `/dev/kmsg` and parse and then print them into the log file under `/var/log/`.
 
+## /dev/kmsg
+
+`/dev/kmsg` is a device file that stores the kernel logging information.
