@@ -5,15 +5,23 @@
 
 In linux, sockets are the pipes or the software wires that are used for the exchange of the data using the TCP/IP protocol stack.
 
-The server program opens a sockets, waits for someone to connect to it. The socket can be created to communicate over the TCP or the UDP protocol and the underlying networking layer can be IPv4 or IPv6.
+The server program opens a sockets, waits for someone to connect to it. The socket can be created to communicate over the TCP or the UDP protocol and the underlying networking layer can be IPv4 or IPv6. Often sockets are used to provide interprocess communication between the programs with in the OS.
 
 In the Linux systems programming, the TCP protocol is denoted by a macro called **SOCK_STREAM** and the UDP protocol is denoted by a macro called **SOCK_DGRAM**. Either of the above macros are passed as the second argument to the **socket** API.
+
+Below are the most commonly used header files in the socket programming.
+
+1. `<sys/socket.h>`
+2. `<arpa/inet.h>`
+3. `<netinet/in.h>`
 
 The protocol IPv4 is denoted by **AF_INET** and the protocol IPv6 is denoted by **AF_INET6**. Either of these macros are passed as the first argument to the **socket** API.
 
 The socket API usually takes the following form.
 
-    socket (Address family, transport protocol, IP protocol);
+```c
+socket (Address family, transport protocol, IP protocol);
+```
 
 for a TCP socket:
 
@@ -25,32 +33,33 @@ for a UDP socket:
 
 The return value of the **socket** API is the actual socket connection. The below code snippet will give an example of the usage:
 
-    int sock;
+```c
+int sock;
     
-    // create a TCP socket
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0) {
-        perror("failed to open a socket");
-        return -1;
-    }
-    
-    printf("the socket address is %d\n", sock);
+// create a TCP socket
+sock = socket(AF_INET, SOCK_STREAM, 0);
+if (sock < 0) {
+    perror("failed to open a socket");
+    return -1;
+}
 
+printf("the socket address is %d\n", sock);
+```
 
 The returned socket address is then used as the communication channel.
 
 To create a server, we must use a **bind** system call to tell others that we are running at some port and ip. Like naming the connection and allowing others to talk with us by referring to the name.
 
 
-    bind(Socket Address, Server Address Structure, length of the Server address structure);
-    
+```c
+bind(Socket Address, Server Address Structure, length of the Server address structure);
 
-    ret = bind(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
-    
+ret = bind(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+```    
 
 It is advised to perform the `setsockopt` call with `SO_REUSEADDR` option after a call to the `socket`. This is described nicely [here](http://www.unixguide.net/network/socketfaq/4.5.shtml).
 
-In brief, if you stopped the server for some time and started back again quickly, the `bind` may fail. This is because the OS still contain the context associated to your server (ip and port) and does not allow others to connect with the same information. The context gets cleared with the `setsockopt` option before the bind.
+In brief, if you stopped the server for some time and started back again quickly, the `bind` may fail. This is because the OS still contain the context associated to your server (ip and port) and does not allow others to connect with the same information. The context gets cleared with the `setsockopt` call with the `SO_REUSEADDR` option before the bind.
 
 The setsockopt option would look like the below.
 
@@ -58,14 +67,18 @@ The setsockopt option would look like the below.
 
 The basic and most common usage of the `setsockopt` is like the below:
 
-    int reuse_addr = 1;   // turn on the reuse address operation in the OS
+```c
+int reuse_addr = 1;   // turn on the reuse address operation in the OS
     
-    ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr, sizeof(reuse_addr));
+ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr, sizeof(reuse_addr));
+```
 
 A server must register to the OS that it is ready to perform accepting the connections by using the `listen` system call. It takes the below form:
 
-    int listen(int sock_fd, int backlog);
-    
+```c
+int listen(int sock_fd, int backlog);
+```
+
 The sock_fd is the socket address returned by the `socket` system call. The backlog defines the number of pending connections on to the socket. If the backlog connections cross the limit of `backlog`, the client will get a connection refused error. The usual call to the listen for an in-system and embedded server would be as follows:
 
     ret = listen(sock, 10);     // server will only perform replies to a max of 10 clients
@@ -106,14 +119,45 @@ The `connect` system call most commonly takes the following form:
     
     ret = connect(sock_fd, (struct sockaddr *)&server, sizeof(server));
 
-    
+The address `127.0.0.1` is called the loopback address. Most server programs that run locally with in the computer for IPC use this address for communication with the clients.
+
+#### inet_addr
+
+```c
+in_addr_t inet_addr(const char *cp);
+```
+
+#### inet_aton
+
+```c
+int inet_aton(const char *cp, struct in_addr *inp);
+```
+
+#### inet_ntoa
+
+```c
+char *inet_ntoa(struct in_addr in);
+```
+
+#### inet_ntop
+
+```c
+const char *inet_ntop(int af, const void *src,
+                      char *dst, socklen_t size);
+```
+
+#### inet_pton
+
+```c
+int inet_pton(int af, const char *src, void *dst);
+```
+
 The below sample programs describe about the basic server and client programs. The server programs creates the TCP IPv4 socket, sets up the socket option `SO_REUSEADDR`, binds, adds a backlog of 10 connections and waits on the accept system call. The server ip and port are given as the command line arguments.
 
+The accept returns a socket that is connected to this server. The below program simply prints the socket address onto the screen and stops the program.
 
-The accept returns a socket that got connected to this server. The below program simply prints the socket address onto the screen and stops the program.
 
-
-```
+```c
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -189,12 +233,11 @@ int main(int argc, char **argv)
 }
 ```
 
-**Example: Sample server program
-**
+**Example: Sample server program**
 
 The client program is described below. It creates a TCP IPv4 socket, connect to the server, on a successful connection, it prints the connection result and stops the program.
 
-```
+```c
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -247,8 +290,7 @@ int main(int argc, char **argv)
 }
 ```
 
-**Example: Sample client program
-**
+**Example: Sample client program**
 
 
 ### 2. Sending and Receiving over the Sockets
@@ -262,14 +304,25 @@ The `send` system call sends the data over the TCP socket  and the `sendto` syst
 The `recv` system call takes the following form:
 
     ssize_t recv(int sock_fd, void *buf, size_t len, int flags);
-    
 The `recv` function receives data from the sock_fd into the buf of length len. The options of `recv` are specified in the flags argument. Usually the flags are specified as 0. However, for a non blocking mode of socket operation **MSG_DONTWAIT** option is used.
 
 The example `recv`:
 
     recv_len = recv(sock, buf, sizeof(buf), 0);
     
-The `recv_len` will return the length of the bytes received. `recv_len` is 0 or less than 0, meaning that the other end has closed the connection and we must close the connection. Otherwise, the `recv` function call will be restarted by the OS repeatedly causing heavy CPU loads.
+The `recv_len` will return the length of the bytes received. `recv_len` is 0 or less than 0, meaning that the other end of the socket has closed the connection and we must close the connection. Otherwise, the `recv` function call will be restarted by the OS repeatedly causing heavy CPU loads. The code snipped shows the handling.
+
+```c
+int ret;
+
+ret = recv(sock, buf, sizeof(buf), 0);
+if (ret <= 0) {
+    close(sock);
+    return -1;
+}
+```
+
+The above code snippet checks for `recv` function return code for 0 and less than 0 and handles socket close.
 
 The `recvfrom` system call is much similar to the `recv` and takes the following form:
 
@@ -306,3 +359,162 @@ The `sendto` is same as `send` with address.
 
 The client program now performs a send system call to send "Hello" message to the server. The server program then receives over a recv system call to receive the message and prints it on the console.
 
+With the `recv` and `send` system calls the above programs are modified to look as below.
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#define SAMPLE_SERVER_CONN 10
+
+int main(int argc, char **argv)
+{
+    int ret;
+    int sock;
+    int conn;
+    int set_reuse = 1;
+    struct sockaddr_in remote;
+    socklen_t remote_len;
+    char buf[1000];
+
+    if (argc != 3) {
+        fprintf(stderr, "%s [ip] [port]\n", argv[0]);
+        return -1;
+    }
+
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        perror("failed to socket\n");
+        return -1;
+    }
+
+    ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &set_reuse, sizeof(set_reuse));
+    if (ret < 0) {
+        perror("failed to setsockopt\n");
+        close(sock);
+        return -1;
+    }
+
+    remote.sin_family = AF_INET;
+    remote.sin_addr.s_addr = inet_addr(argv[1]);
+    remote.sin_port = htons(atoi(argv[2]));
+
+    ret = bind(sock, (struct sockaddr *)&remote, sizeof(remote));
+    if (ret < 0) {
+        perror("failed to bind\n");
+        close(sock);
+        return -1;
+    }
+
+    ret = listen(sock, SAMPLE_SERVER_CONN);
+    if (ret < 0) {
+        perror("failed to listen\n");
+        close(sock);
+        return -1;
+    }
+
+    remote_len = sizeof(struct sockaddr_in);
+
+    conn = accept(sock, (struct sockaddr *)&remote, &remote_len);
+    if (conn < 0) {
+        perror("failed to accept\n");
+        close(sock);
+        return -1;
+    }
+
+    printf("new client %d\n", conn);
+
+    memset(buf, 0, sizeof(buf));
+
+    printf("waiting for the data ... \n");
+    ret = recv(conn, buf, sizeof(buf), 0);
+    if (ret <= 0) {
+        printf("failed to recv\n");
+        close(conn);
+        return -1;
+    }
+
+    printf("received %s \n", buf);
+
+    close(conn);
+
+    return 0;
+}
+```
+**Example: Tcp server with recv calls**
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#define SAMPLE_SERVER_CONN 10
+
+int main(int argc, char **argv)
+{
+    int ret;
+    int sock;
+    struct sockaddr_in remote;
+    socklen_t remote_len;
+    char buf[1000];
+
+    if (argc != 3) {
+        fprintf(stderr, "%s [ip] [port]\n", argv[0]);
+        return -1;
+    }
+
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        perror("failed to socket\n");
+        return -1;
+    }
+
+    remote.sin_family = AF_INET;
+    remote.sin_addr.s_addr = inet_addr(argv[1]);
+    remote.sin_port = htons(atoi(argv[2]));
+
+    remote_len = sizeof(struct sockaddr_in);
+
+    ret = connect(sock, (struct sockaddr *)&remote, remote_len);
+    if (ret < 0) {
+        perror("failed to accept\n");
+        close(sock);
+        return -1;
+    }
+
+    printf("connect success %d\n", ret);
+
+    printf("enter something to send\n");
+
+    fgets(buf, sizeof(buf), stdin);
+
+    ret = send(sock, buf, strlen(buf), 0);
+    if (ret < 0) {
+        printf("failed to send %s\n", buf);
+        close(sock);
+        return -1;
+    }
+
+    printf("sent %d bytes\n", ret);
+
+    close(sock);
+
+    return 0;
+}
+```
+**Example: Tcp client with send calls**

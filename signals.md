@@ -44,10 +44,15 @@ A very good [stackoverflow question](http://stackoverflow.com/questions/231912/w
 
 2. As soon as the `signal()` handler is executed, the `signal()` sets the default handler to `SIG_DFL` which may be `SIGINT / SIGTERM / SIGQUIT` and the handler must reset the function back to itself so that when the signal occur again, the signal can be handled back. However, with the signal() allowing the handler to be called even though the handler is already executing, this will implicate a serious problem where in which the small window between the register and default would let the program go into `SIG_DFL`.
 
+### sigwaitinfo
+
+### sigtimedwait
+
+### sigwait
 
 ### signalfd
 
-signalfd is a new system call introduced by the linux kernel. The signalfd system call returns a file descriptor associated with the signal. This file descriptor is then used to wait on the select, poll or epoll system calls.
+signalfd is a new system call introduced by the linux kernel. The signalfd system call returns a file descriptor associated with the signal. This file descriptor is then used to wait on the select, poll or epoll system calls. Unlike the `signal` or `sigaction` the signals are queued in the socket buffer and can be read on the socket.
 
 The prototype of the `signalfd` is as follows.
 
@@ -57,11 +62,93 @@ To use the `signalfd` one must include `<sys/signalfd.h>`.
 
 If the fd argument is -1, the `signalfd` returns a new file descriptor. If fd argument is not -1, then the fd that is returned from previous calls to the `signalfd` must be given as an argument.
 
-The mask argument is similar to the one that we pass to the `sigprocmask` system call. This allows the `signalfd` to create an `fd` out for the mask. As the mask is created, the signals in the mask should be blocked with the `sigprocmask`. This allows the correct functionality of the `signalfd`. 
+The mask argument is similar to the one that we pass to the `sigprocmask` system call. This allows the `signalfd` to create an `fd` out for the mask. As the mask is created, the signals in the mask should be blocked with the `sigprocmask`. This allows the correct functionality of the `signalfd`.
 
 The `flags` argument is usually set to 0. It is much similar to the O_NONBLOCK flag options of other system calls.
 
+Include `<sys/signalfd.h>` to use the `signalfd` system call.
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/signalfd.h>
+#include <string.h>
+
+int main(int argc, char **argv)
+{
+    int sfd;
+    sigset_t mask;
+
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGQUIT);
+    sigaddset(&mask, SIGINT);
+
+    if (sigprocmask(SIG_BLOCK, &mask, NULL) < 0) {
+        printf("afiled to sigprocmask\n");
+        return -1;
+    }
+
+    sfd = signalfd(-1, &mask, 0);
+    if (sfd < 0) {
+        printf("failed to get signalfd\n");
+        return -1;
+    }
+
+    while (1) {
+        struct signalfd_siginfo sf;
+        int ret;
+
+        memset(&sf, 0, sizeof(sf));
+        ret = read(sfd, &sf, sizeof(sf));
+        if (ret != sizeof(sf)) {
+            printf("invalid length of siginfo %d received\n", ret);
+            return -1;
+        }
+        
+        printf("pid %d signal value: %d signal code: %d\n",
+        				sf.ssi_pid,
+        				sf.ssi_signo,
+        				sf.ssi_code);
+
+        if (sf.ssi_signo == SIGQUIT) {
+            printf("received termination signal\n");
+        } else if (sf.ssi_signo == SIGINT) {
+            printf("received interrupt\n");
+        } else {
+            printf("invalid signal %d\n", sf.ssi_signo);
+        }
+    }
+
+    close(sfd);
+
+    return 0;
+}
+```
+
+**Example: signalfd basic example**
+
 ### sigaddset
+
+`sigaddset` adds the signal to a set. The prototype is as follows.
+
+```c
+int sigaddset(sigset_t *set, int signo);
+```
+
+The `signo` gets added to the `set`. Multiple calls of the `sigaddset` on the same `set` would add the signals to the set. The function is mostly used in generating a signal mask for the `sigprocmask`. See more about `sigprocmask` in the below sections.
+
+### sigfillset
+
+`sigfillset` initializes the `set` to full, including all the signals. The prototype is as follows.
+
+```c
+int sigfillset(sigset_t *set);
+```
+
+### sigemptyset
+
+### sigismember
 
 ### sigdelset
 

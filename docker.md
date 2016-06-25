@@ -54,7 +54,6 @@ dev@hanzo:~$ docker run -a stdin -a stdout -i -t ubuntu /bin/bash
 root@496911dda486:/#
 ```
 
-
 docker info lists system wide information
 
 ```bash
@@ -84,4 +83,3 @@ docker stats display a live stream of one or more containers.
 CONTAINER           CPU %               MEM USAGE/LIMIT       MEM %               NET I/O
 496911dda486        0.00%               34.39 MiB/707.1 MiB   4.86%               21.58 MiB/492 KiB
 ```
-

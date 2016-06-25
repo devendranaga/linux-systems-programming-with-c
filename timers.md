@@ -32,6 +32,17 @@ int main(int argc, char **argv)
     return 0;
 }
 ```
+compile and run the program as follows.
+
+```bash
+root@b516cef12271:~/books# gcc alarm.c
+root@b516cef12271:~/books# ./a.out
+Alarm signal
+```
+
+Removing the `while (1);` would make the program stop instead of waiting in the alarm. This means that the alarm function registers a timer in the kernel and returns. The kernel, upon a timer expiry, triggers a SIGALRM signal that, when handled by a program, the signal handler is invoked.
+
+The waiting is done in the `while` statement so as to allow the kernel to trigger the timer for this running process.
 
 
 ## setitimer
@@ -161,4 +172,3 @@ The program first registers the SIGALRM signal via `sigaction` and registers the
 
 
 ## timerfd_create
-
