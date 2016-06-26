@@ -17,9 +17,9 @@ This chapter mostly concentrates on the C programming language and also gives ou
         sudo apt-get install gcc build-essentials
 
   Under Fedora (as root):
-  
-        dnf install gcc
 
+        dnf install gcc
+* pick an editor to type the source code such as `atom` editor or `vim` that colors the types, functions etc.. to ease up understanding and coding.
 
 ### The Python programming Language
 
@@ -33,12 +33,12 @@ This chapter mostly concentrates on the C programming language and also gives ou
         sudo apt-get install python
 
   Under Fedora (as root):
-  
+
         dnf install python
 * pip is a tool used to install python modules. To install pip on the Ubuntu use the following command
 
         sudo apt-get install python-pip
-        
+
   Under Fedora
 
         dnf install python-pip

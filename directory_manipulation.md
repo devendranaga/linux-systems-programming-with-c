@@ -12,29 +12,33 @@ The `opendir` system call opens up a directory that is given as its first argume
 The manual page of the `opendir` gives us the following prototype.
 
     DIR * opendir(const char *name);
-    
+
 The call returns the directory tree node of type `DIR` as a pointer.
 
 The manual page of the `readdir` gives us the following prototype.
 
     struct dirent * readdir(DIR *dir);
-    
+
 The `readdir` takes the directory tree node pointer of type `DIR` that is returned from the `opendir` call. The `readdir` call is repeatedly called until it returns `NULL`. Each call to the `readdir` gives us a directory entry pointer of type `struct dirent`. From the man pages this structure is as follows:
 
-    struct dirent {
-        ino_t          d_ino;       /* inode number */
-        off_t          d_off;       /* not an offset; see NOTES */
-        unsigned short d_reclen;    /* length of this record */
-        unsigned char  d_type;      /* type of file; not supported
+```c
+struct dirent {
+    ino_t          d_ino;       /* inode number */
+    off_t          d_off;       /* not an offset; see NOTES */
+    unsigned short d_reclen;    /* length of this record */
+    unsigned char  d_type;      /* type of file; not supported
                                               by all filesystem types */
-        char           d_name[256]; /* filename */
-    };
+    char           d_name[256]; /* filename */
+};
+```
 
 The `d_name` and `d_type` elements in the structure are the most important things to us. The `d_name` variable gives us the file / directory that is present under the parent directory. The `d_type` tells us the type of the `d_name`. If the `d_type` is `DT_DIR`, then the `d_name` contains a directory, and if the `d_type` is `DT_REG`, then the `d_name` is a regular file.
 
 An `opendir` call must follow a call to `closedir` if the `opendir` call is successful. From the man pages, the `closedir` call looks below:
 
-    int closedir(DIR *dirp);
+```c
+int closedir(DIR *dirp);
+```
 
 The `closedir` will close the directory referenced by `dirp` pointer and frees up any memory that is allocated by the `opendir` call.
 
@@ -98,6 +102,34 @@ The above example simply lists down the files and directories. By taking this as
 1. Sort the contents of the directory and print them.
 2. Recursively perform reading of the directories with in the parent directories until there exist no more directories. The directories "." and ".." can be ignored.
 
+Some file systems does not set the `entry->d_type` variable. Thus it is advised to perform the `stat` system call.
+
+The following example shows how a `stat` system call is used to find out the filetype.
+
+```c
+struct stat s;
+char buf[1000];
+
+while (entry = readdir(dirp)) {
+    memset(buf, 0, sizeof(buf));
+    strcpy(buf, directory);
+    strcat(buf, "/");
+    strcpy(buf, dir->d_name);
+
+    if (stat(buf, &s)) {
+        printf("failed to stat %s\n", buf);
+        continue;
+    }
+
+    if (S_ISREG(s.st_mode)) {
+        printf("regular file %s\n", buf);
+    } else if (S_ISDIR(s.st_mode)) {
+        printf("directory %s\n", buf);
+    } else if (S_ISLNK(s.st_mode)) {
+        printf("link %s\n", buf);
+    }
+}
+```
 ### Creating directories with ```mkdir```
 
 The `mkdir` also a system call that creates a directory. The command `mkdir` with option `-p` would recursively create the directories. However, the `mkdir` system call would only create one directory.
@@ -147,7 +179,51 @@ However, when we compile and run the above program with good inputs as the follo
         successfully created test/
         going into test/
         inside test/
-        
+
 and when the program exits, we are still in the directory where the program is compiled and run.
 
 This is because the program does not affect the current directory of the shell (Shell is however a program too). The directory change is only affected to the program but not to anything else in the userspace if they are not related.
+
+## scandir
+
+The `scandir` scans the directory and calls the `filter` and `compar` functions and returns a list of `struct dirent` datastructures and returns the length of them. The prototype of the `scandir` looks as below..
+
+```c
+int scandir(const char *dir, struct dirent ***list,
+            int (*filter)(const struct dirent *),
+            int (*compar)(const struct dirent **, const struct dirent **));
+```
+
+The compare function can be a sorting function that arranges the files in an order. The `Glibc` has `alphasort` API to call as `compar` function. On success it returns the number of directory entries selected. On failure, it returns -1. Below is one of the example..
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
+
+int main(int argc, char **argv)
+{
+    struct dirent **list;
+    int n, i;
+
+    if (argc != 2) {
+        printf("%s [directory] \n", argv[0]);
+        return -1;
+    }
+
+    n = scandir(argv[1], &list, NULL, alphasort);
+    if (n < 0) {
+        printf("failed to scandir %s\n", argv[1]);
+        return -1;
+    }
+
+    for (i = 0; i < n; i ++) {
+        printf("name %s\n", list[i]->d_name);
+        free(list[i]);
+    }
+    free(list);
+
+    return 0;
+}
+```
+

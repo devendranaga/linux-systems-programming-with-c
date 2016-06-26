@@ -1,4 +1,4 @@
-# atoi and string to integer 
+# atoi and string to integer
 
 
 The `atoi` function perform an asci to integer conversion of a number stored in the string form. If it can't convert it, then it would return simply 0. However, value 0 is also a number and is valid. So in most of the cases `atoi` is only used for simple numbers and to programs that the input number string expected is always correct. In most of the cases, the `strtol` family of functions are preferred.
@@ -11,23 +11,23 @@ The rest of the code here performs a scanning of integer from a string input.
 ```c
 #include <stdio.h>
 #include <ctype.h>
-    
+
 int our_atoi(char *string)
 {
     int num;
     int ret;
     int i;
     int len = strlen(string);
-        
+
     for (i = 0; i < len; i++) {
         if (!isdigit(string[i]))
             return -1;
     }
-        
+
     ret = sscanf(string, "%d", &num);
     if (ret == 1)
         return num;
-            
+
     return -1;
 }
 ```
@@ -39,7 +39,7 @@ The strtol converts a string to the `long` type. The prototype looks as follows.
 ```c
 long strtol(const char *str, char **endptr, int base)
 ```
-    
+
 It returns the converted value from the string `str`.
 
 If the string does not contain the number (or any character that is present in the string), it will store the string from that character into the `endptr`.
@@ -61,20 +61,20 @@ int main(int argc, char **argv)
 {
     int data;
     char *errorp = NULL;
-    
+
     if (argc != 2) {
         printf("%s integer\n", argv[0]);
         return -1;
     }
-    
+
     data = strtol(argv[1], &errorp, 10);
     if (errorp && (errorp[0] != '\0')) {
         printf("invalid number %s\n", argv[0]);
         return -1;
     }
-    
+
     printf("converted %d\n", data);
-    
+
     return 0;
 }
 
@@ -89,12 +89,12 @@ int string_to_int_d(char *string, int *int_var)
 {
     int var;
     char *errorp = NULL;
-    
+
     var = strtol(string, &errorp, 10);
     if (errorp && (errorp[0] != '\0')) {
         return -1;
     }
-    
+
     *int_var = var;
     return 0;
 }
@@ -107,12 +107,12 @@ int string_to_int_h(char *string, int *int_var)
 {
     int var;
     char *errorp = NULL;
-    
+
     var = strtol(string, &errorp, 16);
     if (errorp && (errorp[0] != '\0')) {
         return -1;
     }
-    
+
     *int_var = var;
     return 0;
 }
@@ -159,3 +159,38 @@ int main(int argc, char **argv)
 ```
 
 # strtod
+
+The `strtod` converts a string into a `double`. The prototype looks as follows.
+
+```c
+double strtod(const char *nptr, char **endptr);
+```
+
+Just like other functions, it is always necessary to check the `endptr`.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char **argv)
+{
+    int ret;
+    char *endptr = NULL;
+    double val;
+
+    if (argc != 2) {
+        printf("%s [double] \n", argv[0]);
+        return -1;
+    }
+
+    val = strtod(argv[1], &endptr);
+    if (endptr && (endptr[0] != '\0')) {
+        printf("invalid double value %s\n", argv[1]);
+        return -1;
+    }
+
+    printf("value %f\n", val);
+
+    return 0;
+}
+```

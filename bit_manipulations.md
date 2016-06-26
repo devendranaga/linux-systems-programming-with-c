@@ -9,7 +9,7 @@ For example consider the following number 128 (in hex 0x80).
 
 lets,
 
-```
+```c
 a = 0x80
 MSBit_set = !!(a & 0x80)
 if (MSBit_set)
@@ -45,9 +45,8 @@ The bit representation would look as follows.
 `00000001`
 
 The fourth statement `var |= 0x02` would set 1 in the 1'st bit of the byte 1.
-It does not change any other bits except the 1st bit. When the fifth statement is executed it prints the value 0x3. 
+It does not change any other bits except the 1st bit. When the fifth statement is executed it prints the value 0x3.
 
 The bit representation would look as follows.
 
 `00000011`
-
