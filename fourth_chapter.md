@@ -25,11 +25,15 @@ socket (Address family, transport protocol, IP protocol);
 
 for a TCP socket:
 
-    socket(AF_INET, SOCK_STREAM, 0);
+```c
+socket(AF_INET, SOCK_STREAM, 0);
+```
 
 for a UDP socket:
 
-    socket(AF_INET, SOCK_DGRAM, 0);
+```c
+socket(AF_INET, SOCK_DGRAM, 0);
+```
 
 The return value of the **socket** API is the actual socket connection. The below code snippet will give an example of the usage:
 
@@ -518,3 +522,90 @@ int main(int argc, char **argv)
 }
 ```
 **Example: Tcp client with send calls**
+
+
+### Unix domain sockets
+
+The unix domain sockets used to communicate between processes on the same machine locally. The protocol used is `AF_UNIX`. The unix domain sockets can have `SOCK_STREAM` or `SOCK_DGRAM` protocol families.
+
+The example socket call can be the below..
+
+```c
+socket(AF_UNIX, SOCK_STREAM, 0);   -> for TCP
+socket(AF_UNIX, SOCK_DGRAM, 0);    -> for UDP
+```
+
+The `struct sockaddr_un` data structure is used for the unix domain sockets.
+
+```c
+struct sockaddr_un {
+    sa_family_t sun_family;
+    char        sun_path[108];
+};
+```
+
+The bind call can be as below..
+
+```c
+int ret;
+
+char *path = "/tmp/test_server.sock"
+
+struct sockaddr_un addr;
+
+addr.sun_family = AF_UNIX;
+unlink(path);
+strcpy(addr.sun_path, path);
+
+ret = bind(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_un));
+if (ret < 0) {
+    // handling the failure here
+    printf("failed to bind\n");
+    return -1;
+}
+
+```
+
+The `unlink` call is used before the bind to make sure the path is not being used. This is to make sure the `bind` call would be success.
+
+
+### socketpair
+
+`socketpair` creates an unnamed pair of sockets. Only the `AF_UNIX` is supported. Other than creating the two sockets, it is much similar to the two calls with `AF_UNIX`. The prototype is as follows.. 
+
+```c
+int socketpair(int domain, int type, int protocol, int sv[2]);
+```
+
+include `<sys/types.h>` and `<sys/socket.h>` for the API.
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int main(int argc, char **argv)
+{
+	int sv[2];
+	int ret;
+
+	ret = socketpair(AF_UNIX, SOCK_STREAM, 0, sv);
+	if (ret < 0) {
+		printf("Failed to create socketpair\n");
+		return -1;
+	}
+
+	printf("socketpair created %d %d\n", sv[0], sv[1]);
+
+	close(sv[0]);
+	close(sv[1]);
+
+	return 0;
+}
+```
+**Example: socketpair**
+
+### 
+
+## 2. Netlink sockets

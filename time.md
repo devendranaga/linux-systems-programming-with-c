@@ -4,6 +4,8 @@ Linux reads time from the RTC hardware clock if its available. The clock runs in
 
 The resolution is in seconds from the RTC hardware.
 
+The linux kernel then keeps the read time from the RTC into the software and keeps it ticking till it gets a reboot or shutdown signal or the power down interrupt.
+
 The kernel's time management system provides a clock resolution of nano seconds.
 
 Kernel maintains a software timer called jiffies that is measured in ticks. The jiffies are the number of ticks that have occurred since the system booted.
@@ -18,7 +20,7 @@ The below code gets the current time in seconds since 1970 UTC JAN 1.
 
 the `now` variable holds the current time in seconds. The `time_t` is typecasted from `long` type. Thus it is printable as the long type.
 
-        printf("the current system time in sec %ld\n", now);
+        printf("the currentsystem time in sec %ld\n", now);
 
 The header file to include when using the `time` system call is `time.h`.
 
@@ -69,11 +71,105 @@ the below example gives an idea on how to use the gmtime function in a more basi
            t->tm_min,
            t->tm_sec);
            
+`mktime` is an API that converts the time in `struct tm` format into `time_t`. The prototype is as follows.
+
+```c
+time_t mktime(struct tm *t);
+```
+
+```c
+#include <stdio.h>
+#include <time.h>
+
+int main(int argc, char **argv)
+{
+	int year, month, date, hr, min, sec;
+	struct tm t;
+	time_t result;
+
+	if (argc != 7) {
+		printf("%s [year] [month] [date] [hour] [minute] [second]\n", argv[0]);
+		return -1;
+	}
+
+	year = atoi(argv[1]);
+	month = atoi(argv[2]);
+	date = atoi(argv[3]);
+	hr = atoi(argv[4]);
+	min = atoi(argv[5]);
+	sec = atoi(argv[6]);
+
+    if (month < 0 || month > 12) {
+		printf("out of range month %d\n", month);
+		return -1;
+	}
+
+	if (date < 0 || date > 31) {
+		printf("out of range date %d\n", date);
+		return -1;
+	}
+
+	if (hr < 0 || hr > 24) {
+		printf("out of range hour %d\n", hr);
+		return -1;
+	}
+
+	if (min < 0 || min > 60) {
+		printf("out of range minute %d\n", min);
+		return -1;
+	}
+
+	if (sec < 0 || sec > 60) {
+		printf("out of range second %d\n", sec);
+		return -1;
+	}
+
+	t.tm_year = year - 1900;
+	t.tm_mon = month - 1;
+	t.tm_mday = date;
+	t.tm_hour = hr;
+	t.tm_min = min;
+	t.tm_sec = sec;
+	t.tm_isdst = -1;
+
+	result = mktime(&t);
+	if (result == -1) {
+		printf("Failed to get mktime\n");
+		return -1;
+	}
+
+	printf("res %ld\n", result);
+
+	return 0;
+}
+```
+
+**Example: mktime**
+
+The `t.tm_isdst` is set to -1 as we do not know the timezone.
+
 A more resolution timeout can be obtained from the `gettimeofday` API. The API looks like below:
 
     int gettimeofday(struct timeval *tv, struct timezone *tz);
     
 The second argument is usually passed NULL for getting the time since UTC.
+
+The `gettimeofday` is used to get the microsecond resolution time as well as the timezone. The `gettimeofday` returns 0 on success and -1 on failure.
+
+The value is returned into `struct timeval`. The `struct timeval` is as follows.
+
+```c
+struct timeval {
+    time_t  tv_sec;
+    suseconds_t tv_usec;
+};
+```
+
+The `settimeofday` API is used to set the system time. The prototype is as follows..
+
+```c
+int settimeofday(const struct timeval *tv, const struct timezone *tz);
+```
 
 We simply use the below code to get the curren time in seconds and micro seconds resolution.
 
