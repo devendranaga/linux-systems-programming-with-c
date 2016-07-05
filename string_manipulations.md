@@ -295,3 +295,8 @@ int main(int argc, char **argv)
 }
 
 ```
+
+###Strstr
+
+strstr finds a substring inside a string. It returns the address of the first character if the substring has been found and null otherwise.
+

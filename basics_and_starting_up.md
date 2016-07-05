@@ -61,6 +61,16 @@ when compiled with ```gcc -Wall cmdline.c -o cmdline``` option, this will genera
 
 The program accepts either of two strings namely, add and sub. If either of them are present, it then executes a function that performs the action (Add two integers or Subtract two integers).
 
+The `program_usage`, `sub` and `add` are called the functions. Functions allow the code to be more structured and sensible.
+
+A function would typically look as below..
+
+```c
+return_type function_name(variable_type var_name, variable_type var_name, ..);
+```
+
+Each function has `return_type` and accepts set of variables as its input called `arguments`. The return_type can be a variable type such as `int` or `void`. The function, when it has the return type as `void` meaning that the function returns nothing.
+
 The same program is written in Python below:
 
 ```
