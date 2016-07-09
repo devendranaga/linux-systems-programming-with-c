@@ -130,6 +130,39 @@ while (entry = readdir(dirp)) {
     }
 }
 ```
+
+### Chdir system call
+
+The `chdir` system call changes the current working directory of the program. The `getcwd` system call gets the current directory the program is under.
+
+```c
+#include <stdio.h>
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
+
+int main(int argc, char **argv)
+{
+        int ret;
+
+        if (argc != 2) {
+                fprintf(stderr, "%s <directory name>\n", argv[0]);
+                return -1;
+        }
+
+        ret = chdir(argv[1]);
+        if (ret) {
+                fprintf(stderr, "Failed changing the directory to %s, error: %s\n",
+                                            argv[1], strerror(errno));
+                return -1;
+        }
+
+        printf("directory change successful\n");
+
+        return 0;
+}
+```
+
 ### Creating directories with ```mkdir```
 
 The `mkdir` also a system call that creates a directory. The command `mkdir` with option `-p` would recursively create the directories. However, the `mkdir` system call would only create one directory.
@@ -170,8 +203,6 @@ int main(int argc, char **argv)
 }
 
 ```
-
-The `chdir` system call changes the current working directory of the program. The `getcwd` system call gets the current directory the program is under.
 
 However, when we compile and run the above program with good inputs as the following:
 

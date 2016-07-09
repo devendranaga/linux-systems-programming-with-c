@@ -66,8 +66,51 @@ An else will always be at the last of the `if` `else if` conditional.
 
 A series of `if` and `else if` conditional statements is also called an `else if ladder`.
 
+For ex: an `else if ladder` would look as below.
+
+```c
+if (fruit_name == FRUIT_APPLE) {
+    printf("Apple\n");
+} else if (fruit_name == FRUIT_ORANGE) {
+    printf("Orange\n");
+} else if (fruit_name == FRUIT_PINEAPPLE) {
+    printf("Pine Apple\n");
+} else if (fruit_name == FRUIT_GRAPE) {
+    printf("Grape\n");
+} else {
+    printf("Noooo .. i dont have any Fruits\n");
+}
+```
+
+Always make sure that an `else` statement is always present in an `if.. else if` conditional. This allows not to miss any case that does not satisfy either `if` or `else if`. Most of the software bugs lie around the `if`, `else if` and `else` parts.
+
+Sometimes, the `else if ladder` is replaced with a `switch` statement. The `switch` statement is often and mostly used for data elements of type `int` or `char`. On the otherhand, `switch` can't be used with `float`, `double` or strings. The compiler cries if any of them are being used in a switch.
+
+For ex: the `switch` statement converted fruit example looks as below.
+
+```c
+switch (fruit_name) {
+	case FRUIT_APPLE:
+       printf("Apple\n");
+   break;
+   case FRUIT_ORANGE:
+       printf("Orange\n");
+   break;
+   case FRUIT_PINEAPPLE:
+       printf("Pine Apple\n");
+   break;
+   case FRUIT_GRAPE:
+       printf("Grape\n");
+   break;
+   default:
+       printf("Noooo .. i dont have any Fruits\n");
+}
+```
+With in the `switch` statement, a series of `case` blocks with the `default` block can be used. Consider the `case` blocks as the `if` conditionals followed by the `break` statement causing the next `case` statement NOT to execute. If there is no `break` statement, the next conditions may execute and the result will be entirely different. We will see about this in the following paragraphs. The `default` statement is like an `else` conditional. If any of the `case` statements does not satisfy the condition given in the `switch` the `default` statement gets executed.
 
 The conditionals statements are very important in the coding.
+
+There are cases where the `switch` statement is not always `if .. else if`. Consider the following example from the stackoverflow website here: [http://programmers.stackexchange.com/questions/162574/why-do-we-have-to-use-break-in-switch](stackoverflow)
 
 There comes a situation where you need to loop until some condition is evaluated to true. You can do with the `while` and `for` statements. There is also `do .. while` statement. We will see about these below.
 
@@ -118,3 +161,5 @@ The infinite loops can be written as the following:
      }
      
 An infinite program, when ran, can be stopped via signalling it by the `ctrl + c` combination from the Keyboard. We look at the signals more in the upcoming topics.
+
+Infinite loops cause the program to consume all of the CPU causing the system load go high and the temperature of the system. Often, the daemons use the infinite loops in a controlled way to make the program run forever. The controlled way avoids the heavy CPU loads.

@@ -2,7 +2,7 @@
 
 The C library (libc) provides an interface to manipulate with the strings.
 
-A string is a sequence of characters. A sequence of characters is stored in a character array.
+A string is a sequence of characters. A sequence of characters are stored in a character array.
 
     char char_array[10];
     
@@ -21,7 +21,7 @@ Or another way of assigning the string is the following.
 
     char char_array[] = "linux";
 
-The `printf` or `fprintf` macro can be used to print the strings. The format specifier `%s` is used to print the string.
+The `printf` or `fprintf` functions can be used to print the strings. The format specifier `%s` is used to print the string.
 
 The below code prints the `char_array` on to the console.
 
@@ -46,6 +46,7 @@ The above API are enough to perform the string manipulation of almost any kind o
 The `strlen` function usage is demoed below.
 
 prototype: `size_t strlen(const char *s);`
+
 ```c
 #include <stdio.h>
 #include <string.h>
@@ -89,6 +90,7 @@ int own_strlen(char *string)
 The `strcpy` function usage is demoed below.
 
 prototype: `char *strcpy(char *dst, const char *src);`
+
 ```c
 #include <stdio.h>
 #include <string.h>

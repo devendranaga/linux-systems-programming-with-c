@@ -9,7 +9,8 @@
 * Very simple root file system and provides easy access to the development and test.
 * Some missing components that are needed for the production systems (such as CLI, Clean web-interface, one click setup, customization etc). Each vendor implements their own production features to release in the market.
 * Has a very versatile and modular build system. Sometimes it is hard to program the build Makefile, but most of the time a copy and paste of a sample Makefile would do the trick.
-* Allows generation of a firmware image to many target variants: X86, ARM, MIPS, PPC etc. Supports many hardware: Gateworks, i.MX, Broadcom, Marvell etc.
+* The packaging system allows to configure the final software image on to the embedded device allowing it to selectively add or delete software components in the image.
+* Allows generation of a firmware image to many target variants: X86, ARM, MIPS, PPC etc. Supports many hardware platforms: Gateworks, i.MX, Broadcom, Marvell etc.
 * Allows creation of an SDK for other developers to use and program the system very simply without downloading everything that OpenWRT offers.
 * Contains `.config` the single configuration file that contains all the build system information including the kernel, root file system and any other packages. Can be changed by hand or via the `make menuconfig` command.
 * A single `make` command or a `make V=99` command would perform the build towards generating the target firmware. The `V=99` is to verbosely build the firmware image.
@@ -22,7 +23,7 @@
 ####1.1 OpenWRT packages
 
 * The OpenWRT's most powerful feature is the packages. Packages add or remove a functionality to the final image.
-* They are useful to build a tiny system to a very large miniature computer system.
+* They are useful to build a tiny system to a very large miniature computer system. The packages can selectively be chosen to fit the needs of the software project / product.
 * Sample package Makefile for the bridge (taken from [here](https://wiki.openwrt.org/doc/devel/packages)).
 
 

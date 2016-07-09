@@ -14,13 +14,19 @@ The system call to get the current time in seconds is `time`. The data type `tim
 
 The below code gets the current time in seconds since 1970 UTC JAN 1.
 
-        time_t now;
-        
-        now = time(0);
+
+```c
+time_t now;
+
+now = time(0);
+```
+
 
 the `now` variable holds the current time in seconds. The `time_t` is typecasted from `long` type. Thus it is printable as the long type.
 
-        printf("the currentsystem time in sec %ld\n", now);
+```c
+printf("the currentsystem time in sec %ld\n", now);
+```
 
 The header file to include when using the `time` system call is `time.h`.
 
@@ -186,11 +192,46 @@ We simply use the below code to get the curren time in seconds and micro seconds
                         cur.tv_sec, cur.tv_usec);
 
 
-The most common use of `gettimeofday` is to perform microsecond sleep calls with the usleep, analyze how much time the function call would take to execute.
+The most common use of `gettimeofday` is to put the call above and below a function cal, analyze how much time the function call would take to execute.
 
-The above calls would get the current 'wallclock' tme. Meaning they are affected by the changes in the time due to clock drift and adjustments. The most important factors include the GPS setting the time into the system, NTP changing the system time syncing with the NTP servers. This would affect programs depending on these API. For example: the timers using the above API would either expire quickly (due to time moving forward) or wait forever (due to time moving backwards to a larger value).
+An example would look as follows.
+
+```c
+void function()
+{
+    ...
+}
+
+void analysis()
+{
+    long diff;
+    struct timeval before, after;
+
+    gettimeofday(&before, 0);
+    function();
+    gettimeofday(&after, 0);
+
+    diff = (((after.tv_sec * 1000) - (before.tv_sec * 1000)) +
+               (after.tv_usec / 1000) - (before.tv_sec / 1000))
+
+    printf("delta %ld\n", diff); 
+}
+
+```
+
+The above calls would get the current 'wallclock' time. Meaning they are affected by the changes in the time due to clock drift and adjustments. The most important factors include the GPS setting the time into the system, NTP changing the system time syncing with the NTP servers. This would affect programs depending on these API. For example: the timers using the above API would either expire quickly (due to time moving forward) or wait forever (due to time moving backwards to a larger value).
 
 When we are programming timers, we should avoid any calls to the above API as they are not monotonic or steadily moving forward in the future.
+
+### Timer APIs
+
+Linux supports the following timer API.
+
+```c
+1. setitimer
+2. timer_create
+3. timerfd_create
+```
 
 The command `hwclock` is very useful to get or set time to the system.
 
