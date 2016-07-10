@@ -30,6 +30,16 @@ The below code prints the `char_array` on to the console.
     printf("%s", char_array);
     
     
+Reading of the strings can be performed by the use of `fgets` function. However, the `scanf` can also be used but is too dangerous to read strings. Thus it is not a preferrable choice when reading the strings from the command line. The sample usage of `fgets` when reading the strings looks as follows...
+
+```c
+char data[10];
+
+fgets(data, sizeof(data), stdin);
+```
+
+We read the string `data` of length 10 from the `stdin`. Where `stdin` is the standard input as we know it.
+
 The standard library provides a string manipulation functions such as the following. Include the header file `<string.h>` for the API declarations.
 
 
@@ -333,4 +343,14 @@ int main(int argc, char **argv)
 }
 
 ```
+
+**Problems**:
+
+The following problems are given to encourage the reader to put things that are learnt, into practice.
+
+1. Program to find the frequency of occurence of a character `e` in the string "frequency".
+2. Program to find the length of a string "Meaningful".
+3. Program to sort the set of strings in alphabetical order. The strings are "Apple", "Banana", "Pine Apple", "Grapes", "Guava" and "Peach".
+4. Given two strings "Apple" and "Banana". Concatenate from the third character of both of the strings. Meaning the final output would be "Appana".
+5. Look up a string in a set of strings. Take any large set of strings and look up any string.
 
