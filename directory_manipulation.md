@@ -94,8 +94,7 @@ int main(int argc, char **argv)
 }
 ```
 
-**
-Example: Basic `ls` command example**
+**Example: Basic `ls` command example**
 
 The above example simply lists down the files and directories. By taking this as an example, we can solve the below programming problems.
 
@@ -163,6 +162,8 @@ int main(int argc, char **argv)
 }
 ```
 
+The `chdir` affects only the calling program .
+ 
 ### Creating directories with ```mkdir```
 
 The `mkdir` also a system call that creates a directory. The command `mkdir` with option `-p` would recursively create the directories. However, the `mkdir` system call would only create one directory.

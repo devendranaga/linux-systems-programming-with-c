@@ -20,12 +20,15 @@ A string is always terminated by a null termination mark `'\0'`. The null termin
 Or another way of assigning the string is the following.
 
     char char_array[] = "linux";
+    
+Here in the char_array, we do not have to specify the size. Such variables are stored in the data section part of the final executable.
 
 The `printf` or `fprintf` functions can be used to print the strings. The format specifier `%s` is used to print the string.
 
 The below code prints the `char_array` on to the console.
 
     printf("%s", char_array);
+    
     
 The standard library provides a string manipulation functions such as the following. Include the header file `<string.h>` for the API declarations.
 
@@ -47,6 +50,7 @@ The `strlen` function usage is demoed below.
 
 prototype: `size_t strlen(const char *s);`
 
+
 ```c
 #include <stdio.h>
 #include <string.h>
@@ -67,7 +71,7 @@ int main(int argc, char **argv)
 }
 ```
 
-Alternatively the length of the string can be calculated manually. The length of the string is the count of characters till the null terminator mark except the null terminator.
+Alternatively the length of the string can be calculated manually. The length of the string is the count of characters till the null termination mark except the null terminator.
 
 ```c
 int own_strlen(char *string)
@@ -301,4 +305,32 @@ int main(int argc, char **argv)
 ###Strstr
 
 strstr finds a substring inside a string. It returns the address of the first character if the substring has been found and null otherwise.
+
+prototype: `char *strstr(const char *haystack, const char *needle);`
+
+```c
+#include <string.h>
+#include <stdio.h>
+
+int main(int argc, char **argv)
+{
+        char *str;
+        int ret;
+
+        if (argc != 3) {
+                printf("%s <string1> <substring>\n", argv[0]);
+                return -1;
+        }
+
+        str = strstr(argv[1], argv[2]);
+        if (str) {
+                fprintf(stderr, "Found substring %s\n", str);
+        } else {
+                fprintf(stderr, "Substring not found\n");
+        }
+
+        return 0;
+}
+
+```
 

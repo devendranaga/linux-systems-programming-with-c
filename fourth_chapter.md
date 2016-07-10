@@ -544,7 +544,7 @@ struct sockaddr_un {
 };
 ```
 
-The bind call can be as below..
+The code snippet for the bind call can be as below..
 
 ```c
 int ret;
@@ -604,8 +604,6 @@ int main(int argc, char **argv)
 	return 0;
 }
 ```
+
 **Example: socketpair**
 
-### 
-
-## 2. Netlink sockets

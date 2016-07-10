@@ -11,21 +11,24 @@ We are also going to take a dig at the searching and sorting functions too.. The
 2. Objects can be of any type.
 3. Dynamically modified (created, deleted, altered)
 4. Number of elements in the list is the length of the list
+5. Often more time consuming when looking for an element in the list if there are lots of elements.
 
 Linked lists can be created with the simple data structure below.
 
+```c
     struct linked_list {
         void *data;
         struct linked_list *next;
     };
 
     struct linked_list *head, *tail;
+```
 
-The ```data``` part is a pointer that pointing towards another data structure.
+The ```data``` part is a pointer that pointing to a data structure. A user can point their data structure to this pointer.
 
-The ```tail``` pointer is used to point to always the end of the list. The end pointer is used to chain the newly created element in the list at the end of the list. The end pointer is then made point to the newly created element. The end pointer is always maintained to point to the end of the list.
+The ```tail``` pointer is used to point to always the end of the list. The end pointer is used to chain the newly created element in the list at the end of the list. The end pointer is then made point to the newly created element.
 
-The following code performs the ```head``` and ```tail`` pointer assignments
+The following code performs the ```head``` and ```tail``` pointer assignments
 
 ```c
     if (!head) {

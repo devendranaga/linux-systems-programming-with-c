@@ -12,7 +12,7 @@ This book is not for those who seek for kernel programming topics. This book dea
 
 Almost all of the code samples are kept at [GitHub](https://github.com/DevNaga/gists.git). Please feel free to clone.
 
-Please open a ticket for grammatical errors, a new feature request or topic addition or [email](<mailto:devendra.aaru@gmail.com>) me about it.
+Please open a ticket for grammatical errors, a new feature request or topic addition. You can also [email](<mailto:devendra.aaru@gmail.com>) me about it.
 
 -----
 

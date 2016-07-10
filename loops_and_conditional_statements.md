@@ -43,6 +43,7 @@ If there are more than one conditions to be executed based on some truth conditi
 
 The `else if` conditional looks like the below.
 
+```c
     if (condition1) {
         // execute conde path 1
     } else if (condition2) {
@@ -50,10 +51,11 @@ The `else if` conditional looks like the below.
     } else {
         // execute code path 3
     }
-    
+```    
     
  Ex: 
  
+ ```c
       int a = 2;
      
       if (a == 1) {
@@ -61,7 +63,8 @@ The `else if` conditional looks like the below.
       } else if (a == 2) {
           printf("a value is %d\n", a);
       }
-      
+ ```
+     
 An else will always be at the last of the `if` `else if` conditional.
 
 A series of `if` and `else if` conditional statements is also called an `else if ladder`.
@@ -110,7 +113,7 @@ With in the `switch` statement, a series of `case` blocks with the `default` blo
 
 The conditionals statements are very important in the coding.
 
-There are cases where the `switch` statement is not always `if .. else if`. Consider the following example from the stackoverflow website here: [http://programmers.stackexchange.com/questions/162574/why-do-we-have-to-use-break-in-switch](stackoverflow)
+There are cases where the `switch` statement is not always `if .. else if`. Consider the following example from the stackoverflow website [here](http://programmers.stackexchange.com/questions/162574/why-do-we-have-to-use-break-in-switch)
 
 There comes a situation where you need to loop until some condition is evaluated to true. You can do with the `while` and `for` statements. There is also `do .. while` statement. We will see about these below.
 
@@ -119,7 +122,9 @@ The `while` statement loops till the condition evaluates to false. It looks like
     while (condition) {
         // series of statements    
     }
-    
+
+When the condition fails, the `while` conditional will not get executed.
+
 The series of statements are evaulated again and again till the condition becomes invalid.
 
 For ex: let us consider a case where we print 10 number from 1.
@@ -148,6 +153,8 @@ For ex: the `while` loop is rewritten as
          printf("i value %d\n", i);
      }
      
+The initialiser sets the value of the variable to 1 and it gets executed only once. The condition then executes and if condition becomes satisfied the statements with in the for loop are executed. After the last statement is executed, the increment part of the for loop is executed and then the condition with in the for loop. The initializer will only be executed in the beginning.
+
 There can be cases where one needs to run the program forever. This forever programs we call infinite loops.
 
 The infinite loops can be written as the following:

@@ -3,10 +3,10 @@
 We are going to write a socket library as an exercise to what we have learnt in the socket programming.
 
 The socket library has the following API.
-```
 
 The below are the error numbers to return by the APIs that we are about to write.
 
+```
 typedef enum {
     TCP_SOCK_OPEN_SUCCESS = 0,
     TCP_SOCK_OPEN_ERROR_INVAL_PROTO,
@@ -42,3 +42,4 @@ typedef enum {
 13. udp_socket_recvfrom(int sock, void *buf, int len, int opts, struct sockaddr *addr, socklen_t *len);
 14. socklib_select(int sock, fd_set *rdfds, struct timeval *timeout);
 ```
+

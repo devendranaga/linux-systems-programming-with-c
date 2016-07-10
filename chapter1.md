@@ -7,7 +7,7 @@ This chapter mostly concentrates on the C programming language and also gives ou
 ### The C programming Language
 
 * C programming language is invented by the great programmers **Dennis Ritchie** and **Brian Kernighan**.
-* We use C programming language in many areas such as in embedded devices, high performance backend software, gaming engines etc.
+* We use C programming language in many areas such as in embedded devices, high performance backend software for servers and web browsers, gaming engines etc.
 * C is highly desired programming language to write any performance oriented code.
 * C is still a majorly used language in the current competing world where there are new programming languages every quarter.
 * C is very useful in programming device drivers or the software that can be closely written to the hardware.
@@ -20,6 +20,7 @@ This chapter mostly concentrates on the C programming language and also gives ou
 
         dnf install gcc
 * pick an editor to type the source code such as `atom` editor or `vim` that colors the types, functions etc.. to ease up understanding and coding.
+* To play with the code and understand the content in this book, A Linux OS and a C compiler is most necessary. I am using Fedora / Ubuntu as the Linux OS and Gcc as the C compiler. If you do not wish to install Linux OS on your computer, you can still try it out with the VirtualBox as a guest OS.
 
 ### The Python programming Language
 
