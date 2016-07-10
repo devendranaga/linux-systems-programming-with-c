@@ -7,6 +7,8 @@ In linux, sockets are the pipes or the software wires that are used for the exch
 
 The server program opens a sockets, waits for someone to connect to it. The socket can be created to communicate over the TCP or the UDP protocol and the underlying networking layer can be IPv4 or IPv6. Often sockets are used to provide interprocess communication between the programs with in the OS.
 
+The **socket** API is the most commonly used function in a network oriented programs. This is the starting point to create a socket that can be used for further communication either with in the OS in a computer or between two computers.
+
 In the Linux systems programming, the TCP protocol is denoted by a macro called **SOCK_STREAM** and the UDP protocol is denoted by a macro called **SOCK_DGRAM**. Either of the above macros are passed as the second argument to the **socket** API.
 
 Below are the most commonly used header files in the socket programming.
@@ -76,6 +78,7 @@ int reuse_addr = 1;   // turn on the reuse address operation in the OS
     
 ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr, sizeof(reuse_addr));
 ```
+More on the `setsockopt` and `getsockopt` is described later in this chapter.
 
 A server must register to the OS that it is ready to perform accepting the connections by using the `listen` system call. It takes the below form:
 
@@ -607,3 +610,147 @@ int main(int argc, char **argv)
 
 **Example: socketpair**
 
+### 3. Getsockopt and Setsockopt
+
+The `getsockopt` and `setsockopt` are the two most commonly used socket control and configuration APIs.
+
+
+The prototypes of the functions look as below.
+
+```c
+int getsockopt(int sockfd, int level, int optname,
+               void *optval, socklen_t *optlen);
+int setsockopt(int sockfd, int level, int optname,
+               const void *optval, socklen_t optlen);
+```
+
+There are lots of possible socket options with different socket levels.
+
+| socket level | option name |
+|-------------|-----------------|
+|SO_ACCEPTCONN | Check if a socket is marked to accept connections. returns 1 if the socket is capable of accepting the connections. returns 0 if the socket is not. |
+|SO_BINDTODEVICE | Bind to a particular network device as specified as the option. If on success, the packets only from the device will be received and processde by the socket.|
+|SO_RCVBUF | Sets or gets the socket receive buffer in bytes. The kernel doubles the value when set using the `setsockopt`.|
+|SO_REUSEADDR |  Reuse the local address that is used previously by the other program which has been stopped. Only used in the server programs before the `bind` call.|
+|SO_SNDBUF | Sets or gets the maximum socket send buffer in bytes. The kernel doubles this values when set by using the `setsockopt`. |
+
+An Example of the `SO_ACCEPTCONN` looks as below.
+
+The below example shows that there is no `listen` call so that the socket will not be able to perform the accept of connections.
+
+Thus the accept connection is set to "No" in the kernel on this socket.
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <sys/socket.h>
+
+int main(int argc, char **argv)
+{
+        int val;
+        int optlen;
+        int ret;
+        int sock;
+
+        sock = socket(AF_INET, SOCK_STREAM, 0);
+        if (sock < 0) {
+                fprintf(stderr, "failed to open socket\n");
+                return -1;
+        }
+
+        struct sockaddr_in serv = {
+                .sin_family = AF_INET,
+                .sin_addr.s_addr = inet_addr("127.0.0.1"),
+        };
+
+        ret = bind(sock, (struct sockaddr *)&serv, sizeof(serv));
+        if (ret < 0) {
+                fprintf(stderr, "failed to bind\n");
+                close(sock);
+                return -1;
+        }
+        
+        optlen = sizeof(val);
+
+        ret = getsockopt(sock, SOL_SOCKET, SO_ACCEPTCONN, &val, &optlen);
+        if (ret < 0) {
+                fprintf(stderr, "failed to getsockopt\n");
+                close(sock);
+                return -1;
+        }
+
+        printf("accepts connection %s\n", val ? "Yes": "No");
+
+        close(sock);
+
+        return 0;
+}
+
+```
+
+The below example shows that there is `listen` call so that the socket will be able to perform the accept of connections.
+
+Thus the accept connection is set to "Yes" in the kernel on this socket.
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <sys/socket.h>
+
+int main(int argc, char **argv)
+{
+        int val;
+        int optlen;
+        int ret;
+        int sock;
+
+        sock = socket(AF_INET, SOCK_STREAM, 0);
+        if (sock < 0) {
+                fprintf(stderr, "failed to open socket\n");
+                return -1;
+        }
+
+        struct sockaddr_in serv = {
+                .sin_family = AF_INET,
+                .sin_addr.s_addr = inet_addr("127.0.0.1"),
+        };
+
+        ret = bind(sock, (struct sockaddr *)&serv, sizeof(serv));
+        if (ret < 0) {
+                fprintf(stderr, "failed to bind\n");
+                close(sock);
+                return -1;
+        }
+
+        ret = listen(sock,  100);
+        if (ret < 0) {
+                fprintf(stderr, "failed to listen\n");
+                close(sock);
+                return -1;
+        }
+
+        optlen = sizeof(val);
+
+        ret = getsockopt(sock, SOL_SOCKET, SO_ACCEPTCONN, &val, &optlen);
+        if (ret < 0) {
+                fprintf(stderr, "failed to getsockopt\n");
+                close(sock);
+                return -1;
+        }
+
+        printf("accepts connection %s\n", val ? "Yes": "No");
+
+        close(sock);
+
+        return 0;
+}
+
+```
