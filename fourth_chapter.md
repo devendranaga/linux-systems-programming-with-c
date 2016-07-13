@@ -569,8 +569,152 @@ if (ret < 0) {
 
 ```
 
-The `unlink` call is used before the bind to make sure the path is not being used. This is to make sure the `bind` call would be success.
+The `unlink` call is used before the `bind` to make sure the path is not being used. This is to make sure the `bind` call would be success.
 
+The sample UNIX domain TCP server and client are shown below...
+
+These are the steps at the server:
+
+1. open a socket with `AF_UNIX` and `SOCK_STREAM`.
+2. unlink the `SERVER_PATH` before performing the `bind`.
+3. call `listen` to setup the socket into a listening socket.
+4. accept single connection on the socket.
+5. loop around in the `read` call for the data. When the `read` call returns 0, this means that the client has closed the connection.
+6. stop the server and quit the program.
+
+These are the steps at the client:
+
+1. open a socket with `AF_UNIX` and `SOCK_STREAM`.
+2. connect to the server at `SERVER_PATH`.
+3. after a successful `connect` call perform a write on the socket.
+4. quit the program (thus making kernel's Garbage Collector cleanup the connection).
+
+
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/un.h>
+
+#define SERVER_PATH "/tmp/unix_sock.sock"
+
+void server()
+{
+    int ret;
+    int sock;
+    int client;
+
+    sock = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (sock < 0) {
+        printf("failed to create socket\n");
+        return;
+    }
+
+    struct sockaddr_un serv;
+    struct sockaddr_un cli;
+
+    unlink(SERVER_PATH);
+    strcpy(serv.sun_path, SERVER_PATH);
+    serv.sun_family = AF_UNIX;
+
+    ret = bind(sock, (struct sockaddr *)&serv, sizeof(serv));
+    if (ret < 0) {
+        close(sock);
+        printf("failed to bind\n");
+        return;
+    }
+
+    ret = listen(sock, 100);
+    if (ret < 0) {
+        close(sock);
+        printf("failed to listen\n");
+        return;
+    }
+
+    socklen_t len = sizeof(serv);
+
+    client = accept(sock, (struct sockaddr *)&cli, &len);
+    if (client < 0) {
+        close(sock);
+        printf("failed to accept\n");
+        return;
+    }
+
+    char buf[200];
+
+    while (1) {
+        memset(buf, 0, sizeof(buf));
+        ret = read(client, buf, sizeof(buf));
+        if (ret <= 0) {
+            close(client);
+            close(sock);
+            printf("closing connection..\n");
+            return;
+        }
+        printf("data %s\n", buf);
+    }
+
+    return;
+}
+
+void client()
+{
+    int ret;
+    char buf[] = "UNIX domain client";
+    int sock;
+
+    sock = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (sock < 0) {
+        printf("Failed to open socket \n");
+        return;
+    }
+
+    struct sockaddr_un serv;
+
+    strcpy(serv.sun_path, SERVER_PATH);
+    serv.sun_family = AF_UNIX;
+
+    ret = connect(sock, (struct sockaddr *)&serv, sizeof(serv));
+    if (ret < 0) {
+        close(sock);
+        printf("Failed to connect to the server\n");
+        return;
+    }
+
+    write(sock, buf, sizeof(buf));
+    return;
+}
+
+
+int main(int argc, char **argv)
+{
+    int ret;
+
+    if (argc != 2) {
+        printf("%s [server | client]\n", argv[0]);
+        return -1;
+    }
+
+    if (!strcmp(argv[1], "server")) {
+        server();
+    } else if (!strcmp(argv[1], "client")) {
+        client();
+    } else {
+        printf("invalid argument %s\n", argv[1]);
+    }
+
+    return 0;
+}
+```
+
+However, for a UNIX domain UDP sockets, we have to perform the `bind` call on both the sides... i.e. at the server and at the client. This is because when the server performs a `sendto` back to the client, it needs to know exactly the path of the client ... i.e. a name. Thus needing a `bind` call to let the server know about the client path.
+
+So in our code example above, for a UNIX UDP socket, we need to change the `SOCK_STREAM` to `SOCK_DGRAM`, perform `bind` on the server as well as client and replace `read` and `write` calls with `sendto` and `recvfrom`.
 
 ### socketpair
 

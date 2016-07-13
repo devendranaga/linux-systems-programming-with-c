@@ -53,3 +53,48 @@
   * **optarg**: This variable is set by getopt to point at the value of the option argument, for those options that accept arguments.
 
     * we get this option in our example of the getopt and use it to convert into an integer that gives us the time to sleep in the code. The `optarg` is the most commonly used argument in any basic to an intermediate level program.
+
+
+# getopt_long
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <getopt.h>
+
+int main(int argc, char **argv)
+{
+    int opt;
+    int opt_id = 0;
+    static struct option long_opt[] = {
+        {"option1", required_argument, 0, 'x'},
+        {"option2", required_argument, 0, 'y'},
+        {"option3", required_argument, 0, 'z'},
+        {"usage", no_argument, 0, 'p'},
+        {0, 0, 0, 0},
+    };
+
+    while ((opt = getopt_long(argc, argv, "x:y:z:p", long_opt, &opt_id)) != -1) {
+        switch (opt) {
+            case 'x':
+                printf("option1 given %s\n", optarg);
+            break;
+            case 'y':
+                printf("option2 given %s\n", optarg);
+            break;
+            case 'z':
+                printf("option3 given %s\n", optarg);
+            break;
+            case 'p':
+                printf("%s [option1 (x)] "
+                        "[option2 (y)] "
+                        "[option3 (z)] "
+                        "[usage (p)]\n",
+                                argv[0]);
+            break;
+        }
+    }
+
+    return 0;
+}
+```

@@ -172,3 +172,76 @@ The program first registers the SIGALRM signal via `sigaction` and registers the
 
 
 ## timerfd_create
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+#include <sys/time.h>
+#include <stdint.h>
+#include <time.h>
+#include <stdlib.h>
+#include <sys/timerfd.h>
+#include <sys/select.h>
+
+int main(int argc, char **argv)
+{
+    int time_intvl;
+    int ret;
+    int fd;
+
+    if (argc != 2) {
+        printf("%s [timer interval in msec]\n", argv[0]);
+		return -1;
+	}
+
+    time_intvl = atoi(argv[1]);
+
+    fd = timerfd_create(CLOCK_MONOTONIC, 0);
+    if (fd < 0) {
+        printf("failed to timerfd_create\n");
+        return -1;
+    }
+
+    struct itimerspec it = {
+            .it_value = {
+                .tv_sec = 0,
+                .tv_nsec = 1000 * 1000ULL * time_intvl,
+            },
+            .it_interval = {
+                .tv_sec = 0,
+                .tv_nsec = 1000 * 1000ULL * time_intvl,
+            },
+    };
+
+    ret = timerfd_settime(fd, 0, &it, 0);
+    if (ret < 0) {
+        printf("failed to timerfd_settime\n");
+        return -1;
+    }
+
+    printf("fd %d\n", fd);
+    struct timeval tv;
+    fd_set rdfd;
+
+    while (1) {
+        FD_ZERO(&rdfd);
+        FD_SET(fd, &rdfd);
+
+        ret = select(fd + 1, &rdfd, NULL, NULL, NULL);
+        if (ret > 0) {
+            if (FD_ISSET(fd, &rdfd)) {
+			    uint64_t expiration;
+
+                ret = read(fd, &expiration, sizeof(expiration));
+				if (ret > 0) {
+                    gettimeofday(&tv, 0);
+                    printf("interval timer %ld.%ld, expirations %ju\n", tv.tv_sec, tv.tv_usec, expiration);
+				}
+            }
+        }
+    }
+
+    return 0;
+}
+
+```

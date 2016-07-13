@@ -5,6 +5,7 @@
 * [Programming in C](chapter1.md)
    * [Basics and Starting up](basics_and_starting_up.md) 
        * [loops and conditional statements](loops_and_conditional_statements.md)
+       * [Dynamic memory allocation](dynamic_memory.md)
        * [Data structures](data_structures.md)
        * [function pointers](function_pointers.md)
        * [string manipulations](string_manipulations.md)
