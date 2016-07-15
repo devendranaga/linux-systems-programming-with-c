@@ -112,34 +112,39 @@ The exec family of functions create a new process image from the given binary fi
 the following are the exec functions.
 
 ```c
+int execl(const char *path, const char *arg, ...);
+int execlp(const char *path, const char *arg, ...);
+int execle(const char *path, const char *arg, ...);
+int execv(const char *path, char *const argv[]);
+int execvp(const char *file, char *const argv[]);
 
 ```
 
-### system variables
 
-`sysconf` is an API to get the current value of a configurable system limit or option variable.
+\#\#\# system variables
+
+\`sysconf\` is an API to get the current value of a configurable system limit or option variable.
 
 The API prototype is the following
 
-    long sysconf(int name);
+    long sysconf\(int name\);
 
-symbolic constants for each of the variables is found at include file `<unistd.h>`. The `name` argument specifies the system variable to be queried.
+symbolic constants for each of the variables is found at include file \`&lt;unistd.h&gt;\`. The \`name\` argument specifies the system variable to be queried.
 
-sysconf() example on the max opened files:
+sysconf\(\) example on the max opened files:
 
-```c
-#include <stdio.h>
-#include <unistd.h>
+\`\`\`c
+\#include &lt;stdio.h&gt;
+\#include &lt;unistd.h&gt;
 
-int main(void)
+int main\(void\)
 {
     int maxfd;
 
-    maxfd = sysconf(_SC_OPEN_MAX);
-    printf("maxfd %d\n", maxfd);
+    maxfd = sysconf\(\_SC\_OPEN\_MAX\);
+    printf\("maxfd %d\n", maxfd\);
 
     return 0;
 }
 
-```
 
