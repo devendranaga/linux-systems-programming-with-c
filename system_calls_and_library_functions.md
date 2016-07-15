@@ -63,9 +63,9 @@ Then we run our binary with the incorrect option as below:
     fopen: No such file or directory
 ```
 
-Linux provides another API to print the error message based on the error number variable \`errno\`.
+Linux provides another API to print the error message based on the error number variable `errno`.
 
-```
+```c
 #include <stdio.h>
 #include <errno.h>
 #include <stdint.h>
