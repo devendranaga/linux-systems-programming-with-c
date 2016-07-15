@@ -130,12 +130,11 @@ The API prototype is the following
 long sysconf(int name);
 ```
 
-symbolic constants for each of the variables is found at include file` <unistd.h>`. The `name` argument specifies the system variable to be queried.
+symbolic constants for each of the variables is found at include file`<unistd.h>`. The `name` argument specifies the system variable to be queried.
 
 `sysconf()` example on the max opened files:
 
 ```c
-
 #include <stdio.h>
 #include <unistd.h>
 
