@@ -259,3 +259,61 @@ int main(int argc, char **argv)
 }
 ```
 
+## rmdir
+
+`rmdir` system call removes the directory. On failure it returns a corresponding error code.
+The following program demos an `rmdir` call and the example of the such.
+
+
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+#include <errno.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+
+int main(int argc, char **argv)
+{
+    int ret;
+
+    if (argc != 2) {
+        printf("%s [directory name]\n", argv[0]);
+        return -1;
+    }
+
+    ret = rmdir(argv[1]);
+    if (ret) {
+        printf("failed to rmdir %s\n", strerror(errno));
+        return -1;
+    }
+
+    printf("rmdir success\n");
+    return 0;
+}
+```
+
+**Example: rmdir demo**
+
+Here shows the various runs of rmdir call:
+
+```
+root@4a032360f5c5:~/books# ./a.out test_file
+failed to rmdir No such file or directory
+root@4a032360f5c5:~/books# ./a.out test_directory
+failed to rmdir No such file or directory
+root@4a032360f5c5:~/books# ./a.out /proc/        
+failed to rmdir Device or resource busy
+root@4a032360f5c5:~/books# ./a.out /proc/1/
+failed to rmdir Operation not permitted
+root@4a032360f5c5:~/books# ./a.out /proc/1/fd
+failed to rmdir Permission denied
+root@4a032360f5c5:~/books# mkdir pool        
+root@4a032360f5c5:~/books# ./a.out pool/
+rmdir success
+root@4a032360f5c5:~/books# 
+```
+

@@ -40,6 +40,8 @@ handling of the signals:
 
 ### signal and sigaction
 
+prototype: `sighandler_t signal(int signum, sighandler_t handler);`
+
 #### Signal
 
 #### Sigaction

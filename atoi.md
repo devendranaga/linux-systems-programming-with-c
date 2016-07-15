@@ -1,4 +1,4 @@
-# atoi and string to integer
+# atoi and string to number conversion API
 
 
 The `atoi` function perform an asci to integer conversion of a number stored in the string form. If it can't convert it, then it would return simply 0. However, value 0 is also a number and is valid. So in most of the cases `atoi` is only used for simple numbers and to programs that the input number string expected is always correct. In most of the cases, the `strtol` family of functions are preferred.

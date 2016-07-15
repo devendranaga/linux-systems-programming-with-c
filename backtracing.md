@@ -1,6 +1,6 @@
 # backtracing
 
-At some situations such as crash, it is at most useful to trace the function calls. One possible way to find this is to perform `gdb` on the program and typing `bt` when the crash occured. The other possible way to simply print the dump using some of the C APIs such as `backtrace` and `backtrace_symobls`.
+At some situations such as crash, it is at most useful to trace the function calls. One possible way to find this is to perform `gdb` on the program and typing `bt` when the crash occured. The other possible way to simply print the dump using some of the C APIs such as `backtrace` and `backtrace_symbols`.
 
 The function prototypes are as follows.
 
@@ -56,6 +56,8 @@ compile the program as follows.
 
 `[root@localhost manuscript]# gcc -rdynamic backtrace.c  -g`
 
+Without the -g or -rdynamic the backtrace that is producted may not contain the needed symbols.
+
 run the program as follows thus producing the following output.
 
 ```
@@ -73,7 +75,7 @@ Some examples of the `backtrace` use it to produce a crashtrace when the crash o
 
 The program registers the segfault handler with the `signal` and dereferences a null character pointer, thus resulting in a crash. The handler immediately gets called and provides us the trace of the calls made to come to the crash path. The first function in the calls will be the signal handler.
 
-**NOTE**: When registering a signal handler for segfault (i.e, `SIGSEGV`) please make sure to abort the program, otherwise the signal handler will be restarted continuously. To test that out, remove the abort function call in the signal handler below.
+**NOTE**: When registering a signal handler for the segfault (i.e, `SIGSEGV`) please make sure to abort the program, otherwise the signal handler will be restarted continuously. To test that out, remove the abort function call in the signal handler below.
 
 ```c
 #include <stdio.h>
@@ -137,7 +139,7 @@ int main()
 
 ```
 
-Sometimes, it is necessary to dump the trace to a file by the program. This occurs when the program is running as a daemon or running in the background. The glibc provides us another function called `backtrace_symbols_fd`.
+Sometimes, it is necessary to dump the trace to a file by the program. This occurs when the program is running as a daemon or running in the background. The glibc provides us another function called `backtrace_symbols_fd`. This can also be useful when sending the trace over to a network socket or to a local pipe to monitor the crash and perform necessary action such as recording.
 
 The `backtrace_symbols_fd` prints the trace into a file. Here is an example:
 

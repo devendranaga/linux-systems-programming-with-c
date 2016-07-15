@@ -51,17 +51,37 @@ int main(int argc, char **argv)
     return 0;
 }
 ```
-**Example: command line sample program
-**
+**Example: command line sample program**
 
 We use Gcc (any version > 5.0 is fine).
 
 when compiled with ```gcc -Wall cmdline.c -o cmdline``` option, this will generate the ```cmdline```binary file.
 
+This file is an executable file. This file can be run by typing the file name as below in the shell.
+
+```
+# ./cmdline
+```
+
+The `./` tells the shell to execute the program that is present in this directory.
+
+More about the program running in the upcoming chapters. For now, we now know how to compile and run a program.
 
 The program accepts either of two strings namely, add and sub. If either of them are present, it then executes a function that performs the action (Add two integers or Subtract two integers).
 
 The `program_usage`, `sub` and `add` are called the functions. Functions allow the code to be more structured and sensible.
+
+so typically the command line argument would become,
+
+```
+# ./cmdline add 28  24
+```
+
+or
+
+```
+# ./cmdline sub 28 24
+```
 
 A function would typically look as below..
 
