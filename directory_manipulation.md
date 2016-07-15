@@ -317,3 +317,6 @@ rmdir success
 root@4a032360f5c5:~/books# 
 ```
 
+This completes the directory manipulation chapter in linux. Mostly next things in here is going to be some adventurous and interesting programs that provides the practical experience.
+
+### Programming problems
