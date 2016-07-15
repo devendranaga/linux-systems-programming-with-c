@@ -2,18 +2,17 @@
 
 ## system V shared memory
 
-
-The shared memory is one of the quickest forms of IPC that can be used between the processes. Since the memory is common between the two programs (or more than two) it is a must to protect it from being accessed parallely at the same time causing the corruption. Thus, we need to use some form of locking (such as the semaphores or events). The method of creating and communicating via the shared memory is as follows.
+The shared memory is one of the quickest forms of IPC that can be used between the processes. Since the memory is common between the two programs \(or more than two\) it is a must to protect it from being accessed parallely at the same time causing the corruption. Thus, we need to use some form of locking \(such as the semaphores or events\). The method of creating and communicating via the shared memory is as follows.
 
 * A process creates a shared memory segment with a unique key value
 * The process then attaches to it.
 * Another process, knowing the unique key value, attaches to the shared memory segment.
-* Now the two processes can communicate (transfer the data between each other) using the shared memory.
+* Now the two processes can communicate \(transfer the data between each other\) using the shared memory.
 
 To create a shared memory, the Linux OS provides shared memory API as the following.
 
-| shm API | description|
-| -- | -- |
+| shm API | description |
+| :--- | :--- |
 | shmget | allocate shared memory segment |
 | shmat | attach to the shared memory with the given shared memory identifier |
 | shmctl | perform control operations on the shared memory segment |
@@ -25,17 +24,20 @@ To use the above API we must include `<sys/ipc.h>` and `<sys/shm.h>` header file
 
 The `shmget` prototype is as follows.
 
-    int shmget(key_t key, size_t size, int shmflg);
-    
+```c
+int shmget(key_t key, size_t size, int shmflg);
+```
+
 `shmget` returns the shared memory ID on success.
+
 * The first argument `key` must be unique. This `key` can be generated using the `ftok()` call.
-* The `size` argument is the size of the shared memory segment (it is rounded to the multiples of PAGE_SIZE. Usually PAGE_SIZE is 4k).
-* The `shmflg` is usually set with the IPC_CREAT flag. 
+* The `size` argument is the size of the shared memory segment \(it is rounded to the multiples of PAGE\_SIZE. Usually PAGE\_SIZE is 4k\).
+* The `shmflg` is usually set with the IPC\_CREAT flag. 
 * If the `key` already exist, the `errno` is set to EEXIST and returns -1.
 
 The below is an example to create the shared memory segment. The key is taken to be static number for the example.
 
-```
+```c
 #include <stdio.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -60,11 +62,11 @@ int main()
 }
 ```
 
-We compile and execute the program and on success it prints the last print statement i.e. created 993131 (some number that is the shm id).
+We compile and execute the program and on success it prints the last print statement i.e. created 993131 \(some number that is the shm id\).
 
 an ipcs -m command on the created shared memory shows me this.
 
-```
+```bash
 dev@hanzo:~$ ipcs -m
 
 ------ Shared Memory Segments --------
@@ -77,8 +79,10 @@ key        shmid      owner      perms      bytes      nattch     status
 
 The API `shmat` performs the attachement to the shared memory segment. Its prototype is as following.
 
-    void *shmat(int shmid, const void *shmaddr, int shmflg);
-    
+```c
+void *shmat(int shmid, const void *shmaddr, int shmflg);
+```
+
 * the first argument `shmid` is the id returned from shmget.
 * the second argument is the attach address, and is usually kept to NULL.
 * the shmflg is also kept to 0 when doing read and write operations on the shared memory.
@@ -89,7 +93,7 @@ Let us write two programs, one is the program that creates the shared memory, at
 
 **Server code**
 
-```
+```c
 #include <stdio.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -131,7 +135,7 @@ int main()
 
 **Client code**
 
-```
+```c
 #include <stdio.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -172,15 +176,15 @@ int main()
 
 We compile the two programs and create the binaries as `shmsrv` and `shmcli`. We run the `shmsrv` first and then `shmcli` next. The `shmsrv` program performs the write to the shared memory segment and runs into infinite loop while the `shmcli` program performs a read on the shared memory segment and prints the data `Hello` on to the screen.
 
-Let us run the `ipcs -m -i 229379` (where the 229379 is my shm id).
+Let us run the `ipcs -m -i 229379` \(where the 229379 is my shm id\).
 
-```
+```bash
 dev@hanzo:~$ ipcs -m -i 229379
 
 Shared memory Segment shmid=229379
-uid=1000	gid=1000	cuid=1000	cgid=1000
-mode=0	access_perms=0
-bytes=4096	lpid=3617	cpid=3430	nattch=0
+uid=1000    gid=1000    cuid=1000    cgid=1000
+mode=0    access_perms=0
+bytes=4096    lpid=3617    cpid=3430    nattch=0
 att_time=Sat Mar 26 17:21:50 2016
 det_time=Sat Mar 26 17:21:50 2016
 change_time=Sat Mar 26 17:08:59 2016
@@ -191,7 +195,7 @@ statistics about the shared memory be found using the `shmctl` API.
 
 Let us add the following code to the shmcli.c file.
 
-```
+```c
     struct shmid_ds buf;
 
     ret = shmctl(shmid, IPC_STAT, &buf);
@@ -208,7 +212,6 @@ Let us add the following code to the shmcli.c file.
     printf("creator pid %d\n", buf.shm_cpid);
     printf("n attach %d\n", buf.shm_nattch);
 ```
-
 
 ## mmap
 
