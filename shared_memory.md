@@ -215,3 +215,47 @@ Let us add the following code to the shmcli.c file.
 
 ## mmap
 
+`mmap` maps the files or device into memory. `mmap` creates a new mapping in the virtual memory of the process.
+
+The prototype is as follows.
+
+```c
+void *mmap(void *addr, size_t length, int prot, int flags,
+            int fd, off_t offset);
+```
+
+If `addr` is `NULL`, the kernel initialises and chooses a memory and returns as the `mmap` return value.
+
+file size is specified in the `length` argument.
+
+the `prot` is is the protection bits for the memory. It is defined as
+
+
+
+| prot | description |
+| :--- | :--- |
+| PROT\_EXEC | pages may be executable |
+| PROT\_READ | pages may be read |
+| PROT\_WRITE | pages may be written |
+| PROT\_NONE | pages may not be accessible |
+
+usual `prot` arguments for a file descriptor are `PROT_READ` and `PROT_WRITE`.
+
+The `flags` argument determines whether the updates to the memory are visible to the other processes mapping to the same region. One of the most commonly used flags are `MAP_SHARED` and `MAP_PRIVATE`.
+
+`MAP_SHARED` makes the other processes get the updates on the pages.
+
+`MAP_PRIVATE` creates a private copy on write mapping and the updates are not visible to other processes that are mapping to the same file.
+
+
+
+The `munmap` unmaps the files from the memory.
+
+
+
+The prototype is as follows.
+
+```c
+int munmap(void *addr, 
+```
+
