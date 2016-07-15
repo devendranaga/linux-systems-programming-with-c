@@ -65,6 +65,30 @@ Then we run our binary with the incorrect option as below:
 
 Linux provides another API to print the error message based on the error number variable \`errno\`.
 
+```
+#include <stdio.h>
+#include <errno.h>
+#include <stdint.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+int main(void)
+{
+    char *file = NULL;
+    int fd;
+
+    fd = open(file, O_RDWR);
+    if (fd < 0) {
+        printf("failed to open file: error: %s\n", strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+```
+
 ### System\(\) system call
 
 The `system()` system call is used to execute a shell command in a program. Such as the following code
