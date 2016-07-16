@@ -49,7 +49,7 @@ while (processed < read_bytes) {
     
     event = (struct inotify_event *)(buf + processed);
     // event processing
-    event += sizeof(struct inotify_event);
+    processed += sizeof(struct inotify_event);
 }
 ```
 
@@ -95,24 +95,23 @@ int main(int argc, char **argv)
             break;
         }
 
-        printf("read called\n");
         while (processed < ret) {
             event = (struct inotify_event *)(buf + processed);
 
             if (event->mask & IN_ACCESS) {
-                printf("Read event \n");
+                printf("Read event on file %s\n", event->name);
             }
 
             if (event->mask & IN_CREATE) {
-                printf("File created\n");
+                printf("File created %s\n", event->name);
             }
 
             if (event->mask & IN_DELETE) {
-                printf("File deleted\n");
+                printf("File deleted %s\n", event->name);
             }
 
             if (event->mask & IN_OPEN) {
-                printf("File is in open\n");
+                printf("File is in open %s\n", event->name);
             }
 			processed += sizeof(struct inotify_event);
         }
