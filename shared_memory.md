@@ -253,7 +253,7 @@ The prototype is as follows.
 int munmap(void *addr, size_t length);
 ```
 
-include `<sys/mman.h>` for the mmap API.
+include `<sys/mman.h>` for the `mmap` API.
 
 
 
@@ -307,5 +307,76 @@ int main(int argc, char **argv)
 }
 ```
 
+There is also a way to write the data stored at the memory back to the file using the `msync` API.
 
+The `msync` API prototype is as follows.
+
+`int msync(void *addr, size_t length, int flags);`
+
+The `msync` will write the contents stored at the address `addr` of `length` bytes into the file that the `addr` points to. The `addr` is the return value of the `mmap` where in which the file descriptor is given to map the contents.
+
+The `flags` argument has two values.
+
+`MS_ASYNC`: schedule an update on this address to the file on the disk. The call returns immediately after setting the bit in the kernel for the update.
+
+`MS_SYNC`: request an update and wait till the update finishes.
+
+Here is an extension of the above example that performs the `msync` API.
+
+```c
+#include <stdio.h>
+#include <errno.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+
+int main(int argc, char **argv)
+{
+    int ret;
+    int fd;
+    void *addr;
+    struct stat s;
+
+    if (argc != 2) {
+        printf("%s [filename]\n", argv[0]);
+        return -1;
+    }
+
+    fd = open(argv[1], O_RDWR);
+    if (fd < 0) {
+        printf("failed to open %s\n", argv[1]);
+        return -1;
+    }
+
+    ret = stat(argv[1], &s);
+    if (ret < 0) {
+        printf("failed to stat %s\n", argv[1]);
+        return -1;
+    }
+
+    addr = mmap(NULL, s.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (!addr) {
+        printf("Failed to mmap %s\n", strerror(errno));
+        return -1;
+    }
+
+    printf("data at the address %p is %s\n", addr, addr);
+
+    memset(addr, 0, s.st_size);
+    strcpy(addr, "Hello Mmap");
+
+    msync(addr, s.st_size, MS_SYNC);
+    perror("msync");
+
+    munmap(addr, s.st_size);
+
+    close(fd);
+    return 0;
+}
+
+```
 
