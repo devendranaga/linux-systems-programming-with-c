@@ -4,10 +4,16 @@ symlink is another system call used to create symlinks of a real file. symlinks 
 
 The symlink prototype is as follows.
 
-`int symlink(const char *target, const char *linkpath);`
+```c
+int symlink(const char *target, const char *linkpath);
+```
 
 the `target` is the original file and `linkpath` is the link file. It is advised that both of the arguments should be represented with the absolute paths thus avoiding the broken links although the real directory or the file is present.
 
+If the file that the link is pointing to is deleted or moved somewhere else, the link becomes invalid. This link is called as **dangling symlink**.
+
+Another important note is that when a link gets deleted with the `unlink` command, only the link will be removed not the original file that the link is pointing to.
+ 
 The following example provides the `symlink` API in use:
 
 ```c
