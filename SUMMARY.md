@@ -65,6 +65,6 @@
    * [mbedtls](mbedtls.md)
    * [docker](docker.md)
    * [syslogd](syslogd.md)
-* [Software development Practices](software_development_practices.md)
+* [Software development Practices](software_development_proctices.md)
 * [Programming problems](programming_problems.md)
    * [C programming](c_programming.md)

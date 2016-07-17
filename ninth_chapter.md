@@ -48,9 +48,134 @@
 |tag   |      Create, list, delete or verify a tag object signed with GPG |
 
 
+## git examples
+
+#### clone a repository:
+
+```
+git clone https://github.com/DevNaga/gists.git
+```
+
+#### check the status of the branch
+
+```
+git status
+```
+
+#### configure the git username
+
+```
+git config --add user.name "devnaga"
+```
+
+#### confiure the git user email address
+
+```
+git config --add user.email "devendra.aaru@gmail.com"
+```
+
+#### configure the color screen for branch and status
+
+```
+git config --add color.diff auto
+git config --add color.branch auto
+git config --add color.status auto
+```
+
+#### configure the difftool
+
+```
+git config --add diff.tool meld
+```
+
+#### configure the favourite editor for the commit
+
+```
+git config --add core.editor subl
+```
+
+#### pull the code in the repository:
+
+```
+git pull
+```
+
+#### launch a difftool
+
+```
+git difftool
+```
+
+#### create a branch:
+
+```
+git branch new
+```
+
+#### delete a branch:
+
+```
+git branch -D new
+```
+
+#### stash local changes
+
+```
+git stash
+```
+
+#### list the stashed items
+
+```
+git stash list
+```
+
+#### show the stashed change
+
+```
+git stash show -p stash@{0}
+```
+
+where `0` is the number of the stash.
+
+#### diff the local changes
+
+```
+git diff
+```
+
+#### counters of the diff
+
+```
+git diff --stat
+```
+
+#### view the changes in the staging
+
+```
+git diff --cached
+```
+
+#### view the counters of the changes in the staging
+
+```
+git diff --stat --cached
+```
+
+#### commit the changes
+
+```
+git commit
+```
+
+#### push the changes
+
+```
+git push origin <branch-name>
+```
 
 
-Links:
+### Links:
 
 https://git-scm.com/book/en/v2/Getting-Started-Git-Basics
 
