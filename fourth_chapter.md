@@ -7,7 +7,7 @@ In linux, sockets are the pipes or the software wires that are used for the exch
 
 The server program opens a sockets, waits for someone to connect to it. The socket can be created to communicate over the TCP or the UDP protocol and the underlying networking layer can be IPv4 or IPv6. Often sockets are used to provide interprocess communication between the programs with in the OS.
 
-The **socket** API is the most commonly used function in a network oriented programs. This is the starting point to create a socket that can be used for further communication either with in the OS in a computer or between two computers.
+The **socket** API is the most commonly used API in a network oriented programs. This is the starting point to create a socket that can be used for further communication either with in the OS in a computer or between two computers.
 
 In the Linux systems programming, the TCP protocol is denoted by a macro called **SOCK_STREAM** and the UDP protocol is denoted by a macro called **SOCK_DGRAM**. Either of the above macros are passed as the second argument to the **socket** API.
 
