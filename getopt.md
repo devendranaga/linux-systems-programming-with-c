@@ -64,13 +64,36 @@
 
 Some commands accept the input as the following...
 
-
-
 ```
 command --list
 ```
 
-The two  -- allow to provide a descriptive command
+The two  `--` allow to provide a descriptive command from the command line.
+
+The option data structure looks as below that is passed as argument to `getopt_long`.
+
+The data structure is as follows...
+
+```c
+struct option {
+    const char *name;
+    int has_arg;
+    int *flag;
+    int val;
+};
+```
+
+Here is the description:
+
+`name`: name of the long options.
+
+`has_arg`:  `no_argument` \(0\) if the option does not take an argument. `required_argument` \(1\) if the option requires an argument. `optional_argument` \(2\) if the option takes an optional argument.
+
+`flag`: usually set to 0.
+
+`val`: the value to be used in short notation in case getopt is used.
+
+
 
 ```c
 #include <stdio.h>
