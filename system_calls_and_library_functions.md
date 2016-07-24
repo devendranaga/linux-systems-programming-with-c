@@ -45,7 +45,7 @@ We compile it with `gcc -Wall errno_strings.c`. It will generate an `a.out` file
 
 Then we run our binary with the correct option as below:
 
-```
+```bash
     ./a.out errno_string.c
 
     fopen: Success
@@ -56,7 +56,7 @@ The `perror` gives us that the file has been opened successfully. The filepointe
 
 Then we run our binary with the incorrect option as below:
 
-```
+```bash
     ./a.out errno_string.c.1
 
     failed to open errno_string.c.1
