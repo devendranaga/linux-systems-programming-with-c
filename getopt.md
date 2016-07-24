@@ -1,19 +1,18 @@
 # getopt
 
+* parses arguments with options
+* example:
 
-*  parses arguments with options
-*  example:
-
-``` 
+```c
     #include <stido.h>
     #include <unistd.h>
     #include <getopt.h>
-    
+
     int main(int argc, char **argv)
     {
         int opt;
         int time_delay = 0;
-        
+
         while ((opt = getopt(argc, argv, "t:")) != -1) {
             switch (opt) {
                 case 't':
@@ -24,27 +23,32 @@
                     return -1;
             }
         }
-        
+
         printf("sleeping for %d\n", time_delay);
         sleep(time_delay);
-        
+
         return 0;
     }
 ```
-    
+
 **    Example: getopt base example**
 
 * We compile and generate the binary as the following:
-      gcc -Wall getopt_example.c -o getopt_example
-      
-      ./getopt_example -t 1
-      
+      gcc -Wall getopt\_example.c -o getopt\_example
+
+  ```bash
+  ./getopt_example -t 1
+  ```
+
   The above code sleeps for 1 second and stops the execution
 
 * include files : `<getopt.h>` and `<unistd.h>`.
+
 * getopt defines a set of variable that can be used by the program.
+
   * **opterr**: If the value of this variable is nonzero, then getopt prints an error message to the standard error stream if it encounters an unknown option character or an option with a missing required argument. If you set this variable to zero, getopt does not print any messages, but it still returns the character ? to indicate an error.
-    * For ex: if we run the above example as the following `./getopt_example -d `. It would print `./getopt_example: illegal option -- d` on to the screen.
+
+    * For ex: if we run the above example as the following `./getopt_example -d`. It would print `./getopt_example: illegal option -- d` on to the screen.
 
   * **optopt**: When getopt encounters an unknown option character or an option with a missing required argument, it stores that option character in this variable. You can use this for providing your own diagnostic messages.
 
@@ -55,7 +59,18 @@
     * we get this option in our example of the getopt and use it to convert into an integer that gives us the time to sleep in the code. The `optarg` is the most commonly used argument in any basic to an intermediate level program.
 
 
-# getopt_long
+
+# getopt\_long
+
+Some commands accept the input as the following...
+
+
+
+```
+command --list
+```
+
+The two  -- allow to provide a descriptive command
 
 ```c
 #include <stdio.h>
@@ -98,3 +113,4 @@ int main(int argc, char **argv)
     return 0;
 }
 ```
+
