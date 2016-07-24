@@ -23,7 +23,7 @@ A string is always terminated by a null termination mark `'\0'`. The null termin
 
 Or another way of assigning the string is the following.
 
-```
+```c
 char char_array[] = "linux";
 ```
 
@@ -33,7 +33,7 @@ The `printf` or `fprintf` functions can be used to print the strings. The format
 
 The below code prints the `char_array` on to the console.
 
-```
+```c
 printf("%s", char_array);
 ```
 
