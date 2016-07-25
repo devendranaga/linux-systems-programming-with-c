@@ -255,8 +255,6 @@ int munmap(void *addr, size_t length);
 
 include `<sys/mman.h>` for the `mmap` API.
 
-
-
 sample code:
 
 ```c
@@ -377,6 +375,9 @@ int main(int argc, char **argv)
     close(fd);
     return 0;
 }
-
 ```
+
+The `mmap` is mostly used in optimising the file writes, such as in case of data bases. They map the file into the RAM and only write \(perform the `msync`\) optimally. This reduces the use of write system calls in the kernel and the kernel's paging daemon flushing the pages to the disk and using this saved CPU usage to the other tasks.
+
+
 
