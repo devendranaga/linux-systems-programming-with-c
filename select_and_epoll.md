@@ -1,6 +1,6 @@
 # select and epoll
 
-###1. select system call
+### 1. select system call
 
 `select` system call is used to wait on multiple file descriptors at the same time. The file descriptors can be a file, socket, pipe, message queue etc.
 
@@ -12,21 +12,21 @@
 
 `FD_CLR` clears an fd in the `fd_set`.
 
-
 `select` can also be used to perform millisecond timeout. This can also be used to selective wait for an event or a delay.
 
 the `select` from the manual page looks like below:
 
-
 `int select(int nfd, FD_SET *rdfd, FD_SET *wrfd, FD_SET *exfd, struct timeval *timeout);`
 
-The select returns number of file descriptors contained in the three returned file descriptor sets and returns `0` if there is a timeout.
+The select returns greater than 0 and sets the file descriptors that are ready in the 3 file descriptor sets. and returns `0` if there is a timeout.
+
+
 
 A TCP server using the select loop is demonstrated below:
 
 The select accepts 3 sets of file descriptor sets. Read fdset, Write fdset, Except fdset. Of all we only use read fdset. We do not really need write fdset and except fdset in most of the cases.
 
-The select when returned (and with no error), the above fdsets should be tested with the FD_ISSET with the list of FDs that we are interested in.
+The select when returned \(and with no error\), the above fdsets should be tested with the FD\_ISSET with the list of FDs that we are interested in.
 
 The below two programs can be downloaded here: [Server](https://github.com/DevNaga/gists/blob/master/tcp_select_server.c) and [Client](https://github.com/DevNaga/gists/blob/master/tcp_client.c)
 
@@ -188,7 +188,7 @@ int main()
 }
 ```
 
-The above two programs are only demonstratable programs. They have many errors. Finding and spotting the errors is our problem here. And the solution to it makes us to become a better programmer.
+The above two programs are only demonstratable programs. They have many errors. Finding and spotting the errors is going to be your task here. And the solution to it makes us to become a better programmer.
 
 The timeout argument used for the timer events or used as a timer callback.
 
@@ -197,7 +197,7 @@ struct timeval timeout = {
     .tv_sec = 0,
     .tv_usec = 250 * 1000,
 };
-    
+
 select(1, NULL, NULL, NULL, &timeout);
 ```
 
@@ -205,5 +205,5 @@ The above code waits for the timeout of 250 milliseconds and the `select` call r
 
 We can use this mechanism to program a timer along with the sockets. We are going to demostrate this feature in the event library section of this book.
 
-###2. epoll system call
+### 2. epoll system call
 
