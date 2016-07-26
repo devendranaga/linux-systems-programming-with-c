@@ -21,7 +21,7 @@ Let us have a look at the `flags` parameter. The `flags` talk about the state of
 
 To get the `flags` one must to `SIOCGIFFLAGS` ioctl.
 
-**The struct ifreq**: This is the base structure that we give out to the kernel for either get / set of network parameters.
+**The struct ifreq**: This is the base structure that we give out to the kernel for either get \/ set of network parameters.
 This is also what we are going to use right now.
 
 The below is the definition of the `struct ifreq`.
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 
 ```
 
-The above program opens up a DGRAM socket and performs an ioctl to the kernel with the SIOCGIFFLAGS
+The above program opens up a DGRAM socket and performs an ioctl to the kernel with the `SIOCGIFFLAGS`
 command. This will then be unpacked in the kernel and passed to the corresponding subsystem i.e. the
 networking subsystem. The networking subsystem will then validate the fields and the buffers and fills
 the data into the buffer i.e `struct ifreq`. Thus the ioctl returns at the userspace with the data.
@@ -123,6 +123,7 @@ ifflags details:
          Broadcast
          Multicast
 ```
+
 Now we have gotten the method to get the interface flags, let's move to `MTU` field in the `ifconfig` output.
 
 MTU is the largest size of the packet or frame specified in octets. For ethernet, it is mostly 1500 octets.
@@ -238,7 +239,7 @@ int main(int argc, char **argv)
 ```
 
 The above program does the similar top level jobs such as opening a socket, closing a socket and using the `struct ifreq`.
-The ifr_hwaddr contains the hardware address of the network device. The `ifr_hwaddr` is of type `struct sockaddr`.
+The ifr\_hwaddr contains the hardware address of the network device. The `ifr_hwaddr` is of type `struct sockaddr`.
 
 The `struct sockaddr` contains its data member `sa_data` which inturn is the hardware address that the kernel copied.
 
@@ -415,7 +416,6 @@ int main(int argc, char **argv)
 The programs makes the interface go down, otherwise we cannot change the name of the interface.
 The interface is made down using the `SIOCSIFFLAGS` ioctl and sets up the interface name and
 makes the interface up again using the `SIOCSIFFLAGS`.
-
 
 # wireless ioctls
 
