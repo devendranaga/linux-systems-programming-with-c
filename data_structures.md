@@ -9,7 +9,7 @@ We are also going to take a dig at the searching and sorting functions too.. The
 
 1. Think of this as set of objects in series.
 2. Objects can be of any type.
-3. Dynamically modified (created, deleted, altered)
+3. Dynamically modified \(created, deleted, altered\)
 4. Number of elements in the list is the length of the list
 5. Often more time consuming when looking for an element in the list if there are lots of elements.
 
@@ -24,11 +24,11 @@ Linked lists can be created with the simple data structure below.
     struct linked_list *head, *tail;
 ```
 
-The ```data``` part is a pointer that pointing to a data structure. A user can point their data structure to this pointer.
+The `data` part is a pointer that pointing to a data structure. A user can point their data structure to this pointer.
 
-The ```tail``` pointer is used to point to always the end of the list. The end pointer is used to chain the newly created element in the list at the end of the list. The end pointer is then made point to the newly created element.
+The `tail` pointer is used to point to always the end of the list. The end pointer is used to chain the newly created element in the list at the end of the list. The end pointer is then made point to the newly created element.
 
-The following code performs the ```head``` and ```tail``` pointer assignments
+The following code performs the `head` and `tail` pointer assignments
 
 ```c
     if (!head) {
@@ -39,6 +39,14 @@ The following code performs the ```head``` and ```tail``` pointer assignments
         tail = new_node;
     }
 ```
+
+
+
+
+
+
+
+![](/assets/Linked list.jpg)
 
 The `if` conditional says if there is no `head` element, then the new node becomes the head element and also the `tail` node points to the new node. Otherwise, the `new_node` gets added as the next element of the `tail` node and further the `tail` node gets pointed to the `new_node`. Thus if a new element is again getting added, it will always gets added at the end.
 
@@ -70,7 +78,7 @@ The part of the code is keep into a function called `list_add`.
 
 the function creates a new linked list node and puts the `elem` to the `data` pointer of it.
 
-Then it adds the element at the end of the list or at the beginning of the list (no list head).
+Then it adds the element at the end of the list or at the beginning of the list \(no list head\).
 
 The below function adds the elements to the head and so be called `list_add_head`.
 
@@ -96,7 +104,7 @@ int list_add_head(void *elem)
 }
 ```
 
-Before we make the new_node the head, we must assign the next pointer of the new_node to head so that we preserve the entire chain. Next is to make the head pointing to the new_node. Thus keeping the new_node the head.
+Before we make the new\_node the head, we must assign the next pointer of the new\_node to head so that we preserve the entire chain. Next is to make the head pointing to the new\_node. Thus keeping the new\_node the head.
 
 To get the data pointer of each element, we need to `traverse` each element in the list and retrieve the data pointer.
 
@@ -156,11 +164,12 @@ int list_delete(void *elem, int (*free_func)(void *data))
 
 The `free_func` is called when an element is found while we are deleting the node. Before we delete the node, we should make sure whatever the data application is allocated gets freed. Thus we call the `free_func` so that application would get chance to free up the memory that is has allocated.
 
+---
 
-*****
 Problem:
 1. program to count the number of elements in the list.
-*****
+
+---
 
 ## 2. Doubly linked list
 
@@ -169,25 +178,26 @@ Problem:
 
 the doubly linked list looks as the following.
 
-    struct doubly_linked_list {
-        void *data;
-        struct doubly_linked_list *prev;
-        struct doubly_linked_list *next;
-    };
+```
+struct doubly_linked_list {
+    void *data;
+    struct doubly_linked_list *prev;
+    struct doubly_linked_list *next;
+};
 
-    struct doubly_linked_list *head, *tail;
+struct doubly_linked_list *head, *tail;
+```
 
 similar to the linked list, we define the API such as the following.
 
-| Doubly linked list API| description |
-| -- | -- |
-| dllist_add_tail | add a node at the tail |
-| dllist_add_head | add a node at the head |
-| dllist_for_each_forward | move towards the end of the list from the head |
-| dllist_for_each_reverse | move towards the beginning of the list from the tail |
-| dllist_delte_elem | delete the element from the doubly linked list |
-| dllist_destroy | destroy the created doubly linked list |
-
+| Doubly linked list API | description |
+| :--- | :--- |
+| dllist\_add\_tail | add a node at the tail |
+| dllist\_add\_head | add a node at the head |
+| dllist\_for\_each\_forward | move towards the end of the list from the head |
+| dllist\_for\_each\_reverse | move towards the beginning of the list from the tail |
+| dllist\_delte\_elem | delete the element from the doubly linked list |
+| dllist\_destroy | destroy the created doubly linked list |
 
 The `dllist_add_tail` API adds the node to the tail of the list. The code looks as follows.
 
@@ -215,7 +225,7 @@ int dllist_add_tail(void *elem)
 }
 ```
 
-This API finds if a node is NULL, adds the node to the head. Otherwise, it points the previous element of the new node to the tail node and makes the tail's next pointer point to the new_node. Then finally makes tail points to the new_node.
+This API finds if a node is NULL, adds the node to the head. Otherwise, it points the previous element of the new node to the tail node and makes the tail's next pointer point to the new\_node. Then finally makes tail points to the new\_node.
 
 The `dllist_add_head` API adds the element to the head. The API looks as follows.
 
@@ -243,7 +253,7 @@ int dllist_add_head(void *elem)
 }
 ```
 
-the `dllist_add_head` always adds the node at the beginning of the head. Make the previous pointer of head point to the new_node and new_node next points to the head element and finally making the head node point to the new_node.
+the `dllist_add_head` always adds the node at the beginning of the head. Make the previous pointer of head point to the new\_node and new\_node next points to the head element and finally making the head node point to the new\_node.
 
 the `dllist_for_each_forward` makes the iterator move from the head to the end. At each point, the callback is called and given the user data to the callback. So if the user gives out a callback, the API calls the callback for each node with the userdata.
 
@@ -330,35 +340,37 @@ int dllist_destroy(void (*callback)(void *data))
 
 the circular linked list looks as the following.
 
-    struct circular_linked_list {
-        void *data;
-        struct circular_linked_list *next;
-    };
+```
+struct circular_linked_list {
+    void *data;
+    struct circular_linked_list *next;
+};
 
-    struct circular_linked_list *head, *tail;
+struct circular_linked_list *head, *tail;
+```
 
 Adding an element to the circular list is same as adding an element to the linked list, but the last element points to the head back.
 
 ```c
 int circular_list_add(void *elem)
 {
-	struct circular_linked_list *new;
+    struct circular_linked_list *new;
 
-	new = calloc(1, sizeof(struct circular_linked_list));
-	if (!new)
-		return -1;
+    new = calloc(1, sizeof(struct circular_linked_list));
+    if (!new)
+        return -1;
 
-	new->data = elem;
-	if (!head) {
-		head = new;
-		tail = new;
-	} else {
-		tail->next = new;
-		tail = new;
-	}
+    new->data = elem;
+    if (!head) {
+        head = new;
+        tail = new;
+    } else {
+        tail->next = new;
+        tail = new;
+    }
 
-	new->next = head;
-	return 0;
+    new->next = head;
+    return 0;
 }
 ```
 
@@ -367,15 +379,15 @@ The traversal of the list is done as follows, however the check has to be made w
 ```c
 int circular_list_for_each(void (*func)(void *data))
 {
-	struct circular_linked_list *node = head;
+    struct circular_linked_list *node = head;
 
-	do {
-		if (func)
-			func(node->data);
-		node = node->next;
-	} while (node != head);
+    do {
+        if (func)
+            func(node->data);
+        node = node->next;
+    } while (node != head);
 
-	return 0;
+    return 0;
 }
 ```
 
@@ -387,20 +399,22 @@ The callback function is called at each element traversal.
 
 the circular doubly linked list looks as the following.
 
-    struct ciruclar_doubly_linked_list {
-        void *data;
-        struct circular_doubly_linked_list *next;
-        struct circular_doubly_linked_list *prev;
-    };
+```
+struct ciruclar_doubly_linked_list {
+    void *data;
+    struct circular_doubly_linked_list *next;
+    struct circular_doubly_linked_list *prev;
+};
 
-    struct circular_doubly_linked_list *head, *tail;
-
+struct circular_doubly_linked_list *head, *tail;
+```
 
 ## 4. Queues
+
 1. Same as linked list.
 2. new entries are added at the last. Also called enqueue.
 3. the elements are retrieved at the front. Also called dequeue.
-4. The queue is also called FIFO (first in first out).
+4. The queue is also called FIFO \(first in first out\).
 
 ```c
     struct queue {
@@ -413,50 +427,53 @@ the circular doubly linked list looks as the following.
 
 The queue front and rear are initialised when a new element is added. The addition of new element is as the following.
 
-    int enqueue(void *data)
-    {
-        struct queue *node;
+```
+int enqueue(void *data)
+{
+    struct queue *node;
 
-        node = calloc(1, sizeof(struct queue));
-        if (!node) {
-            return -1;
-        }
-
-        node->data = data;
-        if (!rear) {
-            rear = node;
-            front = node;
-        } else {
-            rear->next = node;
-            rear = node;
-        }
-
-        return 0;
+    node = calloc(1, sizeof(struct queue));
+    if (!node) {
+        return -1;
     }
+
+    node->data = data;
+    if (!rear) {
+        rear = node;
+        front = node;
+    } else {
+        rear->next = node;
+        rear = node;
+    }
+
+    return 0;
+}
+```
 
 The dequeue is performed by taking one element out of the front end.
 
-    int dequeue(void (*dequeue_func)(void *data))
-    {
-        struct queue *node;
+```
+int dequeue(void (*dequeue_func)(void *data))
+{
+    struct queue *node;
 
-        node = front;
+    node = front;
 
-        if (!node)
-            return -1;
+    if (!node)
+        return -1;
 
-        front = node->next;
-        dequeue_func(node->data);
+    front = node->next;
+    dequeue_func(node->data);
 
-        return 0;
-    }
+    return 0;
+}
+```
 
 The queues above are dynamic lists. Meaning, there is no limit on the number of elements that be added. Only the memory limit would be the limitting factor.
 
-
 ## 5. Stacks
 
-A stack is a container of objects that are inserted and removed in Last in First out (LIFO) manner. Putting the elements into the stack is called `push` and taking out the elements out of the stack is called `pop`.
+A stack is a container of objects that are inserted and removed in Last in First out \(LIFO\) manner. Putting the elements into the stack is called `push` and taking out the elements out of the stack is called `pop`.
 
 `push` adds an item into the top of the stack and `pop` removes the item from the top.
 
@@ -517,11 +534,12 @@ int pop(void (*callback)(void *data))
 ## 6. Hash tables
 
 ## 7. Tree
+
 ### 7.1. Binary tree
+
 ### 7.2. Red black trees
 
 # Searching Algorithms
-
 
 ## 1. Binary search
 
@@ -534,3 +552,4 @@ int pop(void (*callback)(void *data))
 ## 5. Insertion sort
 
 ## 6. Merge sort
+
