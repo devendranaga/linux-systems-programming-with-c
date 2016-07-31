@@ -176,45 +176,6 @@ struct timeval {
 };
 ```
 
-The `settimeofday` API is used to set the system time. The prototype is as follows..
-
-```c
-int settimeofday(const struct timeval *tv, const struct timezone *tz);
-```
-
-The settimeofday API can fail in the following cases:
-
-`EPERM`:
-
-if the user is not privileged user and tries to call this API.
-
-`ENOSYS`:
-
-If the tz pointer in the call is not null and the os does not supports it.
-
-The above calls would get the current 'wallclock' time. Meaning they are affected by the changes in the time due to clock drift and adjustments. The most important factors include the GPS setting the time into the system, NTP changing the system time syncing with the NTP servers. This would affect programs depending on these API. For example: the timers using the above API would either expire quickly \(due to time moving forward\) or wait forever \(due to time moving backwards to a larger value\).
-
-
-The following code snippet describes the usage of the `settimeofday` system call.
-
-```c
-struct timeval tv;
-int ret;
-
-ret = gettimeofday(&tv, 0);
-if (ret < 0) {
-    perror("failed to gettimeofday");
-    return -1;
-}
-
-tv.tv_sec += 1;
-ret = settimeofday(&tv, 0);
-if (ret < 0) {
-    perror("failed to settimeofday");
-    return -1;
-}
-```
-
 We simply use the below code to get the current time in seconds and micro seconds resolution.
 
 ```c
@@ -258,8 +219,130 @@ void analysis()
 
 ```
 
+The `settimeofday` API is used to set the system time. The prototype is as follows..
+
+```c
+int settimeofday(const struct timeval *tv, const struct timezone *tz);
+```
+
+The settimeofday API can fail in the following cases:
+
+`EPERM`:
+
+if the user is not privileged user and tries to call this API.
+
+`ENOSYS`:
+
+If the tz pointer in the call is not null and the os does not supports it.
+
+The above calls would get the current 'wallclock' time. Meaning they are affected by the changes in the time due to clock drift and adjustments. The most important factors include the GPS setting the time into the system, NTP changing the system time syncing with the NTP servers. This would affect programs depending on these API. For example: the timers using the above API would either expire quickly \(due to time moving forward\) or wait forever \(due to time moving backwards to a larger value\).
+
+
+The following code snippet describes the usage of the `settimeofday` system call.
+
+```c
+struct timeval tv;
+int ret;
+
+ret = gettimeofday(&tv, 0);
+if (ret < 0) {
+    perror("failed to gettimeofday");
+    return -1;
+}
+
+tv.tv_sec += 1;
+ret = settimeofday(&tv, 0);
+if (ret < 0) {
+    perror("failed to settimeofday");
+    return -1;
+}
+```
+
+The problem with the `settimeofday` is that the time can go abruptly forward or abruptly backwards. This might affect some programs as we have discussed above that programs using wallclock time might misbehave with the abrupt change of time. To avoid this process we need to use the `adjtime` API which is described as follows.
+
+The `adjtime` looks as follows
+
+```c
+int adjtime(const struct timeval *delta, struct timeval *olddelta);
+```
+
+The `adjtime` API speeds up or slows down the time in monotonically. If the `delta` argument is positive, then the system time is speeded up till the `delta` value and if the `delta` argument is negative, then the system time is slowed down till the `delta` value.
+
+The below code sample shows the usage of `adjtime`.
+
+```c
+int ret;
+struct timeval delta;
+
+delta.tv_sec = 1;
+delta.tv_usec = 0;
+
+ret = adjtime(&delta, NULL);
+if (ret < 0) {
+    perror("failed to adjtime");
+    return -1;
+}
+```
 
 When we are programming timers, we should avoid any calls to the above API as they are not monotonic or steadily moving forward in the future.
+
+The `time.h` provides a macro called `difftime` that is used to find the difference of time between two variables of type `time_t` (Although one can subtract the two from each other on linux system).
+
+The `difftime` looks as follows.
+
+```c
+double difftime(time_t time0, time_t time1);
+```
+
+`clock` is another API that measures the CPU time perfectly. As we looked at one of the usage of `gettimeofday` call, we provided an example of using the `gettimeofday` to measure the time it takes to execute the function. However, this incurs the scheduling and other jobs with in the system and is not the effective way to find out only the CPU time. `clock` function provides us to do just this.
+
+The `clock` looks as follows.
+
+```c
+clock_t clock();
+```
+
+The `clock` returns the number of ticks. To convert it, divide it by `CLOCKS_PER_SEC`. If the processor time used is not represented, it returns -1. The `clock` return value can wrap around every 72 minutes. On a 32 bit system the `CLOCKS_PER_SEC` is 1,000,000. 
+
+The sample code is as below.
+
+```c
+clock_t start;
+clock_t end;
+
+start = clock();
+func_call();
+end = clock();
+
+printf("ticks %d\n", end - start);
+```
+
+There is another API that is used to get the CPU times, called `times`.
+
+The prototype is as follows
+
+```c
+clock_t times(struct tms *buf);
+```
+
+The `times` API stores the information into the `struct tms`. The structure looks as below.
+
+```c
+struct tms {
+    clock_t tms_utime; // user time
+    clock_t tms_stime; // system time
+    clock_t tms_cutime; // user time of children
+    clock_t tms_cstime; // system time of children
+};
+```
+
+`tms_utime` is the amount of time spent in executing the instructions in user space.
+`tms_stime` is the amount of time spent in executing the instructions in system.
+`tms_cutime` is the amount of time spent by the children executing the instructions in user space.
+`tms_cstime` is the amount of time spent by the children executing the instructions in system.
+
+All the above times are units of clock ticks.
+
 
 ### Timer APIs
 
