@@ -8,7 +8,7 @@ A one shot timer runs only once. A periodic timer repeats itself upon every expi
 
 `alarm()` arranges for a `SIGALRM` signal to be delivered to the calling process. The `alarm` can be thought of as one shot timer.
 
-Below example provides a oneshot timer implementation with the `alarm`.
+Below example provides a oneshot timer implementation with the `alarm`. The weblink to the program is [here](https://github.com/DevNaga/gists/blob/master/alarm_book.c)
 
 ```c
 #include <stdio.h>
