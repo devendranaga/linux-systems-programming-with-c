@@ -192,9 +192,30 @@ if the user is not privileged user and tries to call this API.
 
 If the tz pointer in the call is not null and the os does not supports it.
 
+The above calls would get the current 'wallclock' time. Meaning they are affected by the changes in the time due to clock drift and adjustments. The most important factors include the GPS setting the time into the system, NTP changing the system time syncing with the NTP servers. This would affect programs depending on these API. For example: the timers using the above API would either expire quickly \(due to time moving forward\) or wait forever \(due to time moving backwards to a larger value\).
 
 
-We simply use the below code to get the curren time in seconds and micro seconds resolution.
+The following code snippet describes the usage of the `settimeofday` system call.
+
+```c
+struct timeval tv;
+int ret;
+
+ret = gettimeofday(&tv, 0);
+if (ret < 0) {
+    perror("failed to gettimeofday");
+    return -1;
+}
+
+tv.tv_sec += 1;
+ret = settimeofday(&tv, 0);
+if (ret < 0) {
+    perror("failed to settimeofday");
+    return -1;
+}
+```
+
+We simply use the below code to get the current time in seconds and micro seconds resolution.
 
 ```c
 struct timeval cur_time;
@@ -237,7 +258,6 @@ void analysis()
 
 ```
 
-The above calls would get the current 'wallclock' time. Meaning they are affected by the changes in the time due to clock drift and adjustments. The most important factors include the GPS setting the time into the system, NTP changing the system time syncing with the NTP servers. This would affect programs depending on these API. For example: the timers using the above API would either expire quickly \(due to time moving forward\) or wait forever \(due to time moving backwards to a larger value\).
 
 When we are programming timers, we should avoid any calls to the above API as they are not monotonic or steadily moving forward in the future.
 
