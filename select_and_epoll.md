@@ -203,9 +203,7 @@ The above code waits for the timeout of 250 milliseconds and the `select` call r
 
 We can use this mechanism to program a timer along with the sockets. We are going to demostrate this feature in the event library section of this book.
 
-
-
-The select system call cannot serve maximum connections more than FD\_SETSIZE. On some systems it is 2048.
+The `select` system call cannot serve maximum connections more than `FD_SETSIZE`. On some systems it is 2048. This limits the number of connections when the server program use this call. Thus the `select` call is not a perferred approach when using with a large set of connections that are possibly for the outside of the box.
 
 ### 2. epoll system call
 

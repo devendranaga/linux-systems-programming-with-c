@@ -2,12 +2,9 @@
 
 A timer counts down to 0 from a specific value. In operating systems, the timer upon expiry, allows a program to perform specific actions. There are two timers, specifically one shot and periodic.
 
-A one shot timer runs only once. A periodic timer repeats itself upon every expiration.
-
+A one shot timer runs only once. A periodic timer repeats itself upon every expiration. Some programs need the timer to be tick at smaller intervals and with lesser resolutions. the `time_t` variable can be used for this purpose. The `time_t` is of resolution in seconds.
 
 ## alarm
-
-
 
 `alarm()` arranges for a `SIGALRM` signal to be delivered to the calling process. The `alarm` can be thought of as one shot timer.
 
@@ -32,6 +29,7 @@ int main(int argc, char **argv)
     return 0;
 }
 ```
+
 compile and run the program as follows.
 
 ```bash
@@ -44,9 +42,7 @@ Removing the `while (1);` would make the program stop instead of waiting in the 
 
 The waiting is done in the `while` statement so as to allow the kernel to trigger the timer for this running process.
 
-
 ## setitimer
-
 
 The `setitimer` API provides either a one shot or an interval timer. When the timer fires, the OS activates the SIGALRM signal for each expiry. Before the `setitimer` we register a signal handler for the SIGALRM. The `setitimer` thus invokes the signal handler indirectly upon each expiry.
 
@@ -75,7 +71,7 @@ struct timeval {
 
 ```
 
-The structure contains an it_value member describing the initial value for the timer and an it_interval member that is used as a repeatable value. The timer is initialized with the it_value and when the timer expires, the it_interval is loaded as a next expiry value and is repeated again and again.
+The structure contains an it\_value member describing the initial value for the timer and an it\_interval member that is used as a repeatable value. The timer is initialized with the it\_value and when the timer expires, the it\_interval is loaded as a next expiry value and is repeated again and again.
 
 for ex:
 
@@ -89,12 +85,11 @@ struct itimerval it = {
 
 ```
 
-The it_value is initialized to 2 seconds and so after the 2 secs the timer expires and calls the signal handler that is registered. upon the expiry, the it_interval is loaded into the timer as the new expiry time that is 1 sec. At every expiry the 1 sec timeout value is loaded back as a next triggering timeout.
+The it\_value is initialized to 2 seconds and so after the 2 secs the timer expires and calls the signal handler that is registered. upon the expiry, the it\_interval is loaded into the timer as the new expiry time that is 1 sec. At every expiry the 1 sec timeout value is loaded back as a next triggering timeout.
 
-The `setitimer` behaves as a one shot timer when the it_interval argument is 0.
+The `setitimer` behaves as a one shot timer when the it\_interval argument is 0.
 
 Below is the example of the `setitimer`.
-
 
 ```c
 #include <stdio.h>
@@ -166,12 +161,9 @@ int main(int argc, char **argv)
 
 The program first registers the SIGALRM signal via `sigaction` and registers the `setitimer` with the given input values. The periodicity of the timeout is controlled via the repeat argument.
 
+## timer\_create
 
-## timer_create
-
-
-
-## timerfd_create
+## timerfd\_create
 
 ```c
 #include <stdio.h>
@@ -191,8 +183,8 @@ int main(int argc, char **argv)
 
     if (argc != 2) {
         printf("%s [timer interval in msec]\n", argv[0]);
-		return -1;
-	}
+        return -1;
+    }
 
     time_intvl = atoi(argv[1]);
 
@@ -230,13 +222,13 @@ int main(int argc, char **argv)
         ret = select(fd + 1, &rdfd, NULL, NULL, NULL);
         if (ret > 0) {
             if (FD_ISSET(fd, &rdfd)) {
-			    uint64_t expiration;
+                uint64_t expiration;
 
                 ret = read(fd, &expiration, sizeof(expiration));
-				if (ret > 0) {
+                if (ret > 0) {
                     gettimeofday(&tv, 0);
                     printf("interval timer %ld.%ld, expirations %ju\n", tv.tv_sec, tv.tv_usec, expiration);
-				}
+                }
             }
         }
     }
@@ -245,3 +237,4 @@ int main(int argc, char **argv)
 }
 
 ```
+
