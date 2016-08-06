@@ -356,7 +356,7 @@ int main(int argc, char **argv)
 
 ```
 
-POSIX standard defines  \_LARGEFILE64\_SOURCE to support reading or writing of files with sizes more than 2GB.
+POSIX standard defines  `_LARGEFILE64_SOURCE` to support reading or writing of files with sizes more than 2GB.
 
 Programs:
 
