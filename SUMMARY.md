@@ -53,6 +53,7 @@
    * [backtracing](backtracing.md)
    * [prctl](prctl.md)
    * [inotify](Inotify.md)
+   * [terminal i/0](termio.md)
 * [POSIX Threads](seventh_chapter.md)
    * [posix threads programming](posix_threads_programming.md)
 * [Build systems](eighth_chapter.md)

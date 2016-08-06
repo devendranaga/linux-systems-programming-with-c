@@ -147,3 +147,5 @@ int main(void)
 }
 ```
 
+1. to get the number of clock ticks here is the following API: `_SC_CLK_TCK`.
+
