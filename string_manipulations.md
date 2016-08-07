@@ -43,6 +43,23 @@ Some of the useful API are
 
 | API | description |
 |------|-------------|
+| isalpha | return 1 if character is an alphabet |
+| islower | return 1 if character is a lower case letter |
+| isupper | return 1 if character is an upper case letter |
+| isalpha | return 1 if character is an alphabet |
+| isdigit | return 1 if character is a digit |
+| isalnum | return 1 if character is an alphabet and numeric |
+| isxdigit | return 1 if chacter is a hexadecimal digit |
+| ispunct | return 1 if character is a punctuation character |
+| isspace | return 1 if character is a whitespace character |
+| isblank | return 1 if character is a blank space |
+| isgraph | return 1 if character is a graphic character |
+| isprint | return 1 if character is a printing character |
+| iscntrl | return 1 if character is a control character |
+| isascii | return 1 if character is an ascii character |
+| toupper | convert lowercase letter to the upper case |
+| tolower | convert uppercase letter to the lower case |
+| toascii | convert letter to ASCII |
 
 Reading of the strings can be performed by the use of `fgets` function. However, the `scanf` can also be used but is too dangerous to read strings. Thus it is not a preferrable choice when reading the strings from the command line. The sample usage of `fgets` when reading the strings looks as follows...
 
