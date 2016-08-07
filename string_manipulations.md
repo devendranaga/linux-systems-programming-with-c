@@ -37,6 +37,13 @@ The below code prints the `char_array` on to the console.
 printf("%s", char_array);
 ```
 
+The `<ctype.h>` provides the character describing API to find out if the character is a number, whitespace, alphabet.
+
+Some of the useful API are
+
+| API | description |
+|------|-------------|
+
 Reading of the strings can be performed by the use of `fgets` function. However, the `scanf` can also be used but is too dangerous to read strings. Thus it is not a preferrable choice when reading the strings from the command line. The sample usage of `fgets` when reading the strings looks as follows...
 
 ```c

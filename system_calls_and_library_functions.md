@@ -65,6 +65,33 @@ Then we run our binary with the incorrect option as below:
 
 Linux provides another API to print the error message based on the error number variable `errno`.
 
+`error` is another API provided by the Glibc. It is declared as follows.
+
+```c
+void error(int status, int errno, const char *format, ...);
+```
+
+The `status` variable is usually set to 0. The `errno` variable is the `errno`.
+The format is any message that the program wants to print.
+
+The below example provides an idea of the `error` function.
+
+```c
+#include <stdio.h>
+#include <error.h>
+#include <errno.h>
+
+int main(void)
+{
+    int fd = -1;
+    
+    close(fd);
+    error(0, errno, "failed to closed fd\n");
+    
+    return 0;
+}
+```
+
 ```c
 #include <stdio.h>
 #include <errno.h>
