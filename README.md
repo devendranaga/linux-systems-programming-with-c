@@ -19,6 +19,6 @@ Please open a ticket for grammatical errors, a new feature request or topic addi
 This book and all the source code is licensed under [MIT](https://opensource.org/licenses/MIT).
 
 Author: Devendra Naga
-[Linkedin](    https://in.linkedin.com/in/devendranaga) [GitHub](https://github.com/devnaga)
+[Linkedin](    https://in.linkedin.com/in/devendranaga) [GitHub](https://github.com/devnaga) [twitter](@devnaga448)
 
 Email: <mailto:devendra.aaru@gmail.com>
