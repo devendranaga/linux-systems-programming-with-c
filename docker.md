@@ -54,6 +54,14 @@ dev@hanzo:~$ docker run -a stdin -a stdout -i -t ubuntu /bin/bash
 root@496911dda486:/#
 ```
 
+when `docker run` is performed, it gives a  random name to the container. This can be avoided by providing a name at run time like below.
+
+```bash
+docker run --name my-ubuntu ubuntu:14.04
+```
+
+in the above command the name my-ubuntu will be the name of the running container.
+
 docker info lists system wide information
 
 ```bash
@@ -82,4 +90,10 @@ docker stats display a live stream of one or more containers.
 ```bash
 CONTAINER           CPU %               MEM USAGE/LIMIT       MEM %               NET I/O
 496911dda486        0.00%               34.39 MiB/707.1 MiB   4.86%               21.58 MiB/492 KiB
+```
+
+stopping a container is done with the following command.
+
+```bash
+docker stop my-ubuntu
 ```

@@ -88,6 +88,8 @@ The left shift operation uses `<<`.
 
 ### Right shift operation
 
+The right shift operation uses '>>'.
+
 ### Negate opertaion
 
 The computer stores the digits in binary form unlike we use them either in decimal or hexadecimal.

@@ -8,7 +8,7 @@ example of the socket call:
 sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
 ```
 
-Where AF_NETLINK is the protocol, SOCK_RAW is the socket type and NETLINK_ROUTE is the netlink family.
+Where `AF_NETLINK` is the protocol, `SOCK_RAW` is the socket type and `NETLINK_ROUTE` is the netlink family.
 
 The following are the netlink families that are supported by NETLINK.
 

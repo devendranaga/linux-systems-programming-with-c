@@ -16,7 +16,7 @@ In case of failure, the file pointer returned will be `NULL`.
 
 The `pclose` will then close the file pointer.
 
-The following code sample shows the `popen` and `pclose`.
+The following code sample shows the `popen` and `pclose`. You can download it in [here](https://github.com/DevNaga/gists/blob/master/popen_pclose.c)
 
 ```c
 #include <stdio.h>

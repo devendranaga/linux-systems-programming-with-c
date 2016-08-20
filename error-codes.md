@@ -4,7 +4,7 @@ Linux system calls returns errors in the form of codes stored in errno variable.
 
 
 
-Here are some of the descriptions
+Here are some of the descriptions of the error codes. As usual, we use the `perror` or `strerror` to describe the error in a string format.
 
 | error code | description |
 | --- | --- |

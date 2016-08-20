@@ -174,6 +174,20 @@ git commit
 git push origin <branch-name>
 ```
 
+#### merge a branch
+
+```
+git merge origin/<branch-name>
+```
+
+#### rebase the branch
+
+```
+git rebase -i
+```
+
+where i is for the interactive rebase
+
 
 ### Links:
 
