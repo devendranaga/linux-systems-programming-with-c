@@ -104,6 +104,31 @@ int list_add_head(void *elem)
 }
 ```
 
+The below function adds the elements to the tail or at the end of linked list. The operation is O(1).
+
+```c
+int list_add_tail(void *elem)
+{
+    struct linked_list *new_node;
+    
+    new_node = calloc(1, sizeof(struct linked_list));
+    if (!new_node)
+        return -1;
+        
+    new_node->data = elem;
+    
+    if (!tail) {
+        free(new_node);
+        return -1;
+    }
+    
+    tail->next = new_node;
+    tail = new_node;
+    
+    return 0;
+}
+```
+
 Before we make the new\_node the head, we must assign the next pointer of the new\_node to head so that we preserve the entire chain. Next is to make the head pointing to the new\_node. Thus keeping the new\_node the head.
 
 To get the data pointer of each element, we need to `traverse` each element in the list and retrieve the data pointer.
@@ -163,6 +188,27 @@ int list_delete(void *elem, int (*free_func)(void *data))
 ```
 
 The `free_func` is called when an element is found while we are deleting the node. Before we delete the node, we should make sure whatever the data application is allocated gets freed. Thus we call the `free_func` so that application would get chance to free up the memory that is has allocated.
+
+The free function frees up all the nodes and removes the links. The `free_func` gets called on each linked list node thus notifying the user of the list API to safely free up its context structures.
+
+The below function performs the free job.
+
+```c
+void list_free(int (*free_func)(void *data))
+{
+    struct linked_list *prev;
+    struct linked_list *node;
+    
+    node = head;
+    
+    while (node) {
+        free_func(node->data);
+        prev = node;
+        node = node->next;
+        free(prev);
+    }
+}
+```
 
 ---
 
@@ -340,7 +386,7 @@ int dllist_destroy(void (*callback)(void *data))
 
 the circular linked list looks as the following.
 
-```
+```c
 struct circular_linked_list {
     void *data;
     struct circular_linked_list *next;
