@@ -10,12 +10,36 @@ The formatted input and output is used to take input and output in a specific fo
 printf("value is %d\n", value);
 ```
 
+The print format of the data types is as follows. The same can be used for `scanf` set of API.
+
+|format | datatype |
+|-------|----------|
+| %d | int |
+| %s | string|
+| %u | unsigned int |
+| %ld | long integer |
+| %jd | long 64 bit signed integer |
+| %ju | long 64 bit unsigned integer |
+| %f | float |
+| %lf | double |
+
 `fprintf` is another API that prints on to the console but to the `stderr`. The difference between the `stdout` and `stderr` is that the later is not buffered and directly the messages will be dumped on to the console. The `stdout` instead buffers the input and dumps it later. This can easily be viewed when debugging a big loop.
 
 There is another API that prints to a buffer in the formatted way just as `printf`. This API we call it `sprintf`. The `sprintf` usage is very simple as below.
 
+
 ```c
 sprintf(buf, "value is %d\n", value);
+```
+
+A problem with the `sprintf` is that if the print length is more than the size of the buffer, the buffer overflow may occur and the program may stop. The better function is `snprintf`.
+
+The `snprintf` has the length argument and the length is always checked before writing into the data.
+
+The `snprintf` example is as follows.
+
+```c
+snprintf(buf, sizeof(buf), "value is %d\n", value);
 ```
 
 ### scanf and sub functions
