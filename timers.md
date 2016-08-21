@@ -163,9 +163,55 @@ The program first registers the SIGALRM signal via `sigaction` and registers the
 
 ## timer\_create
 
-## timerfd\_create
+## timerfd
+
+**1. timerfd_create**
+
+`timerfd_create` notifies the timer events via the file descriptors. The returned file descriptor is watchable via `select` or `epoll` calls.
+
+The prototype is as follows.
 
 ```c
+int timerfd_create(int clockid, int flags);
+```
+
+The `clockid` refers to the clock that can be used to mark the timer progress. It is one of the `CLOCK_REALTIME` or `CLOCK_MONOTONIC`. Monotonic clock is a non settable clock that progresses constantly over the time. Meaning that the clock will stay constant although there are changes in the system time.
+
+The `flags` argument is usually kept 0 by default.
+
+**2. timerfd_settime**
+
+The `timerfd_settime` arms or disrams the timer value referred by the file descriptor.
+
+The `timerfd_settime` prototype is as follows.
+
+```c
+int timerfd_settime(int fd, int flags,
+                    const struct itimerspec *new_value,
+                    struct itimerspc *old_value);
+```
+
+
+The `itimerspec` looks as below.
+
+```c
+struct timespec {
+    time_t tv_sec;
+    long tv_nsec;
+};
+
+struct itimerspec {
+    struct timerspec it_interval;
+    struct timerspec it_value;
+}
+```
+
+The `it_value` is taken as initial value of the timer. As soon as the timer is fired, the `it_interval` is stored into the timer as the new value. If `it_interval` is set to 0, then the timer becomes a oneshot timer. 
+
+The below program explains the `timerfd_` calls.
+
+```c
+
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/time.h>
@@ -238,3 +284,4 @@ int main(int argc, char **argv)
 
 ```
 
+The expiration indicated by an event from wait mechanism i.e. either `select` or `epoll` and the value is read from the `read `system call. The 8 byte value shall be read describing the number of expirations that have occured.
