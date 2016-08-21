@@ -1,6 +1,9 @@
 # getopt
 
-* parses arguments with options
+**getopt** is an API from the **libc** that is used to parse the command line arguments very easily and effectively. It also provides an interactive input to the user.
+
+The `getopt.h` header file needs to be included in order to use this API.
+
 * example:
 
 ```c
@@ -64,11 +67,13 @@
 
 Some commands accept the input as the following...
 
-```
+```c
 command --list
 ```
 
-The two  `--` allow to provide a descriptive command from the command line.
+The two  `--` allow to provide a descriptive command from the command line. These options are called long options.
+
+Such options are parsed using the `getopt_long` API provided by the **libc**. 
 
 The option data structure looks as below that is passed as argument to `getopt_long`.
 
@@ -85,14 +90,15 @@ struct option {
 
 Here is the description:
 
-`name`: name of the long options.
+**name**: name of the long options.
 
-`has_arg`:  `no_argument` \(0\) if the option does not take an argument. `required_argument` \(1\) if the option requires an argument. `optional_argument` \(2\) if the option takes an optional argument.
+**has_arg**:  `no_argument` \(0\) if the option does not take an argument.
 
-`flag`: usually set to 0.
+`required_argument` \(1\) if the option requires an argument. `optional_argument` \(2\) if the option takes an optional argument.
 
-`val`: the value to be used in short notation in case getopt is used.
+**flag**: usually set to 0.
 
+**val**: the value to be used in short notation in case getopt is used.
 
 
 ```c
