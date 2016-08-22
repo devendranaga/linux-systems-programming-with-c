@@ -579,6 +579,27 @@ int pop(void (*callback)(void *data))
 
 ## 6. Hash tables
 
+A hash table is a data structure used to implement an associative array, a structure that can map keys to values. Hash tables are used to find the index based on the hash value.
+
+To do this, they compute hash of the input and add the value into the array. If more than one input matches to the same hash, it is called collision.
+
+To add an element, we compute the hash out of it using the hashing formula. We then derive the index out of the hash value and then add the element to the index.
+
+The perfect hash function was implemented by `Dan Bernstein`. And it is the following snippet.
+
+```c
+static int hash = 5381;
+
+hash = ((hash << 5) + hash) + number;
+```
+
+the index is then calcuated using the below snippet.
+
+```c
+index = hash % size;
+```
+
+Collisions are the problems in hash tables.
 ## 7. Tree
 
 ### 7.1. Binary tree
