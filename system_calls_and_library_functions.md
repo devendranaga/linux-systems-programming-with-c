@@ -176,3 +176,171 @@ int main(void)
 
 1. to get the number of clock ticks here is the following API: `_SC_CLK_TCK`.
 
+There are two other APIs to get or set the resource limits on the process.
+
+**1. getrlimit**
+**2. setrlimit**
+
+The APIs are defined in `<sys/resource.h>`. The prototypes are as follows.
+
+```c
+int getrlimit(int resource, struct rlimit *rlim);
+int setrlimit(int resource, const struct rlimit *rlim);
+```
+
+The `struct rlimit` is defined as below.
+
+```c
+struct rlimit {
+    rlim_t rlim_cur; // soft limit
+    rlim_t rlim_max; // hard limit
+}
+```
+
+The two APIs return 0 on success and -1 on failure. The corresponding error descriptive functions will be used to describe the return.
+
+The limits are 15 provided by the kernel at asm-generic/resource.h.
+
+|Resource name | description |
+|--------------|-------------|
+| `RLIMIT_CPU` | maximum CPU time |
+| `RLIMIT_FSIZE` | maximum file size in bytes |
+| `RLIMIT_DATA` | maximum data size |
+| `RLIMIT_STACK` | maximum stack size in bytes |
+| `RLIMIT_CORE` | maximum core file size in bytes |
+| `RLIMIT_RSS` | maximum RSS size |
+| `RLIMIT_NPROC` | maximum number of processes that user may be running |
+| `RLIMIT_NOFILE` | maximum number of open files |
+| `RLIMIT_MEMLOCK` | maximum number of bytes a process can lock into memory |
+| `RLIMIT_AS`  | maximum address space size |
+| `RLIMIT_LOCKS` | maximum file locks held |
+| `RLIMIT_SIGPENDING` | maximum number of pending signals that to be delivered to the process |
+| `RLIMIT_MSGQUEUE` | maximum bytes in posix message queue |
+| `RLIMIT_NICE` | maximum nice priority allowed |
+| `RLIMIT_RTPRIO` | maximum realtime priority allowed |
+| `RLIMIT_RTTIME` | timeout of RT tasks in use |
+
+
+The below example illustrates the `rlimit API` uses. Both the `getrlimit` and `setrlimit` are described in the below example.
+
+```c
+#include <stdio.h>
+#include <sys/types.h>
+#include <string.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+
+void get_max_addr_space()
+{
+    struct rlimit rlim;
+    int ret;
+
+    ret = getrlimit(RLIMIT_AS, &rlim);
+    if (ret < 0) {
+        fprintf(stderr, "failed to getrlimit\n");
+        return;
+    }
+
+    printf("soft : %lu hard : %lu\n",
+                            rlim.rlim_cur, rlim.rlim_max);
+}
+
+void get_max_file_size()
+{
+    struct rlimit rlim;
+    int ret;
+
+    ret = getrlimit(RLIMIT_FSIZE, &rlim);
+    if (ret < 0) {
+        fprintf(stderr, "failed to getrlimit\n");
+        return;
+    }
+
+    printf("soft: %lu hard: %lu\n",
+                            rlim.rlim_cur, rlim.rlim_max);
+}
+
+void get_max_stack_size()
+{
+    struct rlimit rlim;
+    int ret;
+
+    ret = getrlimit(RLIMIT_STACK, &rlim);
+    if (ret < 0) {
+        fprintf(stderr, "failed to getrlimit\n");
+        return;
+    }
+
+    printf("soft: %lu hard: %lu\n",
+                            rlim.rlim_cur, rlim.rlim_max);
+ }
+ 
+void get_max_cpu_time()
+{
+    struct rlimit rlim;
+    int ret;
+
+    ret = getrlimit(RLIMIT_CPU, &rlim);
+    if (ret < 0) {
+        fprintf(stderr, "failed to getrlimit\n");
+        return;
+    }
+
+    printf("soft: %lu hard: %lu\n",
+                            rlim.rlim_cur, rlim.rlim_max);
+}
+
+void set_max_stack_size(int n, char **argv)
+{
+    struct rlimit rlim;
+    int ret;
+
+    ret = getrlimit(RLIMIT_STACK, &rlim);
+    if (ret < 0) {
+        fprintf(stderr, "failed to getrlimit\n");
+        return;
+    }
+
+    rlim.rlim_cur = strtol(argv[0], NULL, 10);
+
+    ret = setrlimit(RLIMIT_STACK, &rlim);
+    if (ret < 0) {
+        fprintf(stderr, "failed to setrlimit\n");
+        return;
+    }
+}
+
+struct rlimit_list {
+    char *string;
+    void (*get_callback)(void);
+    void (*set_callback)(int n, char **rem_args);
+} rlimit_list[] = {
+    {"max_addr_space", get_max_addr_space, NULL},
+    {"max_file_size", get_max_file_size, NULL},
+    {"max_stack_size", get_max_stack_size, set_max_stack_size},
+    {"max_cpu_time", get_max_cpu_time, NULL},
+};
+
+int main(int argc, char **argv)
+{
+    int i;
+
+    if (!strcmp(argv[1], "get")) {
+        for (i = 0; i < sizeof(rlimit_list) / sizeof(rlimit_list[0]); i ++) {
+            if (!strcmp(rlimit_list[i].string, argv[2])) {
+                rlimit_list[i].get_callback();
+            }
+        }
+    } else if (!strcmp(argv[1], "set")) {
+        for (i = 0; i < sizeof(rlimit_list) / sizeof(rlimit_list[0]); i ++) {
+            if (!strcmp(rlimit_list[i].string, argv[2])) {
+                if (rlimit_list[i].set_callback)
+                    rlimit_list[i].set_callback(argc - 3, &argv[3]);
+            }
+        }
+    }
+
+    return 0;
+}
+```
+
