@@ -4,7 +4,9 @@
 
 The prototypes are as follows.
 
-`FILE *popen(const char *command, const char *mode);`
+```c
+FILE *popen(const char *command, const char *mode);
+```
 
 `int pclose(FILE *stream);`
 
@@ -41,4 +43,3 @@ int main(void)
 	return 0;
 }
 ```
-
