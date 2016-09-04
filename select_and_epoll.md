@@ -205,7 +205,132 @@ We can use this mechanism to program a timer along with the sockets. We are goin
 
 The `select` system call cannot serve maximum connections more than `FD_SETSIZE`. On some systems it is 2048. This limits the number of connections when the server program use this call. Thus the `select` call is not a perferred approach when using with a large set of connections that are possibly for the outside of the box.
 
-### 2. epoll system call
+### 2. poll system call
 
-epoll is another API that allows you to selectively wait on a large set of file descriptors. Epoll solves the very less number of client connections with select.
+### 3. epoll system call
 
+`epoll` is another API that allows you to selectively wait on a large set of file descriptors. Epoll solves the very less number of client connections with select.
+
+The `epoll` is similar to `poll` system call. The system call is used to monitor multiple file descriptors to see if I/O is possible on them.
+
+The `epoll` API can be used either as an edge triggered or level triggered interface and scales well as the file descriptors increase.
+
+The `epoll` API is a set of system calls.
+
+| API | description |
+|-----|-------------|
+| `epoll_create1` | create an epoll context and return an fd |
+| `epoll_ctl` | register the interested file descriptors |
+| `epoll_wait` | wait for the I/O events |
+
+
+`epoll_create1` creates an epoll context. The context returned is the file descriptor. The file descriptor is then used for the next set of
+API. On failure the `epoll_create1` return -1.
+
+The prototype of the `epoll_create1` is as below.
+
+```c
+int epoll_create1(int flags);
+```
+
+The `flags` argument is by default set to 0.
+
+The `epoll_ctl` is a control interface that is used to add, modify or delete a file descriptor. The prototype is as follows.
+
+```c
+int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+```
+
+The `epfd` is the file descriptor returned from the `epoll_create1` system call.
+
+The `op` argument is used to perform the add, modify or delete operations. It can be one of the following.
+
+1. EPOLL_CTL_ADD
+2. EPOLL_CTL_DEL
+3. EPOLL_CTL_MOD
+
+The `event` object is used to store the context pointer of the caller.
+
+the `struct epoll_event` is as follows.
+
+```c
+typedef union epoll_data {
+    void *ptr;
+    int fd;
+    uint32_t u32;
+    uint64_t u64;
+} epoll_data_t;
+
+struct epoll_event {
+    uint32_t events;  // epoll events
+    epoll_data_t data; // user data
+}
+```
+
+The `events` member can be one of the following.
+
+`EPOLLIN`: The file descriptor is available for reading.
+`EPOLLOUT`: The file descriptor is available for writing.
+
+
+The `epoll_wait` system call waits for events on the returned epoll fd.
+
+The `epoll_wait` prototype is as follows.
+
+```c
+int epoll_wait(int epfd, struct epoll_event *events,
+               int maxevents, int timeout);
+```
+
+The `timeout` argument specifies the timeout in milliseconds to wait.
+
+On success the number of file descriptors ready for the requested I/O are returned, or 0 if none of them are ready during the timeout. On error -1 is returned.
+
+The example of the `epoll` command is shown below. You can also download it [here](https://github.com/DevNaga/gists/blob/master/epoll_test.c)
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <sys/epoll.h>
+#include <unistd.h>
+
+int main(int argc, char **argv[])
+{
+    int ret;
+    int stdin_fd = 0;
+    int ep_fd;
+
+    ep_fd = epoll_create1(EPOLL_CLOEXEC);
+    if (ep_fd < 0)
+        return -1;
+
+    struct epoll_event ep_events;
+
+    memset(&ep_events, 0, sizeof(struct epoll_event));
+
+    ep_events.events = EPOLLIN;
+    ep_events.data.fd = stdin_fd;
+
+    if (epoll_ctl(ep_fd, EPOLL_CTL_ADD, stdin_fd, &ep_events) < 0)
+        return -1;
+
+    for (;;) {
+        int fds;
+        struct epoll_event evt;
+
+        fds = epoll_wait(ep_fd, &evt, 1, -1);
+        printf("fds %d\n", fds);
+
+        if (evt.data.fd == stdin_fd) {
+            printf("read from stdin\n");
+            char buf[100];
+
+            memset(buf, 0, sizeof(buf));
+            read(stdin_fd, buf, sizeof(buf));
+            printf("input %s\n", buf);
+        }
+    }
+
+    return 0;
+}
+```
