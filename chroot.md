@@ -8,7 +8,9 @@ There are two manual pages about the chroot... one talks about the chroot comman
 The manual page of the chroot system call has the following prototype.
 
 
-`int chroot(const char *path);`
+```c
+int chroot(const char *path);
+```
 
 please be sure to include the header file `<unistd.h>`.
 
