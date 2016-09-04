@@ -82,40 +82,41 @@ The `gps_close` closes or ends the session.
 One example of the GPS API is follows.
 
 ```c
-struct gps_data_t gps_data;
-int ret;
+int main(int argc, char **argv)
+{
+    struct gps_data_t gps_data;
+    int ret;
 
-ret = gps_open(NULL, 0, &gps_data);
-if (ret < 0) {
-    fprintf(stderr, "failed to open connection to GPSd\n");
-    return -1;
-}
+    ret = gps_open(NULL, 0, &gps_data);
+    if (ret < 0) {
+        fprintf(stderr, "failed to open connection to GPSd\n");
+        return -1;
+    }
 
-gps_stream(&gps_data, WATCH_ENABLE, NULL);
+    gps_stream(&gps_data, WATCH_ENABLE, NULL);
 
-while (1) {
-    if (gps_waiting(&gps_data, 500)) {
-        if (gps_read(&gps_data) == -1) {
-            fprintf(stderr, "failed to read GPS data\n");
-            return -1;
-        }
-        if ((gps_data.status == STATUS_FIX) && (gps_data.mode >= 2)) {
-            fprintf(stderr, "GPS mode : %d\n", gps_data.mode);
-            if (!isnan(gps_data.latitude)) {
-                fprintf(stderr, "GPS latitude : %f\n", gps_data.latitude);
+    while (1) {
+        if (gps_waiting(&gps_data, 500)) {
+            if (gps_read(&gps_data) == -1) {
+                fprintf(stderr, "failed to read GPS data\n");
+                return -1;
             }
-            
-            if (!isnan(gps_data.longitude)) {
-                fprintf(stderr, "GPS longitude : %f\n", gps_data.longitude);
+            if ((gps_data.status == STATUS_FIX) && (gps_data.mode >= 2)) {
+                fprintf(stderr, "GPS mode : %d\n", gps_data.mode);
+                if (!isnan(gps_data.latitude)) {
+                    fprintf(stderr, "GPS latitude : %f\n", gps_data.latitude);
+                }
+
+                if (!isnan(gps_data.longitude)) {
+                   fprintf(stderr, "GPS longitude : %f\n", gps_data.longitude);
+                }
             }
         }
     }
+
+    gps_stream(&gps_data, WATCH_DISABLE, NULL);
+    gps_close(&gps_data);
 }
-
-gps_stream(&gps_data, WATCH_DISABLE, NULL);
-gps_close(&gps_data);
-
 ```
 
 (Remember to use our `select` interface's timeout option is also an alternative to the `gps_waiting` in here that when the timer expire periodically and calling the `gps_read`)
-
