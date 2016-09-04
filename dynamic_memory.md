@@ -34,7 +34,9 @@ When allocating space for a string, the argument of `malloc` must be one plus th
  the string. This is because the string is terminated with a `\0` character. The reason
  being is that the length does not count the terminating `\0` character but it needs to
  be stored in the array.
- 
+
+ Calling malloc with zero sized bytes is an undefined behavior. Sometimes the allocation happens and free is also possible but the memory is unusable.
+
  # calloc
 
 prototype:
@@ -42,7 +44,7 @@ prototype:
 
 The `calloc` function allocates size bytes * n_memb. The allocated memory is set to zero
  and returned. The `calloc` is same as `malloc` + `memset`.
- 
+
 Here is the following example of the `calloc` function usage.
 
 ```c
@@ -52,13 +54,13 @@ Here is the following example of the `calloc` function usage.
 int main()
 {
     int *array;
-    
+
     array = calloc(10, sizeof(int));
     if (!array) {
         printf("failed to allocate memory at %s %u\n", __func__, __LINE__);
         return -1;
     }
-    
+
     printf("memory %p\n", array);
     return 0;
 }
@@ -71,7 +73,7 @@ prototype:
 
 The `realloc` API changes the size of the `ptr` variable to `size` bytes. The sample
  program is below.
- 
+
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -79,13 +81,13 @@ The `realloc` API changes the size of the `ptr` variable to `size` bytes. The sa
 int main(void)
 {
     int *memory = NULL;
-    
+
     memory = realloc(memory, sizeof(int));
     if (!memory) {
         printf("failed to allocate at %s %u\n", __func__, __LINE__);
         return -1;
     }
-    
+
     return 0;
 }
 ```
@@ -113,7 +115,7 @@ Please be sure to pass a valid pointer to the `free` call.
 The `mallinfo` function returns a copy of a structure containing the memory information
  about the memory allocations performed by `malloc` and related functions. The structure
  is as follows.
- 
+
 ```c
 struct mallinfo {
     int arena;     /* Non-mmapped space allocated (bytes) */
@@ -167,7 +169,7 @@ int main()
 Here is one of the example of the output.
 
 ```bash
-root@89e0cc8e998a:~/books# ./a.out 
+root@89e0cc8e998a:~/books# ./a.out
 total non mapped                       135168
 ordinary blocks                        1
 fastbin blocks                         0
@@ -222,8 +224,8 @@ The program is then run by exporting the MALLOC_TRACE to the corresponding file 
 and keeping the exported file writeable.
 
 ```c
-root@89e0cc8e998a:~/books# MALLOC_TRACE=/root/books/dev.trace ./a.out 
-``` 
+root@89e0cc8e998a:~/books# MALLOC_TRACE=/root/books/dev.trace ./a.out
+```
 
 It produces the trace as the following into the `/root/books/dev.trace` file.
 
@@ -241,7 +243,7 @@ It produces the trace as the following into the `/root/books/dev.trace` file.
 running the mtrace on the file below produces the following output.
 
 ```bash
-root@89e0cc8e998a:~/books# mtrace ./a.out dev.trace 
+root@89e0cc8e998a:~/books# mtrace ./a.out dev.trace
 
 Memory not freed:
 -----------------
@@ -258,4 +260,3 @@ Memory not freed:
 ```
 
 ## stack based allocator (alloca)
-
