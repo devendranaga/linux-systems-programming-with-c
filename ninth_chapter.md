@@ -24,7 +24,7 @@
 
 
 | command | description |
-| -- | -- |
+|---------|-------------|
 |add  |      Add file contents to the index|
 |bisect |    Find by binary search the change that introduced a bug |
 |branch  |    List, create, or delete branches |
@@ -48,7 +48,7 @@
 |tag   |      Create, list, delete or verify a tag object signed with GPG |
 
 
-## git examples
+## git examples (command line)
 
 #### clone a repository:
 
@@ -186,8 +186,14 @@ git merge origin/<branch-name>
 git rebase -i
 ```
 
-where i is for the interactive rebase
+where i is for the interactive rebase.
 
+
+## Git clients
+1. https://www.gitkraken.com/
+2. https://desktop.github.com/
+
+More on the git is at the below links:
 
 ### Links:
 
