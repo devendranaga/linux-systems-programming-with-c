@@ -24,7 +24,7 @@ int add(int a, int b)
 
 int sub(int a, int b)
 {
-    return a + b;
+    return a - b;
 }
 
 void program_usage(char *prog_name)
