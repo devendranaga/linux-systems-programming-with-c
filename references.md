@@ -1,4 +1,4 @@
-# references
+# References
 
 I have used the following to generate the content of this book.
 
