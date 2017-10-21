@@ -1,7 +1,7 @@
 # Basics and Starting up
 
 
-For any systems level programs, tools are at most important for validation, simulation and statistics.
+For any systems level programs, tools are at most important for testing, validation, simulation and statistics.
 
 The tools may range from a simple program that gets transmitted and received packet counts to a tool that performs dynamic changing of configuration items in the system daemons without the need of a restart.
 
@@ -29,7 +29,7 @@ int sub(int a, int b)
 
 void program_usage(char *prog_name)
 {
-    printf("%s <add/sub> num1 num2\n");
+    printf("%s <add/sub> num1 num2\n", prog_name);
 }
 
 int main(int argc, char **argv)
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 ```
 **Example: command line sample program**
 
-We use Gcc (any version > 5.0 is fine).
+We use Gcc (any version > 5.0 is fine) through out this book to compile the source code.
 
 when compiled with ```gcc -Wall cmdline.c -o cmdline``` option, this will generate the ```cmdline```binary file.
 
@@ -63,7 +63,7 @@ This file is an executable file. This file can be run by typing the file name as
 # ./cmdline
 ```
 
-The `./` tells the shell to execute the program that is present in this directory.
+The `./` tells the shell to execute the program that is present in this directory. Usually the command line programs such as `ls`, `cd` and `ps` are in the standard linux directories (such as `/bin`, `/usr/bin`, ...). The linux shell sets the PATH variable to the standard directory so that when the shell searches for a program name it searches with the PATH variable.
 
 More about the program running in the upcoming chapters. For now, we now know how to compile and run a program.
 
@@ -119,3 +119,4 @@ else:
     program_usage()
     exit(1)
 ```
+
