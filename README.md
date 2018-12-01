@@ -16,7 +16,7 @@ Please open a ticket for grammatical errors and bugs \(No more feature requests 
 
 
 
-NOTE: As of today \(December 24  2016\) the book's development is stopped and no more content is going to be published. The reason being that the book's content is more than enough to get a person to basic to intermediate coding level and get hooked to the beautiful world of systems programming under the Linux operating system. To read more advance content, please purchase the book online. Thank you for your kind co-operation.
+NOTE: As of today \(December 24  2016\) the book's development is stopped and no more content is going to be published. The reason being that the book's content is more than enough to get a person to basic to intermediate coding level and get hooked to the beautiful world of systems programming under the Linux operating system. To read more advance content, please purchase the book online [here](https://leanpub.com/linuxsystemprogrammingwithc). Thank you for your kind co-operation.
 
 ---
 
