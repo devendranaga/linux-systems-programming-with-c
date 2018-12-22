@@ -1,4 +1,4 @@
-# network ioctls
+## network ioctls
 
 Linux operating system supports a wide variety of network ioctls. There are many applications that use these ioctls to perform some very useful operations. One such command is `ifconfig`.
 
@@ -339,10 +339,273 @@ enp0s25: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
 
 ```
 
-There is also a way to change the interface name. This is done using the `SIOCSIFNAME` ioctl.
-Below is the code that demonstrates.
+To get the interface index of a particular network interface, `SIOCGIFINDEX` is used.
+
+Below is an example of getting an index from a particular interface. Download [here](https://github.com/DevNaga/gists/blob/master/getifindex.c)
 
 ```c
+
+#include <stdio.h>
+#include <sys/socket.h>
+#include <net/if.h>
+#include <linux/ioctl.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/ioctl.h>
+
+int main(int argc, char **argv)
+{
+    int fd;
+
+    if (argc != 2) {
+        fprintf(stderr, "<%s> interface name\n", argv[0]);
+        return -1;
+    }
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) {
+        return -1;
+    }
+
+    struct ifreq ifr;
+
+    memset(&ifr, 0, sizeof(ifr));
+
+    strcpy(ifr.ifr_name, argv[1]);
+
+    int ret;
+
+    ret = ioctl(fd, SIOCGIFINDEX, &ifr);
+    if (ret < 0) {
+        fprintf(stderr, "failed to get ifindex %s\n", strerror(errno));
+        return -1;
+    }
+
+    printf("interface index for [%s] is %d\n", argv[1], ifr.ifr_ifindex);
+
+    return 0;
+}
+
+```
+
+Below example is another one of `SIOCGIFFLAGS`. Download [here](https://github.com/DevNaga/gists/blob/master/siocgifflags.c)
+
+```c
+
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+
+int main(int argc, char **argv)
+{
+    struct ifreq ifr;
+    int fd;
+    int ret;
+
+    if (argc != 2) {
+        fprintf(stderr, "<%s> ifname\n", argv[0]);
+        return -1;
+    }
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) {
+        return -1;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+
+    strcpy(ifr.ifr_name, argv[1]);
+
+    ret = ioctl(fd, SIOCGIFFLAGS, &ifr);
+    if (ret < 0) {
+        return -1;
+    }
+
+    printf("ifname : %s\n", argv[1]);
+    if (ifr.ifr_flags & IFF_UP) {
+        printf("UP\n");
+    }
+
+    if (ifr.ifr_flags & IFF_BROADCAST) {
+        printf("BROADCAST\n");
+    }
+
+    if (ifr.ifr_flags & IFF_LOOPBACK) {
+        printf("LO\n");
+    }
+
+    if (ifr.ifr_flags & IFF_RUNNING) {
+        printf("RUNN\n");
+    }
+
+    if (ifr.ifr_flags & IFF_PROMISC) {
+        printf("PROMISC\n");
+    }
+
+    if (ifr.ifr_flags & IFF_MULTICAST) {
+        printf("MCAST\n");
+    }
+
+    return 0;
+}
+
+```
+
+there is another way to get the interface index. This can be done using the `if_nametoindex` function.
+
+Below is an example of `if_nametoindex`. Download [here](https://github.com/DevNaga/gists/blob/master/ifnametoindex.c)
+
+```c
+#include <stdio.h>
+#include <net/if.h>
+
+int main(int argc, char **argv)
+{
+    int id;
+
+    if (argc != 2) {
+        fprintf(stderr, "<%s> ifname\n", argv[0]);
+        return -1;
+    }
+
+    id = if_nametoindex(argv[1]);
+    printf("index %d\n", id);
+
+    return 0;
+}
+
+```
+
+The function `if_nametoindex` is declared in `net/if.h`.
+
+The ioctl `SIOCGIFBRDADDR` allows to get the broadcast address of network interface.
+
+Below is an example. Download [here](https://github.com/DevNaga/gists/blob/master/siocgifbrdaddr.c)
+
+
+
+```c
+
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <net/if.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <errno.h>
+
+int main(int argc, char **argv)
+{
+    struct ifreq ifr;
+    char *braddr;
+    int fd;
+    int ret;
+
+    if (argc != 2) {
+        fprintf(stderr, "<%s> ifname\n", argv[0]);
+        return -1;
+    }
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) {
+        fprintf(stderr, "failed to socket %s\n", strerror(errno));
+        return -1;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+    strcpy(ifr.ifr_name, argv[1]);
+
+    ret = ioctl(fd, SIOCGIFBRDADDR, &ifr);
+    if (ret < 0) {
+        fprintf(stderr, "failed to ioctl %s\n", strerror(errno));
+        return -1;
+    }
+
+    braddr = inet_ntoa(((struct sockaddr_in *)&(ifr.ifr_broadaddr))->sin_addr);
+    if (!braddr) {
+        fprintf(stderr, "failed to inet_ntoa %s\n", strerror(errno));
+        return -1;
+    }
+
+    printf("broadcast %s\n", braddr);
+
+    close(fd);
+
+    return 0;
+}
+
+
+```
+
+when the network interface does not have an IP address the above ioctl might fail with an error `cannot assign requested address`.  It may be useful in cases of diagnostics.
+
+The ioctl `SIOCGIFNETMASK` is used to get the network mask of an interface.
+
+Below is an example of `SIOCGIFNETMASK`. Download [here](https://github.com/DevNaga/gists/blob/master/siocgifnetmask.c)
+
+```c
+
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+
+int main(int argc, char **argv)
+{
+    char *netmask;
+    struct ifreq ifr;
+    int fd;
+    int ret;
+
+    if (argc != 2) {
+        fprintf(stderr, "<%s> ifname\n", argv[0]);
+        return -1;
+    }
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) {
+        return -1;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+    strcpy(ifr.ifr_name, argv[1]);
+
+    ret = ioctl(fd, SIOCGIFNETMASK, &ifr);
+    if (ret < 0) {
+        return -1;
+    }
+
+    netmask = inet_ntoa(((struct sockaddr_in *)&(ifr.ifr_netmask))->sin_addr);
+    if (!netmask) {
+        return -1;
+    }
+
+    printf("netmask %s\n", netmask);
+
+    close(fd);
+
+    return 0;
+}
+
+
+```
+
+
+
+
+There is also a way to change the interface name. This is done using the `SIOCSIFNAME` ioctl.
+
+Below is the example that demonstrates the `SIOCSIFNAME`. Download [here](https://github.com/DevNaga/gists/blob/master/setifname.c)
+
+```c
+
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -417,7 +680,7 @@ The programs makes the interface go down, otherwise we cannot change the name of
 The interface is made down using the `SIOCSIFFLAGS` ioctl and sets up the interface name and
 makes the interface up again using the `SIOCSIFFLAGS`.
 
-# wireless ioctls
+## wireless ioctls
 
 The package [wireless-tools](http://www.labs.hpe.com/personal/Jean_Tourrilhes/Linux/Tools.html#latest) provides the needed API to perform many wireless functions.
 
