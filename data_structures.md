@@ -1,11 +1,11 @@
-# Data structures and searching-sorting algorithms
+## Data structures
 
 The data structures are key to any software program. They define the layout of the program.
 In this section we are going to understand about some of the most commonly used data structures.
 
 We are also going to take a dig at the searching and sorting functions too.. These however are important in the data analysis part of the programs.
 
-## 1. Linked List
+### 1. Linked List
 
 1. Think of this as set of objects in series.
 2. Objects can be of any type.
@@ -31,6 +31,15 @@ The `tail` pointer is used to point to always the end of the list. The end point
 The following code performs the `head` and `tail` pointer assignments
 
 ```c
+    // if there's no head element add a new head element and point the
+    // tail to the same so that the next element could be added as
+    // the next element if the tail such as that in the else part
+    //
+    // if the head element is already there, then we have a node in
+    // the linked list. so let's extend this by linking new element
+    // as the next element to the tail such as 
+    //
+    // tail->next = new_node;
     if (!head) {
         head = new_node;
         tail = new_node;
@@ -43,37 +52,44 @@ The following code performs the `head` and `tail` pointer assignments
 
 
 
-
-
-
-![](/assets/Linked list.jpg)
+![LinkedLists](images/linked_lists.jpg)
 
 The `if` conditional says if there is no `head` element, then the new node becomes the head element and also the `tail` node points to the new node. Otherwise, the `new_node` gets added as the next element of the `tail` node and further the `tail` node gets pointed to the `new_node`. Thus if a new element is again getting added, it will always gets added at the end.
 
 The part of the code is keep into a function called `list_add`.
 
 ```c
-    int list_add(void *elem)
-    {
-        struct linked_list *new_node;
+/**
+ * @brief - add new element into the linked list at the tail
+ */
+int list_add(void *elem)
+{
+    struct linked_list *new_node;
 
-        new_node = calloc(1, sizeof(struct linked_list));
-        if (!new_node) {
-            return -1;
-        }
-
-        new_node->data = elem;
-
-        if (!head) {
-            head = new_node;
-            tail = new_node;
-        } else {
-            tail->next = new_node;
-            tail = new_node;
-        }
-
-        return 0;
+    // allocate new_node
+    new_node = calloc(1, sizeof(struct linked_list));
+    if (!new_node) {
+        return -1;
     }
+
+    new_node->data = elem;
+
+    // follow the same logic as in the above code snippet..
+    //
+    // if no head, add head and make tail points to it
+    //
+    // else, add the new node as next element of tail and 
+    // make tail point to the new node
+    if (!head) {
+        head = new_node;
+        tail = new_node;
+    } else {
+        tail->next = new_node;
+        tail = new_node;
+    }
+
+    return 0;
+}
 ```
 
 the function creates a new linked list node and puts the `elem` to the `data` pointer of it.
@@ -110,21 +126,21 @@ The below function adds the elements to the tail or at the end of linked list. T
 int list_add_tail(void *elem)
 {
     struct linked_list *new_node;
-    
+
     new_node = calloc(1, sizeof(struct linked_list));
     if (!new_node)
         return -1;
-        
+
     new_node->data = elem;
-    
+
     if (!tail) {
         free(new_node);
         return -1;
     }
-    
+
     tail->next = new_node;
     tail = new_node;
-    
+
     return 0;
 }
 ```
@@ -198,9 +214,9 @@ void list_free(int (*free_func)(void *data))
 {
     struct linked_list *prev;
     struct linked_list *node;
-    
+
     node = head;
-    
+
     while (node) {
         free_func(node->data);
         prev = node;
@@ -598,25 +614,195 @@ the index is then calcuated using the below snippet.
 ```c
 index = hash % size;
 ```
+Collisions are the problems in hash tables. When the input matches to the same hash, this is treated as collision. When a collision occur, the elements cannot be added at the right index.
+When the collision occur, the element is added at the tail of the data. The best hashing algorithm prevents the number of collisions.
 
-Collisions are the problems in hash tables.
-## 7. Tree
+Example hash program: You can find it [here](https://github.com/DevNaga/gists/blob/master/hash_tables.c)
 
-### 7.1. Binary tree
+```c
+/***
+ * @simple hash table implementation in C
+ *
+ * Author: Dev Naga <devendra.aaru@gmail.com>
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-### 7.2. Red black trees
+/**
+ * List elements
+ */
+struct list_elem {
+    void *spec_data;
+    struct list_elem *next;
+};
 
-# Searching Algorithms
+/**
+ * Hash table
+ */
+struct hash_list {
+    struct list_elem *item;
+};
 
-## 1. Binary search
+static int table_size;
+static struct hash_list *hlist;
 
-## 2. Linear search
+/**
+ * Init the hash tables witha pre-defined table
+ */
+int hlist_init(int hlist_size)
+{
+    hlist = calloc(hlist_size, sizeof(struct hash_list));
+    if (!hlist) {
+        return -1;
+    }
 
-## 3. Queue sort
+    table_size = hlist_size;
+    return 0;
+}
 
-## 4. Shell sort
+/**
+ * Hash the data with a simple addition of characters
+ */
+static int hlist_hash_data(char *hash_str)
+{
+    int hash = 0;
+    int i;
 
-## 5. Insertion sort
+    for (i = 0; i < strlen(hash_str); i ++) {
+        hash += hash_str[i];
+    }
 
-## 6. Merge sort
+    return hash % table_size;
+}
 
+static int hlist_add_item_new(int index, void *item)
+{
+    hlist[index].item = calloc(1, sizeof(struct list_elem));
+    if (!hlist[index].item) {
+        return -1;
+    }
+
+    hlist[index].item->spec_data = item;
+    hlist[index].item->next = NULL;
+
+    return 0;
+}
+
+static int hlist_add_item_append(int index, void *item)
+{
+    struct list_elem *last, *iter;
+
+    iter = hlist[index].item;
+    last = iter;
+    while (iter) {
+       last = iter;
+       iter = iter->next;
+    }
+
+    struct list_elem *new;
+
+    new = calloc(1, sizeof(struct list_elem));
+    if (!new) {
+        return -1;
+    }
+
+    new->spec_data = item;
+    last->next = new;
+
+    return 0;
+}
+
+/**
+ * Find item in the hash tables if exist
+ */
+int hlist_find_item(void *item, int (*compare)(void *a, void *b))
+{
+    int i;
+
+    for (i = 0; i < table_size; i ++) {
+        struct list_elem *list;
+        int res;
+
+        for (list = hlist[i].item; list; list = list->next) {
+            res = compare(item, list->spec_data);
+            if (res) {
+                return 1;
+            }
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * Add an item in list.. append if already hashed to same data, add new if does not
+ */
+int hlist_add_item(void *item, char *hash_str)
+{
+    int index;
+
+    index = hlist_hash_data(hash_str);
+
+    if (hlist[index].item == NULL) {
+        hlist_add_item_new(index, item);
+    } else {
+        hlist_add_item_append(index, item);
+    }
+
+    return 0;
+}
+
+/**
+ * Print hash table elements
+ */
+void hlist_print(void (*data_callback)(void *data))
+{
+   int i;
+
+   for (i = 0; i < table_size; i ++) {
+       struct list_elem *list;
+
+       printf("hash item: <%d>\n", i);
+       for (list = hlist[i].item; list; list = list->next) {
+           printf("\t list->spec_data <%p>\n", list->spec_data);
+           data_callback(list->spec_data);
+       }
+   }
+}
+
+/***
+ * Test program
+ */
+void print_items(void *data)
+{
+    //printf("item : <%s>\n", data);
+}
+
+int compare_item(void *a, void *b)
+{
+    char *a_1 = a;
+    char *a_2 = b;
+
+    return (strcmp(a_1, a_2) == 0);
+}
+
+int main(int argc, char **argv)
+{
+    int i;
+
+    hlist_init(20);
+
+    for (i = 1; i <= argc - 1; i ++) {
+        if (!hlist_find_item(argv[i], compare_item)) {
+            hlist_add_item(argv[i], argv[i]);
+        }
+    }
+
+    hlist_print(print_items);
+
+    return 0;
+}
+```
+
+For more info on the data structures and on C/C++ languages refer this book [here](https://leanpub.com/c_cpp_refman)

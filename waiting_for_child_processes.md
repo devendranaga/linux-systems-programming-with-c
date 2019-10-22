@@ -1,4 +1,4 @@
-# waiting for child processes
+## waiting for child processes
 
 When a child process stops the parent process must `reap` it to prevent it from becoming a zombie. The zombie meaning that the process is not taken out from process table but they dont execute and do not utilize the memory or CPU.
 

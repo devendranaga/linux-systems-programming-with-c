@@ -1,12 +1,13 @@
-# Inotify
+## Inotify
 
-The inotify is a set of system calls that are useful to monitor the files and directories. When a directory is modified, inotify will return events from the directory itself and also for the files inside the directory.
+The `inotify` are a set of system calls that are useful to monitor the files and directories. When a directory is modified, inotify will return events from the directory itself and also for the files inside the directory.
 
 The watching on the files for any changes is done for the following purposes \/ needs.
 
 1. configuration changes
 2. automatic backup program triggering
-3. automatic crash dump collection of a program \(by watching the core files directory and uploading them to the server when any new cores get added\)
+3. directory monitoring for suspicious activity
+4. automatic crash dump collection of a program \(by watching the core files directory and uploading them to the server when any new cores get added\)
 
 The following are the useful inotify calls.
 
@@ -16,15 +17,18 @@ int inotify_add_watch(int fd, const char *path, uint32_t mask);
 int inotify_rm_watch(int fd, uint32_t mask);
 ```
 
+Include `sys/inotify.h` to use the above API.
+
 The `inotify_init` creates a file descriptor that can be used to receive the file or directory events. The file descriptor can also be monitored via the `select` calls.
 
-The `inotify_add_watch` adds a new watch entry to the list of monitored files or directories. The `fd` is the file descriptor returned from the `inotify_init`. The `path` is either a file or a directory. 
+The `inotify_add_watch` adds a new watch entry or modifies an existing watch entry to the list of monitored files or directories. The `fd` is the file descriptor returned from the `inotify_init`. The `path` is either a file or a directory. 
 
 The `inotify_rm_watch` removes the inotify watch that was previously added with the `inotify_add_watch`.
 
-The returned fd is monitored via the `select`, `poll`, `epoll` system calls. The `read` call is then called upon a return from the select, poll or epoll.
+The returned fd is monitored via the `select`, `poll`, `epoll` system calls. The `read` call is then called upon a return from the `select`, `poll` or `epoll` to read the events.
 
-The mask argument has the following types.
+
+The mask argument in the `inotify_add_watch` has the following types.
 
 | mask | description |
 | :--- | :--- |
@@ -41,9 +45,23 @@ The mask argument has the following types.
 | `IN_MOVED_TO` | Generated for the directory containing the new filename when a file is renamed |
 | `IN_OPEN` | File\/Directory was opened |
 
+The `IN_ALL_EVENTS` flag is used to monitor all of the above events.
+
 When there is an event, the `read` system call on the inotify fd might return a set of events instead of filling one event at a time.
 
-So the reading of the events might look as the following ...
+The events are a set of objects of type `struct inotify_event` that looks as follows (for reference).
+
+```c
+struct inotify_event {
+    int wd;   // watch descriptor
+    uint32_t mask;  // mask describing the event
+    uint32_t cookie; // session cookie or something
+    uint32_t len;  // length of the below `name` field
+    char name[];  // optional null-terminated string that contains the name of the directory / file being monitored
+};
+```
+
+The reading of the events might look as the following ...
 
 ```c
 int ret;
@@ -57,6 +75,8 @@ while (processed < read_bytes) {
     processed += sizeof(struct inotify_event);
 }
 ```
+
+Below is the sample program that demonstrate the `inotify` system call usage.
 
 ```c
 #include <stdio.h>
@@ -126,3 +146,4 @@ int main(int argc, char **argv)
 
 **Example: inotify example**
 
+The `inotify` is mostly used by the build systems / continuous integration tools to monitor directories (such as the ones that contain the release images for a new software release etc) for some interesting events.

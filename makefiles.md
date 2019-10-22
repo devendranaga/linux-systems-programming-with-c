@@ -1,4 +1,4 @@
-# Makefiles
+## Makefiles
 
 Makefile is a different language, is a group of instructions that when executed using the command ```make``` generates the output binaries.
 
@@ -11,54 +11,57 @@ The command ```make``` is available in the ```automake``` package of any linux d
 
 To install ```make``` on Ubuntu:
 
-        sudo apt-get install make automake
+```bash
+sudo apt-get install make automake
+```
 
 on Fedora (as root):
 
-        dnf install make automake
+```bash
+dnf install make automake
+```
 
 
 To compile our gist example hash.c using the makefile, we put it in a file called, `Makefile`.
 
 `cat Makefile`
 
-  ```
-        hash:
-              gcc hash.c -o hash
+```makefile
+hash:
+    gcc hash.c -o hash
+```
   
-  ```
   
+a `make` command is issued in the same directory gives us the `hash` binary.
   
-  a `make` command is issued in the same directory gives us the `hash` binary.
+Now, we can add more things to the Makefile as the following.
   
-  Now, we can add more things to the Makefile as the following.
+```makefile
+all:
+    gcc hash.c -o hash
   
-  ```
-  all:
-      gcc hash.c -o hash
+clean:
+    rm -rf hash.o hash
+
+```
   
-  clean:
-      rm -rf hash.o hash
-      
-  ```
+We have two subcommands now for the make argument. They are `all` and `clean`.
   
-  We have two subcommands now for the make argument. They are `all` and `clean`.
+Issuing `make clean` would remove the binary `hash` and the object file `hash.o`.
   
-  Issuing `make clean` would remove the binary `hash` and the object file `hash.o`.
+Issuing `make all` would compile the binary and generate the `hash`.
   
-  Issuing `make all` would compile the binary and generate the `hash`.
+Let us define the variable `CC` which can either be assigned with in the makefile to the C compiler `gcc` or passed via a command line argument. The command line argument is mostly used in cases where the compiler can be an architectural dependent compiler (in case of cross compilation) or a proprietary compiler.
   
-  Let us define the variable `CC` which can either be assigned with in the makefile to the C compiler `gcc` or passed via a command line argument. The command line argument is mostly used in cases where the compiler can be an architectural dependent compiler (in case of cross compilation) or a proprietary compiler.
+The makefile now looks as below.
   
-  The makefile now looks as below.
+```makefile
+CC=gcc
   
-  ```
-  CC=gcc
+all:
+    $(CC) hash.c -o hash
+clean:
+    rm -rf hash.o hash
+```
   
-  all:
-      $(CC) hash.c -o hash
-  clean:
-      rm -rf hash.o hash
-  ```
-  
-  We can pass the `CC` variable via the command line as following `make CC=gcc`.
+We can pass the `CC` variable via the command line as following `make CC=gcc`.

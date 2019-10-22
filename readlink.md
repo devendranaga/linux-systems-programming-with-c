@@ -1,8 +1,10 @@
-# readlink
+## readlink
 
 readlink resolves the symbolic links. The readlink API prototype is as follows.
 
-`size_t readlink(const char *pathname, char *buf, size_t bufsiz);`
+```c
+size_t readlink(const char *pathname, char *buf, size_t bufsiz);
+```
 
 Also, include the `<unistd.h>` header file.
 
@@ -28,6 +30,11 @@ int main(int argc, char **argv)
     memset(buf, 0, sizeof(buf));
 
     len = readlink(argv[1], buf, sizeof(buf));
+    if (len == -1) {
+        fprintf(stderr, "failed to resolve the link for %s\n", argv[1]);
+        return -1;
+    }
+
     buf[len + 1] = '\0';
 
     fprintf(stderr, "resolved %s\n", buf);

@@ -1,30 +1,32 @@
-# signals
+## signals
 
 ### Introduction
-Signals are used to notify a process about some event. The event condition may be for ex: packet received on a network interface, packet sent on a network interface, watchdog timer expiry, floating point exception, invalid memory address read / write (segfault, alignment fault) etc. The linux provides 64 different signals range from `SIGHUP` to `SIGRTMAX`. The normal signals range from `SIGHUP` to `SIGSYS` and the real time signals start from `SIGRTMIN` to `SIGRTMAX`.
+
+Signals are used to notify a process about some event. Signals are asynchornous events. The event condition may be for ex: packet received on a network interface, packet sent on a network interface, watchdog timer expiry, floating point exception, invalid memory address read / write (segfault, alignment fault) etc. The linux provides 64 different signals range from `SIGHUP` to `SIGRTMAX`. The normal signals range from `SIGHUP` to `SIGSYS` and the real time signals start from `SIGRTMIN` to `SIGRTMAX`.
 
 The command `kill -l` on the `bash` would give us the following.
 
-```
- 1) SIGHUP	        2) SIGINT	     3) SIGQUIT	 4) SIGILL	 5) SIGTRAP
- 6) SIGABRT	       7) SIGBUS	     8) SIGFPE	  9) SIGKILL   10) SIGUSR1
-11) SIGSEGV	      12) SIGUSR2       13) SIGPIPE	14) SIGALRM   15) SIGTERM
-16) SIGSTKFLT        17) SIGCHLD       18) SIGCONT	19) SIGSTOP   20) SIGTSTP
-21) SIGTTIN          22) SIGTTOU       23) SIGURG     24) SIGXCPU   25) SIGXFSZ
-26) SIGVTALRM        27) SIGPROF       28) SIGWINCH   29) SIGIO     30) SIGPWR
-31) SIGSYS           34) SIGRTMIN      35) SIGRTMIN+1 36) SIGRTMIN+2 37) SIGRTMIN+3
-38) SIGRTMIN+4	   39) SIGRTMIN+5    40) SIGRTMIN+6 41) SIGRTMIN+7 42) SIGRTMIN+8
-43) SIGRTMIN+9	   44) SIGRTMIN+10   45) SIGRTMIN+11 46) SIGRTMIN+12 47) SIGRTMIN+13
-48) SIGRTMIN+14	  49) SIGRTMIN+15   50) SIGRTMAX-14 51) SIGRTMAX-13 52) SIGRTMAX-12
-53) SIGRTMAX-11      54) SIGRTMAX-10   55) SIGRTMAX-9  56) SIGRTMAX-8  57) SIGRTMAX-7
-58) SIGRTMAX-6       59) SIGRTMAX-5    60) SIGRTMAX-4  61) SIGRTMAX-3  62) SIGRTMAX-2
-63) SIGRTMAX-1       64) SIGRTMAX
+|  |  |  |  |  |
+|--|--|--|--|--|
+| SIGHUP | SIGINT | SIGQUIT | SIGILL | SIGTRAP |
+| SIGABRT | SIGBUS | SIGFPE | SIGKILL | SIGUSR1 |
+| SIGSEGV | SIGUSR2 | SIGPIPE | SIGALRM | SIGTERM |
+| SIGSTKFLT | SIGCHLD | SIGCONT | SIGSTOP | SIGTSTP |
+| SIGTTIN | SIGTTOU | SIGURG | SIGXCPU | SIGXFSZ |
+| SIGVTARLM | SIGPROF | SIGWINCH | SIGIO | SIGPWR |
+| SIGSYS | SIGRTMIN | SIGRTMIN + 1 | SIGRTMIN + 2 | SIGRTMIN + 3|
+| SIGRTMIN + 4 | SIGRTMIN + 5 | SIGRMIN + 6 | SIGRTMIN + 7 | SIGRTMIN + 8 |
+| SIGRTMIN + 9 | SIGRTMIN + 10 | SIGRTMIN + 11 | SIGRTMIN + 12 | SIGRTMIN + 13 |
+| SIGRTMIN + 14 | SIGRTMIN + 15 | SIGRTMAX - 14 | SIGRTMAX - 13 | SIGRTMAX - 12|
+| SIGRTMAX - 11 | SIGRTMAX - 10 | SIGRTMAX - 9 | SIGRTMAX - 8 | SIGRTMAX - 6 |
+| SIGRTMAX - 6 | SIGRTMAX - 5 | SIGRTMAX - 4 | SIGRTMAX - 3 | SIGRTMAX - 2 |
+| SIGRTMAX - 1 | SIGRTMAX |
 
-```
+
 
 The `SIGINT` and `SIGQUIT` are familiar to us as from the keyboard as we usually perform the `ctrl + c` (`SIGINT`) or `ctrl + \` (`SIGQUIT`) combination to stop a program.
 
-Signals are also delivered to a process with the help of `kill` command. The manual page (`man  kill`) of kill command says that the default and easier version of kill command is the `kill pid`. Where `pid` is the process ID that is found via the `ps` command. The default signal is `SIGTERM (15)`. Alternatively a signal number is specified to the `kill` command such as `kill -2 1291` making a delivery of `SIGINT(2)` signal to the process ID 1291.
+Signals are also delivered to a process (running or stopped or waiting) with the help of `kill` command. The manual page (`man  kill`) of kill command says that the default and easier version of kill command is the `kill pid`. Where `pid` is the process ID that is found via the `ps` command. The default signal is `SIGTERM (15)`. Alternatively a signal number is specified to the `kill` command such as `kill -2 1291` making a delivery of `SIGINT(2)` signal to the process ID 1291.
 
 
 The linux also provide a mechanism for sysadmins to control the processes via two powerful and unmaskable signals `SIGKILL` and `SIGSTOP`. They are fatal and the program terminates as soon as it receives them. This allows admins to kill the offending or bad processes from hogging the resources.
@@ -33,16 +35,21 @@ The linux also provide us a set of system calls API to use the signals that are 
 
 handling of the signals:
 
-1. ignore the signal
-2. perform the handler function execution
-3. default action
+1. ignore the signal - SIG_IGN (ignore the signal by specifying this)
+2. perform the handler function execution - create a callback handler that gets called when signal occurs
+3. default action - is default for each process when created - kernel creates a default handler for each process
 
+Signals are asynchornous and must be handled. So the system call interface provides an API to handle the signals. Below described are some of the system calls.
 
 ### signal and sigaction
 
-prototype: `sighandler_t signal(int signum, sighandler_t handler);`
+`signal` is a system call, that allows the program to handle the signal when it occurs.
 
-#### Signal
+prototype:
+
+```c
+sighandler_t signal(int signum, sighandler_t handler);
+```
 
 #### Sigaction
 
@@ -77,6 +84,8 @@ The mask argument is similar to the one that we pass to the `sigprocmask` system
 The `flags` argument is usually set to 0. It is much similar to the O_NONBLOCK flag options of other system calls.
 
 Include `<sys/signalfd.h>` to use the `signalfd` system call.
+
+Below is an example of the `signalfd` system call. Download [here](https://github.com/DevNaga/gists/blob/master/sigfd.c)
 
 ```c
 #include <stdio.h>
@@ -136,6 +145,22 @@ int main(int argc, char **argv)
 }
 ```
 
+The signals are first masked by the `sigaddset` system call and then blocked with `sigprocmask`. The mask is then given to the `signalfd` system call. The signals are then queued to the socket fd returned. This can be waited upon the `read` or `select` system call.
+
+The kernel returns a variable of the form `signalfd_siginfo` upon read.The structure then contains the signal that is occured. Here's some contents in the `signalfd_siginfo`.
+
+```c
+struct signalfd_siginfo {
+    uint32_t ssi_signo;
+    ...
+    uint32_t ssi_pid;
+    ....
+};
+
+```
+
+The `ssi_signo` contains the signal number that is occured. The `ssi_pid` is the process that sent this signal.
+
 **Example: signalfd basic example**
 
 ### sigaddset
@@ -143,10 +168,41 @@ int main(int argc, char **argv)
 `sigaddset` adds the signal to a set. The prototype is as follows.
 
 ```c
+
 int sigaddset(sigset_t *set, int signo);
+
 ```
 
 The `signo` gets added to the `set`. Multiple calls of the `sigaddset` on the same `set` would add the signals to the set. The function is mostly used in generating a signal mask for the `sigprocmask`. See more about `sigprocmask` in the below sections.
+
+usually, the `sigaddset` is called this way:
+
+```c
+
+sigset_t set;
+
+sigaddset(&set, SIGINT); // ignore SIGINT
+
+```
+
+ignores the signal `SIGINT`.
+
+To setup a group of signals, the `sigaddset` can be allowed to call in a loop. For example,
+
+```c
+
+int i = 0;
+int signal_list[] = {SIGINT, SIGQUIT, SIGALRM};
+sigset_t set;
+
+// setup signal mask for the signals in signal_list
+while (i < sizeof(signal_list) / sizeof(signal_list[0])) {
+    sigaddset(&set, signal_list[i]);    
+}
+
+```
+
+
 
 ### sigfillset
 
@@ -158,10 +214,163 @@ int sigfillset(sigset_t *set);
 
 ### sigemptyset
 
+`sigemptyset` clears the signal mask. The initialization of the set of type `sigset_t` is usually done with the `sigemptyset`. Before any calls to `sigaddset` the set of type `sigset_t` must be cleared with `sigemptyset`.
+
+The above examples calls of `sigaddset` must use `sigemptyset`. So the fixed code examples look like the below,
+
+```c
+
+sigset_t set;
+
+sigemptyset(&set); // clear the signal set
+
+sigaddset(&set, SIGINT); // ignore SIGINT
+
+```
+
+
+```c
+
+int i = 0;
+int signal_list[] = {SIGINT, SIGQUIT, SIGALRM};
+sigset_t set;
+
+sigemptyset(&set); // clear the signal set
+
+// setup signal mask for the signals in signal_list
+while (i < sizeof(signal_list) / sizeof(signal_list[0])) {
+    sigaddset(&set, signal_list[i]);    
+}
+
+```
+
+
 ### sigismember
+
+
+`sigismember` validates if the given signal is with in the set. Prototype is as follows,
+
+```c
+
+int sigismember(sigset_t *set, int no);
+
+```
+
+usually, the calling example looks like the following way,
+
+```c
+
+sigismember(&set, SIGALRM);
+
+```
+
+below is one of the examples of using both `sigfillset` and `sigismember`.
+
+```c
+
+/**
+ * sigismember and sigfillset example
+ *
+ * Author: Devendra Naga (devendra.aaru@gmail.com)
+ *
+ * LICENSE MIT
+ */
+
+#include <stdio.h>
+#include <signal.h>
+
+int main()
+{
+    sigset_t set;
+
+    sigfillset(&set);
+
+    if (sigismember(&set, SIGALRM)) {
+        printf("sigalrm is a member of the set\n");
+    } else {
+        printf("sigalrm is not a member of the set\n");
+    }
+}
+
+```
+
 
 ### sigdelset
 
-### sigemptyset
+`sigdelset` deletes the signal from the given set. The prototype is as follows,
+
+```c
+
+int sigdelset(sigset_t *set, int no);
+
+```
+
 
 ### sigprocmask
+
+The system call `sigprocmask`, used to block certain signals.
+
+The `sigprocmask` prototype is as follows (from the man pages),
+
+```c
+
+int sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
+
+```
+
+`how` is defined by one of the following, `SIG_BLOCK` and `SIG_UNBLOCK`.
+
+Below is an example use of `sigprocmask`.
+
+```c
+
+/**
+ * example sigprocmask
+ *
+ * Author: Devendra Naga (devendra.aaru@gmail.com)
+ *
+ * LICENSE MIT
+ */
+#include <stdio.h>
+#include <signal.h>
+#include <unistd.h>
+
+int main()
+{
+    sigset_t set;
+    int ret;
+
+    sigemptyset(&set);
+
+    // add SIGINT
+    sigaddset(&set, SIGINT);
+
+    ret = sigprocmask(SIG_BLOCK, &set, NULL);
+    if (ret != 0) {
+        perror("sigprocmask");
+        return -1;
+    }
+
+    int count = 0;
+
+    while (1) {
+        printf("hello .. %d\n", count ++);
+        sleep(1);
+        if (count == 5) {
+            break;
+        }
+    }
+
+    ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
+    if (ret != 0) {
+        perror("sigprocmask");
+        return -1;
+    }
+}
+
+```
+
+In the above example, the signal set of type `sigset_t` is created with `sigemptyset` followed by the `sigaddset`. The signal `SIGINT` being setup in the signal set.
+
+The `sigprocmask` system call is made with `SIG_BLOCK` that effectively blocks the signal `SIGINT` till the loop below executes. The loop is created only for testing purposes to see if the `SIGINT` is actually blocked by holding down `ctrl +c` combination on the keyboard. Till the count of 5, the signal is blocked and a call to the `sigprocmask` with `SIG_UNBLOCK` is made to unblock the signal.
+

@@ -1,4 +1,4 @@
-# Netlink sockets
+## Netlink sockets
 
 Netlink protocol is `AF_NETLINK`. The type of socket can either be `SOCK_RAW` or `SOCK_DGRAM`.
 

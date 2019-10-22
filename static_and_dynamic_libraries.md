@@ -1,4 +1,4 @@
-# Static and dynamic libraries
+## Static and dynamic libraries
 
 
 1. The static libraries are denoted with `.a` extension while the dynamic libraries are denoted with `.so` extension.
@@ -9,14 +9,18 @@
 
 To create a shared library:
 
-    gcc -shared -o libshared.so -fPIC 1.c 2.c ..
+```bash
+gcc -shared -o libshared.so -fPIC 1.c 2.c ..
+```
     
 
 when creating the shared library using the -fPIC is most important. The position independent operation allows the program to load the address at the different address.
 
 To create a static library:
 
-    ar rcs libstatic.a 1.o 2.o
+```bash
+ar rcs libstatic.a 1.o 2.o
+```
 
 ## The libdl.so (Dynamic loading of functions)
 
@@ -30,7 +34,9 @@ dladdr: find the shared object containing a given address
 
 include the header file `<dlfcn.h>` to use the dynamic library. The `dladdr` function prototype is as follows:
 
-    int dladdr(void *addr, Dl_info *dlip);
+```c
+int dladdr(void *addr, Dl_info *dlip);
+```
 
 The `Dl_info` looks as the following:
 
@@ -47,7 +53,9 @@ typedef struct {
 
 The `dlopen` is defined as follows:
 
-    void *dlopen(const char *filename, int flags);
+```c
+void *dlopen(const char *filename, int flags);
+```
     
 The `dlopen` function loads the dynamic library file referenced by `filename` and returns a handle pointer for the libbrary. The `flags` arguments tell the `dlopen` on the way to load the library. Usually `flags` are set to `RTLD_LAZY`. The `RTLD_LAZY` performs the lazy binding. This means that it only resolves the symbols when the code calls them.
 
@@ -55,7 +63,9 @@ The opened library handle is then used to get the function addresses with refere
 
 The `dlsym` is defined as follows:
 
-    void *dlsym(void *handle, const char *symbol);
+```c
+void *dlsym(void *handle, const char *symbol);
+```
     
 The `symbol` is the function name and `handle` is the return of `dlopen`. The `dlsym` returns the address of the function. It is then captured into a function pointer for further use.
 
@@ -75,7 +85,9 @@ int function_a()
 
 We then compile it as follows.
 
-    gcc -fPIC -o lib.c
+```bash
+gcc -fPIC -o lib.c
+```
     
 The `lib.o` is generated with the above compiler command.
 
@@ -109,11 +121,15 @@ int main()
 
 We then compile the above program as the following:
 
-    gcc dlopen.c -ldl -rdynamic
+```c
+gcc dlopen.c -ldl -rdynamic
+```
     
 The `ldl` and `rdynamic` are used to compile and link the above code.
 
 When we execute the resultant `a.out` file it prints the following:
 
-    function 0x7f05b82d46e0
-    function a is defined
+```bash
+function 0x7f05b82d46e0
+function a is defined
+```

@@ -1,4 +1,4 @@
-# select and epoll
+## select and epoll
 
 ### 1. select system call
 
@@ -184,6 +184,7 @@ int main()
 
     return 0;
 }
+
 ```
 
 The above two programs are only demonstratable programs. They have many errors. Finding and spotting the errors is going to be your task here. And the solution to it makes us to become a better programmer.
@@ -209,7 +210,7 @@ The `select` system call cannot serve maximum connections more than `FD_SETSIZE`
 
 ### 3. epoll system call
 
-`epoll` is another API that allows you to selectively wait on a large set of file descriptors. Epoll solves the very less number of client connections with select.
+`epoll` is another API that allows you to selectively wait on a large set of file descriptors. Epoll solves the very less number of client connections with `select` .
 
 The `epoll` is similar to `poll` system call. The system call is used to monitor multiple file descriptors to see if I/O is possible on them.
 

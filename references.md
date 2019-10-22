@@ -1,6 +1,3 @@
 # References
 
-I have used the following to generate the content of this book.
-
-1. manual pages for system calls and posix API.
-2. Wikipedia for the data structures.
+The content of this book is created from scratch basing on what i have learnt as a developer for 8 years.

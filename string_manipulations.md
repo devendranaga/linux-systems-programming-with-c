@@ -1,4 +1,4 @@
-# string manipulations
+## string manipulations
 
 The C library \(libc\) provides an interface to manipulate with the strings.
 

@@ -1,4 +1,4 @@
-# Shared memory
+## Shared memory
 
 ## system V shared memory
 
@@ -215,7 +215,7 @@ Let us add the following code to the shmcli.c file.
 
 ## mmap
 
-`mmap` maps the files or device into memory. `mmap` creates a new mapping in the virtual memory of the process.
+`mmap` maps the files or device into memory, so that operations can be directly done on the memory. The memory afterwards, can be synced in or out based on its validity. `mmap` creates a new mapping in the virtual memory of the process.
 
 The prototype is as follows.
 
@@ -225,6 +225,20 @@ void *mmap(void *addr, size_t length, int prot, int flags,
 ```
 
 If `addr` is `NULL`, the kernel initialises and chooses a memory and returns as the `mmap` return value.
+
+on a successful `mmap` the pointer to the address of the shared memory is returned, otherwise `MAP_FAILED` is returned. So a check is made on the returned memory  for validity.
+
+```c
+void *maped;
+
+maped = mmap(NULL, 1024 * 1024, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+if (maped == MAP_FAILED) {
+    return -1;
+}
+
+```
+
+when allocating the memory, it is usually best practise to allocate on page boundary. A default page size usually 4kB and may vary from hardware to hardware. check with `sysconf(_SC_PAGE_SIZE)` for runtime page size for each platform.
 
 file size is specified in the `length` argument.
 
@@ -245,7 +259,7 @@ The `flags` argument determines whether the updates to the memory are visible to
 
 `MAP_PRIVATE` creates a private copy on write mapping and the updates are not visible to other processes that are mapping to the same file.
 
-The `munmap` unmaps the files from the memory.
+To unmap the memory that is maped by `mmap` the `munmap` is used. The `munmap` unmaps the mapped memory.
 
 The prototype is as follows.
 
@@ -253,7 +267,7 @@ The prototype is as follows.
 int munmap(void *addr, size_t length);
 ```
 
-include `<sys/mman.h>` for the `mmap` API.
+include `<sys/mman.h>` for the `mmap` API. Download [here](https://github.com/DevNaga/gists/blob/master/mmap.c)
 
 sample code:
 
@@ -305,11 +319,23 @@ int main(int argc, char **argv)
 }
 ```
 
-There is also a way to write the data stored at the memory back to the file using the `msync` API.
+before running the program, perform the following.
+
+```shell
+echo "mmap test" > test
+gcc -Wall mmap.c
+./a.out test
+```
+
+if there is no file that is available or the file is not a text file, the visualisation of the data is not possible.
+
+There is also a way to write the data stored at the memory back to the file using the `msync` API. `msync` allows the memory written at the address to be flushed down to the file either synchronously or asynchronously.
 
 The `msync` API prototype is as follows.
 
-`int msync(void *addr, size_t length, int flags);`
+```c
+int msync(void *addr, size_t length, int flags);
+```
 
 The `msync` will write the contents stored at the address `addr` of `length` bytes into the file that the `addr` points to. The `addr` is the return value of the `mmap` where in which the file descriptor is given to map the contents.
 
@@ -319,7 +345,7 @@ The `flags` argument has two values.
 
 `MS_SYNC`: request an update and wait till the update finishes.
 
-Here is an extension of the above example that performs the `msync` API.
+Here is an extension of the above example that performs the `msync` API. Download [here](https://github.com/DevNaga/gists/blob/master/mmap_sync.c)
 
 ```c
 #include <stdio.h>
@@ -338,15 +364,24 @@ int main(int argc, char **argv)
     int fd;
     void *addr;
     struct stat s;
+    int file_size = 0;
 
-    if (argc != 2) {
-        printf("%s [filename]\n", argv[0]);
+    if (argc != 3) {
+        printf("%s [filename] [filesize in MB]\n", argv[0]);
         return -1;
     }
 
-    fd = open(argv[1], O_RDWR);
+    file_size = atoi(argv[2]);
+
+    fd = open(argv[1], O_RDWR | O_CREAT, S_IRWXU);
     if (fd < 0) {
         printf("failed to open %s\n", argv[1]);
+        return -1;
+    }
+
+    ret = ftruncate(fd, file_size * 1024 * 1024);
+    if (ret < 0) {
+        printf("failed to trucate file %s to %d MB\n", argv[1], file_size);
         return -1;
     }
 
@@ -367,6 +402,7 @@ int main(int argc, char **argv)
     memset(addr, 0, s.st_size);
     strcpy(addr, "Hello Mmap");
 
+    // sync to the disk sychrnously
     msync(addr, s.st_size, MS_SYNC);
     perror("msync");
 
@@ -375,9 +411,344 @@ int main(int argc, char **argv)
     close(fd);
     return 0;
 }
+
 ```
+
+The `ftruncate` is used to first truncate the file before calling mmap with the size of the file. if the file is created newly, its size is default 0 bytes. Thus `mmap` fails on mapping the file to the memory. Instead truncate the file with a specific size and then performing a `stat` on it gives the size of the new truncated value. Thus the call on `mmap` will succeed and the mapping is performed. Subsequent writes on the files are basically copying the values to the address by `strcpy` if string is supposed to be written to the file or a `memcpy` if the data is other than string format.
 
 The `mmap` is mostly used in optimising the file writes, such as in case of data bases. They map the file into the RAM and only write \(perform the `msync`\) optimally. This reduces the use of write system calls in the kernel and the kernel's paging daemon flushing the pages to the disk and using this saved CPU usage to the other tasks.
 
 
+Linux provides another shared memory POSIX API called `shm_open` and `shm_unlink` which can be used along with the `mmap` and `munmap`.
+
+The prototype of `shm_open` is as follows,
+
+
+```c
+int shm_open(const char *name, int oflag, mode_t mode);
+
+```
+
+the `name` should contain a `/` first and the name of the shared memory file.
+the `oflag` is same as that of `O_CREAT | O_RDWR` for creation and `O_RDWR` for read-write operation.
+the `mode` represents the creation mask `S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP` etc.
+
+when given as `O_CREAT` to the `oflag` the shared memory will be created. When there are more than one process that is gonna use shared memory, one process would create the memory with `O_CREAT` along with the rest of the oflags and file mode creation flags. The other processes would use the `O_RDWR` `O_RDONLY` and / or `O_WRONLY` flags. When used with out `O_CREAT`, the mode is set to 0.
+
+
+The `shm_open` returns a file descriptor of the path, and this can be used by the `mmap` as the following,
+
+Prototype of `mmap` is shown below,
+
+```c
+void *mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset);
+
+```
+
+code to perform `mmap` with the `shm_open` is as follows,
+
+```c
+
+int mapfd;
+
+mapfd = shm_open("/shm_path", O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+if (mapfd < 0) {
+    return -1;
+}
+
+ftruncate(mapfd, 1024 * 1024);
+
+void *mapaddr;
+
+mapaddr = mmap(NULL, 1024 * 1024, PROT_READ | PROT_WRITE, MAP_SHARED, mapfd, 0);
+if (mapaddr == MAP_FAILED) {
+    return -1;
+}
+
+```
+
+notice the use of `ftruncate` system call. This is required to let `mmap` work correctly with the given length bytes.
+
+There is no need to `msync` because the operation is on a file descriptor returned by the call to `shm_open`.
+
+the `shm_unlink` prototype is as follows.
+
+
+```c
+int shm_unlink(const char *name);
+
+```
+
+this is called right after the program has stopped using the fd returned by the `shm_open`.
+
+
+Below is an example that demo the use of `mmap` with the `shm_open`. Download [here](https://github.com/DevNaga/gists/blob/master/mmap_comm.c)
+
+```c
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <string.h>
+
+#define SHM_NAME "/test_shm"
+#define SHM_BYTES_MAX (1024 * 1024)
+#define FIFO_NAME "/test_fifo"
+
+static int fifd;
+static int fd;
+
+int intr_reader()
+{
+    int intr = 1;
+
+    return write(fifd, &intr, sizeof(int));
+}
+
+int wait_for_intr()
+{
+    int intr = 0;
+    int ret;
+
+    ret = read(fifd, &intr, sizeof(intr));
+    if (ret <= 0) {
+        return -1;
+    }
+
+    return intr == 1;
+}
+
+void* mmap_create_buf()
+{
+    fd = shm_open(SHM_NAME, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+    if (fd < 0) {
+        perror("shm_open");
+        return NULL;
+    }
+
+    ftruncate(fd, SHM_BYTES_MAX);
+
+    void *addr;
+
+    addr = mmap(NULL, SHM_BYTES_MAX, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (addr == MAP_FAILED) {
+        perror("mmap");
+        return NULL;
+    }
+
+    return addr;
+}
+
+void* mmap_attach_buf()
+{
+    fd = shm_open(SHM_NAME, O_RDWR, 0);
+    if (fd < 0) {
+        perror("shm_open");
+        return NULL;
+    }
+
+    void *addr;
+
+    addr = mmap(NULL, SHM_BYTES_MAX, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (addr == MAP_FAILED) {
+        perror("mmap");
+        return NULL;
+    }
+
+    return addr;
+}
+
+int fifo_create()
+{
+    int ret;
+
+    unlink(FIFO_NAME);
+
+    ret = mkfifo(FIFO_NAME, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+    if (ret < 0) {
+        perror("mkfifo");
+        return -1;
+    }
+
+    fifd = open(FIFO_NAME, O_RDWR);
+    if (fifd < 0) {
+        perror("open");
+        return -1;
+    }
+
+    return 0;
+}
+
+int fifo_attach()
+{
+    fifd = open(FIFO_NAME, O_RDWR);
+    if (fifd < 0) {
+        perror("open");
+        return -1;
+    }
+
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    int ret;
+    void *addr;
+
+    if (argc != 2) {
+        fprintf(stderr, "<%s> producer/consumer\n", argv[0]);
+        return -1;
+    }
+
+    if (!strcmp(argv[1], "producer")) {
+        addr = mmap_create_buf();
+        if (!addr) {
+            return -1;
+        }
+
+        ret = fifo_create();
+        if (ret < 0) {
+            return -1;
+        }
+
+        while (1) {
+            strcpy(addr, "Hello ");
+
+            intr_reader();
+            sleep(1);
+        }
+    } else if (!strcmp(argv[1], "consumer")) {
+        addr = mmap_attach_buf();
+        if (!addr) {
+            return -1;
+        }
+
+        ret = fifo_attach();
+        if (ret < 0) {
+            return -1;
+        }
+
+        while (1) {
+            wait_for_intr();
+            printf("data from prod: %s\n", addr);
+
+            memset(addr, 0, 10);
+        }
+    }
+}
+
+```
+
+The above example demonstrates the use of `mmap` and the `shm_open` along with the `mkfifo` for synchronisation.
+
+The creator is simply the producer and the reader is simply the consumer. The creator creates the shared memory fd, maps using mmap and then creates a fifo with `mkfifo` and calls `open`.
+
+The consumer opens the shread memory with the `shm_open` and maps the memory, it also opens the fifo. The consumer never creates any of the shared fd, memory or the fifo. It opens and waits for the data.
+
+The consumer waits on the read calling the `wait_for_intr` call. The producer sleeps every second and writes "Hello" to the shared memory and interrupts the reader via the `intr_reader`.
+
+Compile the program and run it in two separate terminals and observe the communication between the two programs.
+
+
+
+Linux defines another system call called `mprotect`, allowing to change the permissions of the existing region of memory.
+
+
+The prototype of `mprotect` is as follows.
+
+```c
+int mprotect(const void *addr, size_t len, int prot);
+
+```
+
+where the `addr` is a page aligned memory. The `len` is the portion of the memory to be protected. the `prot` is a combination of `PROT_READ` and `PROT_WRITE`. The `mprotect` overrides the existing protection bits when the memory is created via `mmap`. this means that if the memory needs to be in read only then the `prot` field must be only `PROT_READ`. if its in read write then the combination of OR must be used such as `PROT_READ | PROT_WRITE`.
+
+
+`mprotect` returns 0 if protection bits are changed success and -1 on failure.
+
+
+
+Linux provides a system call `madvise` to provide the kernel an advise. The prototype is as follows,
+
+
+```c
+int madvise(void *addr, size_t length, int advise);
+
+```
+
+The `madvise` system call gives the advise to the kernel about the address. The advise is one of the following.
+
+
+| type | meaning |
+|------|---------|
+| MADV_NORMAL | no special treatment for the address |
+| MADV_RANDOM | expect page references in random |
+| MADV_SEQUENTIAL | expect page references in sequential |
+| MADV_WILLNEED | expect the access in near future |
+
+
+An example call to the `madvise` is as follows.
+
+```c
+void *addr;
+
+addr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+if (addr == MAP_FAILED) {
+    return -1;
+}
+
+ret = madvise(addr, size, MADV_RANDOM);
+if (ret < 0) {
+    return -1;
+}
+
+```
+
+There is another group of syscalls called `mlock` and `mlockall` that explain the system to lock a particular region of shared memory and not allow it to be paged. This means, the physical page that has been allocated to the page table entry and any accesses to it will not create a page fault. This means to let the page in the RAM always.
+
+`munlock` unlocks the portion of the memory that has been locked by the `mlock`.
+
+`mlock` tends to improve performance when used in a time sensitive code thus reducing the paging.
+
+`mlock` prototypes are as follows. include `<sys/mman.h>` before using `mlock` system calls.
+
+```c
+int mlock(const void *addr, size_t len);
+int mlock2(const void *addr, size_t len, int flags);
+int munlock(const void *addr, size_t len);
+
+int mlockall(int flags);
+int munlockall(void);
+
+```
+
+the syscalls, `mlockall` and `munlockall` locks the entire pages mapped to the address space of the calling process.
+
+the parameter `flags` in `mlockall` represents the following:
+
+
+| name | meaning |
+|------|---------|
+| `MCL_CURRENT` | lock all pages which are currently mapped into the address space of the process |
+| `MCL_FUTURE` | lock all pages which become mapped into the address space of the process in future. |
+| `MCL_ONFAULT` | when used together with `MCL_CURRENT` and `MCL_FUTURE`, mark all current or future pages to be locked into RAM when they are faulted |
+
+
+The calling convention for `mlock` is usually the following.
+
+
+```c
+void *addr = malloc(sizeof(int));
+if (!addr) {
+    return -1;
+}
+
+ret = mlock(addr, sizeof(int));
+if (ret < 0) {
+    return -1;
+}
+
+```
 

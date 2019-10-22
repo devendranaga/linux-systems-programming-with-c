@@ -1,6 +1,8 @@
-# Directory manipulation
+## Directory manipulation
 
-## Reading / Writing Directories programmatically under linux:
+Directories are mapped as well into inodes. Linux supports the nesting of directories.
+
+### Reading / Writing Directories programmatically under linux:
 
 Under the linux, directory is read by using the `ls` command. The `ls` command performs the listing of files and directories. The `mkdir` command performs the creation of directories. The `touch` command creates a file. The `ls`, `mkdir` and `touch` run in a shell (such as `bash` or `ash` or `sh`).
 
@@ -11,13 +13,17 @@ The `opendir` system call opens up a directory that is given as its first argume
 
 The manual page of the `opendir` gives us the following prototype.
 
-    DIR * opendir(const char *name);
+```c
+DIR * opendir(const char *name);
+```
 
 The call returns the directory tree node of type `DIR` as a pointer.
 
 The manual page of the `readdir` gives us the following prototype.
 
-    struct dirent * readdir(DIR *dir);
+```c
+struct dirent * readdir(DIR *dir);
+```
 
 The `readdir` takes the directory tree node pointer of type `DIR` that is returned from the `opendir` call. The `readdir` call is repeatedly called until it returns `NULL`. Each call to the `readdir` gives us a directory entry pointer of type `struct dirent`. From the man pages this structure is as follows:
 
@@ -34,7 +40,7 @@ struct dirent {
 
 The `d_name` and `d_type` elements in the structure are the most important things to us. The `d_name` variable gives us the file / directory that is present under the parent directory. The `d_type` tells us the type of the `d_name`. If the `d_type` is `DT_DIR`, then the `d_name` contains a directory, and if the `d_type` is `DT_REG`, then the `d_name` is a regular file.
 
-An `opendir` call must follow a call to `closedir` if the `opendir` call is successful. From the man pages, the `closedir` call looks below:
+An `opendir` call must follow a call to `closedir` if the `opendir` call is successful. If there is an `opendir` call, and no `closedir` is performed, then it results in a memory leak. From the man pages, the `closedir` call looks below:
 
 ```c
 int closedir(DIR *dirp);
@@ -44,7 +50,7 @@ The `closedir` will close the directory referenced by `dirp` pointer and frees u
 
 The below example is a basic `ls` command that perform the listing of the directory contents. It does not perform the listing of symbolic links, permission bits, other types of files.
 
-(You can download the example from [here](https://github.com/DevNaga/gists/blob/master/basic_listdir.c))
+You can download the example from [here](https://github.com/DevNaga/gists/blob/master/basic_listdir.c)
 
 ```c
 #include <stdio.h>
@@ -96,12 +102,12 @@ int main(int argc, char **argv)
 
 **Example: Basic `ls` command example**
 
-The above example simply lists down the files and directories. By taking this as an example, we can solve the below programming problems.
+The above example simply lists down the files and directories. It never lists down the properties of the files / directories, such as the permission bits, timestamps etc. By taking this as an example, we can solve the below programming problems.
 
 1. Sort the contents of the directory and print them.
 2. Recursively perform reading of the directories with in the parent directories until there exist no more directories. The directories "." and ".." can be ignored.
 
-Some file systems does not set the `entry->d_type` variable. Thus it is advised to perform the `stat` system call.
+Some file systems does not set the `entry->d_type` variable. Thus it is advised to perform the `stat` system call on the `entry->d_name` variable. Usually the `entry->d_name` is only an absolute name and does not contain a full path, it is advised to append the full path before the `entry->d_name`.
 
 The following example shows how a `stat` system call is used to find out the filetype.
 
@@ -111,6 +117,8 @@ char buf[1000];
 
 while (entry = readdir(dirp)) {
     memset(buf, 0, sizeof(buf));
+
+    // append the directory before dir->d_name
     strcpy(buf, directory);
     strcat(buf, "/");
     strcpy(buf, dir->d_name);
@@ -162,8 +170,31 @@ int main(int argc, char **argv)
 }
 ```
 
+Few of the examples:
+
+**Permission denied on a directory user requested:**
+
+```shell
+devnaga@hanzo:~$ ./a.out /proc/1/fd
+Failed changing the directory to /proc/1/fd, error: Permission denied
+```
+
+**invalid directory being passed as input:**
+
+```shell
+devnaga@hanzo:~$ ./a.out /proc/8a
+Failed changing the directory to /proc/8a, error: No such file or directory
+```
+
+**valid directory with valid permissions:**
+
+```shell
+devnaga@hanzo:~$ ./a.out /proc
+directory change successful
+```
+
 The `chdir` affects only the calling program .
- 
+
 ### Creating directories with ```mkdir```
 
 The `mkdir` also a system call that creates a directory. The command `mkdir` with option `-p` would recursively create the directories. However, the `mkdir` system call would only create one directory.
@@ -207,10 +238,12 @@ int main(int argc, char **argv)
 
 However, when we compile and run the above program with good inputs as the following:
 
-        ./mkdir_program test/
-        successfully created test/
-        going into test/
-        inside test/
+```c
+./mkdir_program test/
+successfully created test/
+going into test/
+inside test/
+```
 
 and when the program exits, we are still in the directory where the program is compiled and run.
 
@@ -218,7 +251,9 @@ This is because the program does not affect the current directory of the shell (
 
 ## scandir
 
-The `scandir` scans the directory and calls the `filter` and `compar` functions and returns a list of `struct dirent` datastructures and returns the length of them. The prototype of the `scandir` looks as below..
+The `scandir` scans the directory and calls the `filter` and `compar` functions and returns a list of `struct dirent` datastructures and returns the length of them.
+
+The prototype of the `scandir` looks as below..
 
 ```c
 int scandir(const char *dir, struct dirent ***list,
@@ -314,7 +349,7 @@ failed to rmdir Permission denied
 root@4a032360f5c5:~/books# mkdir pool        
 root@4a032360f5c5:~/books# ./a.out pool/
 rmdir success
-root@4a032360f5c5:~/books# 
+root@4a032360f5c5:~/books#
 ```
 
 This completes the directory manipulation chapter in linux. Mostly next things in here is going to be some adventurous and interesting programs that provides the practical experience.

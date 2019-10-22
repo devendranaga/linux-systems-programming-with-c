@@ -1,4 +1,4 @@
-# loops and conditional statements
+## loops and conditional statements
 
 
 The 'C' programming language provides the conditional statements `if`, `else` and `else if` to perform various functions. For ex: run the program until this condition satisfy and exit if it does not. This would be the case for the algorithms. They always check for conditions that satisfy and execute and proceed to the next stages.
@@ -8,32 +8,37 @@ The if conditional checks for a truth statement. Any number other than 0 is true
 
 The if condition looks like the below.
 
-     if (condition) {
-        // execute staement(s)
-     }
-     
+```c
+if (condition) {
+    // execute staement(s)
+}
+```
+
 if the `condition` is evaluated to true, then the statements inside the `if` are executed. Otherwise the statements enclosed in the `if` are not going to be run.
 
 The **otherwise** part we call it the `else` conditional. The else conditional executed if the conditional in the `if` statement is not executed. Very simple.
 
 The `else` condition looks like the below.
 
-     if (condition) {
-         // execute code path 1
-     } else {
-         // execute code path 2
-     }
+```c
+if (condition) {
+    // execute code path 1
+} else {
+    // execute code path 2
+}
+```     
      
-     
- Ex:
+**Example:**
  
-      int a = -1;
+```c
+int a = -1;
       
-      if (a) {
-          printf("a value is %d\n", a);
-      } else {
-          printf("a value is zero\n");
-      }
+if (a) {
+    printf("a value is %d\n", a);
+} else {
+    printf("a value is zero\n");
+}
+```
 
 Remember that the `else` conditional always follow the `if`.
 
@@ -44,26 +49,26 @@ If there are more than one conditions to be executed based on some truth conditi
 The `else if` conditional looks like the below.
 
 ```c
-    if (condition1) {
-        // execute conde path 1
-    } else if (condition2) {
-        // execute code path 2
-    } else {
-        // execute code path 3
-    }
+if (condition1) {
+    // execute conde path 1
+} else if (condition2) {
+    // execute code path 2
+} else {
+    // execute code path 3
+}
 ```    
     
- Ex: 
+**Example:**
  
- ```c
-      int a = 2;
+```c
+int a = 2;
      
-      if (a == 1) {
-          printf("a value is %d\n", a);
-      } else if (a == 2) {
-          printf("a value is %d\n", a);
-      }
- ```
+if (a == 1) {
+    printf("a value is %d\n", a);
+} else if (a == 2) {
+    printf("a value is %d\n", a);
+}
+```
      
 An else will always be at the last of the `if` `else if` conditional.
 
@@ -81,7 +86,7 @@ if (fruit_name == FRUIT_APPLE) {
 } else if (fruit_name == FRUIT_GRAPE) {
     printf("Grape\n");
 } else {
-    printf("Noooo .. i dont have any Fruits\n");
+    printf("Noooo .. i don't have any Fruits\n");
 }
 ```
 
@@ -92,6 +97,7 @@ Sometimes, the `else if ladder` is replaced with a `switch` statement. The `swit
 For ex: the `switch` statement converted fruit example looks as below.
 
 ```c
+
 switch (fruit_name) {
 	case FRUIT_APPLE:
        printf("Apple\n");
@@ -106,10 +112,29 @@ switch (fruit_name) {
        printf("Grape\n");
    break;
    default:
-       printf("Noooo .. i dont have any Fruits\n");
+       printf("Noooo .. i don't have any Fruits\n");
 }
+
 ```
-With in the `switch` statement, a series of `case` blocks with the `default` block can be used. Consider the `case` blocks as the `if` conditionals followed by the `break` statement causing the next `case` statement NOT to execute. If there is no `break` statement, the next conditions may execute and the result will be entirely different. We will see about this in the following paragraphs. The `default` statement is like an `else` conditional. If any of the `case` statements does not satisfy the condition given in the `switch` the `default` statement gets executed.
+
+With in the `switch` statement, a series of `case` blocks with the `default` block can be used. Consider the `case` blocks as the `if` conditionals followed by the `break` statement causing the next `case` statement NOT to execute. If there is no `break` statement, the next conditions may execute and the result will be entirely different. We will see about this in the following paragraphs. The `default` statement is like an `else` conditional. If any of the `case` statements does not satisfy the condition given in the `switch`, the `default` statement gets executed.
+
+For ex: 
+
+```c
+switch (fruit_name) {
+    case FRUIT_APPLE:
+        printf("Apple\n");
+    case FRUIT_ORANGE:
+        printf("Orange"\n");
+    break;
+    default:
+        printf("No... i don't have any Fruits\n");
+}
+
+```
+
+When fruit_name is passed as FRUIT_APPLE, The above code would let the cases FRUIT_APPLE and FRUIT_ORANGE execute. This is because the `break` statement is not present after the `case` statement is complete.
 
 The conditionals statements are very important in the coding.
 
@@ -119,9 +144,11 @@ There comes a situation where you need to loop until some condition is evaluated
 
 The `while` statement loops till the condition evaluates to false. It looks like the following..
 
-    while (condition) {
-        // series of statements    
-    }
+```c
+while (condition) {
+    // series of statements    
+}
+```
 
 When the condition fails, the `while` conditional will not get executed.
 
@@ -129,12 +156,14 @@ The series of statements are evaulated again and again till the condition become
 
 For ex: let us consider a case where we print 10 number from 1.
 
-    int i = 1;
+```c
+int i = 1;
     
-    while (i <= 10) {
-         printf("number %d\n", i);
-         i ++;
-    }
+while (i <= 10) {
+    printf("number %d\n", i);
+    i ++;
+}
+```
     
 The i value before the `while` is 1 and the loop starts printing the numbers from 1 till 10 and when i becomes 11 the condition evaulates to false and the loop stops.
 
@@ -142,16 +171,20 @@ The `for` is similar but it has the following advantages.
 
 `for` statement has initializer, condition evaluation and incrementer.
 
-     for (init; cond; increment) {
-     }
+```c
+for (init; cond; increment) {
+}
+```
      
 For ex: the `while` loop is rewritten as 
 
-     int i;
+```c
+int i;
      
-     for (i = 1; i <= 10; i ++) {
-         printf("i value %d\n", i);
-     }
+for (i = 1; i <= 10; i ++) {
+    printf("i value %d\n", i);
+}
+```
      
 The initialiser sets the value of the variable to 1 and it gets executed only once. The condition then executes and if condition becomes satisfied the statements with in the for loop are executed. After the last statement is executed, the increment part of the for loop is executed and then the condition with in the for loop. The initializer will only be executed in the beginning.
 
@@ -159,13 +192,15 @@ There can be cases where one needs to run the program forever. This forever prog
 
 The infinite loops can be written as the following:
 
-     while (1) {
-        // statements;
-     }
+```c
+while (1) {
+    // statements;
+}
      
-     for (;;) {
-        // statements;
-     }
+for (;;) {
+    // statements;
+}
+```
      
 An infinite program, when ran, can be stopped via signalling it by the `ctrl + c` combination from the Keyboard. We look at the signals more in the upcoming topics.
 

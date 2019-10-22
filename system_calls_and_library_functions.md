@@ -1,13 +1,15 @@
-# System calls and library functions
+## System calls and library functions
 
 The differences are:
 
 1. System call is a function call that involves kernel to execute part of the code and return the value back to the userspace. Library function does not simply perform that operation. It simply performs a job that does not involve going into the kernel and executing on behalf of the user.
 2. Example: `system` is a system call that executes a command. The call involve, going into the kernel space, creating the process, executing etc. The `strcpy` is a function call that simply copies source string into the destination. It does not involve system call to go into kernel space and copy the string \(because that is un-needed\).
 
-When system calls fail, they also set the `errno` variables accordingly to best describe the problem and why the failure has happened.
+when a system call happens, the execution enters from usermode to kernelmode and the kernel executes the called function and returns the output back to the userspace once the execution finishes.
 
-`errno` is a global variable and to be used carefully protected with in the threads. the `errno.h` should be included to use this variable. The `asm-generic/errno.h` contains all the error numbers. \(Although one can only include the `errno.h` and not the `asm-generic/errno.h` as the later is more platform specific AFAIK\).
+When system calls fail, they also set the `errno` variables accordingly to best describe the problem and why the failure has happened. This is returned as the result of the system call operation from the kernel. The userspace then captures this value and returns the -1 on failure and non negative on success. the error result is then copied to the `errno` variable.
+
+`errno` is a global variable and to be used carefully protected with in the threads. the `errno.h` should be included to use this variable. The `asm-generic/errno.h` contains all the error numbers. \(Although one can only include the `errno.h` and not the `asm-generic/errno.h` as the later is more platform specific \).
 
 `perror` is a useful function that describes the error in the form of a string and outputs to `stderr`
 
@@ -38,18 +40,17 @@ int main(int argc, char **argv)
 }
 ```
 
-**
-Example: perror example**
+**Example: perror example**
 
 We compile it with `gcc -Wall errno_strings.c`. It will generate an `a.out` file for us.
 
 Then we run our binary with the correct option as below:
 
 ```bash
-    ./a.out errno_string.c
+./a.out errno_string.c
 
-    fopen: Success
-    opened file errno_strings.c [0xeb1018]
+fopen: Success
+opened file errno_strings.c [0xeb1018]
 ```
 
 The `perror` gives us that the file has been opened successfully. The filepointer is then printed on to the screen.
@@ -57,10 +58,10 @@ The `perror` gives us that the file has been opened successfully. The filepointe
 Then we run our binary with the incorrect option as below:
 
 ```bash
-    ./a.out errno_string.c.1
+./a.out errno_string.c.1
 
-    failed to open errno_string.c.1
-    fopen: No such file or directory
+failed to open errno_string.c.1
+fopen: No such file or directory
 ```
 
 Linux provides another API to print the error message based on the error number variable `errno`.
@@ -92,6 +93,8 @@ int main(void)
 }
 ```
 
+Below is another example of printing error number with using the `strerror`. Download [here](https://github.com/DevNaga/gists/blob/master/strerror.c)
+
 ```c
 #include <stdio.h>
 #include <errno.h>
@@ -120,11 +123,20 @@ int main(void)
 
 The `system()` system call is used to execute a shell command in a program. Such as the following code
 
-```
+```c
 system("ls");
 ```
 
 Will simply execute the `ls` command.
+
+the `system` system call prototype is as follows,
+
+
+```c
+int system(const char *command);
+
+```
+
 
 During the execution of the function, the `SIGCHLD` will be blocked and `SIGINT` and `SIGQUIT` will be ignored. We will go in detail about these signals in the later chapter **signals**.
 
@@ -134,7 +146,7 @@ However the `system` system call has some serious vulnerabilities and should not
 
 ### Exec family of calls
 
-The exec family of functions create a new process image from the given binary file or a script and replaces the contents of the original program with the contents of the given binary file or a script. These functions only return in case of a failure such as when the path to the binary \/ script file is not found.
+The exec family of functions create a new process image from the given binary file or a script and replaces the contents of the original program with the contents of the given binary file or a script. These functions only return in case of a failure such as when the path to the binary \/ script file is not found or the kernel cannot resever any more memory for the program to execute.
 
 the following are the exec functions.
 
@@ -146,6 +158,101 @@ int execv(const char *path, char *const argv[]);
 int execvp(const char *file, char *const argv[]);
 
 ```
+
+the `execl` function executes the program by its `path` and given `arg` set. The `execl` must be terminated with `NULL`.
+
+Below is an example of `execl` system call. Download [here](https://github.com/DevNaga/gists/blob/master/execl.c)
+
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <errno.h>
+
+int main(int argc, char **argv)
+{
+    int ret;
+    pid_t pid;
+
+    if (argc != 3) {
+        fprintf(stderr, "<%s> command command-opt ..\n", argv[0]);
+        return -1;
+    }
+
+    pid = fork();
+    if (pid != 0) {
+        ret = execl(argv[1], argv[1], argv[2], NULL);
+        if (ret < 0) {
+            fprintf(stderr, "failed to execl %s\n", strerror(errno));
+            return -1;
+        }
+    }
+}
+
+```
+
+compile the above program as `gcc -Wall execl.c` and run it as follows.
+
+```bash
+./a.out /bin/ls -l
+
+```
+
+the above command would produce a list of contents with in the directory that the `a.out` has run. Note the `ls` command is given its path. without giving the path, the `execl` fails. Try it like the below command,
+
+```bash
+./a.out ls -l
+
+```
+
+this means that the `execl` always require a full path of the program to execute.
+
+
+similar to the `execl` the `execlp` accepts the filename that is the program name. The path is not required as long as it stays with in the standard directory (as in `PATH` variable current executable directory).
+
+Below is an example of the `execlp`. Download [here](https://github.com/DevNaga/gists/blob/master/execlp.c)
+
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <errno.h>
+
+int main(int argc, char **argv)
+{
+    int ret;
+    pid_t pid;
+
+    if (argc != 3) {
+        fprintf(stderr, "<%s> command command-opt ..\n", argv[0]);
+        return -1;
+    }
+
+    pid = fork();
+    if (pid != 0) {
+        ret = execlp(argv[1], argv[1], argv[2], NULL);
+        if (ret < 0) {
+            fprintf(stderr, "failed to execl %s\n", strerror(errno));
+            return -1;
+        }
+    }
+}
+
+```
+
+compile the above program as `gcc -Wall execlp.c` and run it as below,
+
+
+```bash
+./a.out ls -l
+
+```
+
+it does execute the `ls -l` command and prints the contents on the screen.
+
+
 
 ### system variables
 
@@ -174,7 +281,138 @@ int main(void)
 }
 ```
 
-1. to get the number of clock ticks here is the following API: `_SC_CLK_TCK`.
+to get the system virtual memory page size the `_SC_PAGESIZE` is used. Below example shows the use of the `_SC_PAGESIZE`. Download [here](https://github.com/DevNaga/gists/blob/master/pagesize.c)
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+int main()
+{
+    printf("sysconf(pagesize) %ld\n", sysconf(_SC_PAGESIZE));
+}
+
+```
+
+to get the maximum length of arguments in bytes, passed to a program via command line, use `_SC_ARG_MAX`. Below example illustrates this. Download [here](https://github.com/DevNaga/gists/blob/master/sysconf_argmax.c)
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+int main()
+{
+    printf("sysconf(_SC_ARG_MAX) %ld\n", sysconf(_SC_ARG_MAX));
+}
+
+```
+
+The `_SC_CLK_TCK` gets the number of clockticks on the system. Defaults to 100. Below is an example, Download [here](https://github.com/DevNaga/gists/blob/master/clktick.c)
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+
+int main()
+{
+    int clock_tick;
+
+    clock_tick = sysconf(_SC_CLK_TCK);
+    printf("clock ticks %d\n", clock_tick);
+
+    return 0;
+}
+
+
+```
+
+max priority of the message queue can be obtained by using the `_SC_MQ_PRIO_MAX`. Below is an example, Download [here](https://github.com/DevNaga/gists/blob/master/mq_prio_max.c)
+
+```c
+#include <stdio.h>
+#include <limits.h>
+#include <unistd.h>
+
+int main()
+{
+    printf("mq_priority_max %ld\n", sysconf(_SC_MQ_PRIO_MAX));
+
+    return 0;
+}
+
+```
+
+Below program describe getting the `sysconf`data from all the parameters. Download [here](https://github.com/DevNaga/gists/blob/master/sysconf_params.c)
+
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+
+struct sysconf_params {
+    char *name;
+    int param;
+    int val;
+};
+
+int main()
+{
+    struct sysconf_params sysconf_args[] = {
+        {"_SC_ARG_MAX", _SC_ARG_MAX, 0},
+        {"_SC_OPEN_MAX", _SC_OPEN_MAX, 0},
+        {"_SC_STREAM_MAX", _SC_STREAM_MAX, 0},
+        {"_SC_TZNAME_MAX", _SC_TZNAME_MAX, 0},
+        {"_SC_NGROUPS_MAX", _SC_NGROUPS_MAX, 0},
+        {"_SC_JOB_CONTROL", _SC_JOB_CONTROL, 0},
+        {"_SC_SAVED_IDS", _SC_SAVED_IDS, 0},
+        {"_SC_VERSION", _SC_VERSION, 0},
+        {"_SC_CLK_TCK", _SC_CLK_TCK, 0},
+        {"_SC_CHARCLASS_NAME_MAX", _SC_CHARCLASS_NAME_MAX, 0},
+        {"_SC_REALTIME_SIGNALS", _SC_REALTIME_SIGNALS, 0},
+        {"_SC_PRIORITY_SCHEDULING", _SC_PRIORITY_SCHEDULING, 0},
+        {"_SC_TIMERS", _SC_TIMERS, 0},
+        {"_SC_ASYNCHRONOUS_IO", _SC_ASYNCHRONOUS_IO, 0},
+        {"_SC_PRIORITIZED_IO", _SC_PRIORITIZED_IO, 0},
+        {"_SC_MEMLOCK", _SC_MEMLOCK, 0},
+        {"_SC_MEMLOCK_RANGE", _SC_MEMLOCK_RANGE, 0},
+        {"_SC_SEMAPHORES", _SC_SEMAPHORES, 0},
+        {"_SC_MQ_OPEN_MAX", _SC_MQ_OPEN_MAX, 0},
+        {"_SC_MQ_PRIO_MAX", _SC_MQ_PRIO_MAX, 0},
+        {"_SC_SEM_NSEMS_MAX", _SC_SEM_NSEMS_MAX, 0},
+        {"_SC_SEM_VALUE_MAX", _SC_SEM_VALUE_MAX, 0},
+        {"_SC_TIMER_MAX", _SC_TIMER_MAX, 0},
+        {"_SC_LOGIN_NAME_MAX", _SC_LOGIN_NAME_MAX, 0},
+        {"_SC_THREAD_STACK_MIN", _SC_THREAD_STACK_MIN, 0},
+        {"_SC_THREAD_THREADS_MAX", _SC_THREAD_THREADS_MAX, 0},
+        {"_SC_LINE_MAX", _SC_LINE_MAX, 0},
+        {"_SC_PAGESIZE", _SC_PAGESIZE, 0},
+    };
+    int i;
+
+    for (i = 0; i < sizeof(sysconf_args) / sizeof(sysconf_args[0]); i ++) {
+        sysconf_args[i].val = sysconf(sysconf_args[i].param);
+    }
+
+    for (i = 0; i < sizeof(sysconf_args) / sizeof(sysconf_args[0]); i ++) {
+        printf("sysconf(%s) \t : %d\n", sysconf_args[i].name, sysconf_args[i].val);
+    }
+
+}
+
+```
+
+to summarise, the following `sysconf` varialble exists:
+
+|variable type | meaning |
+|--------------|---------|
+| `_SC_OPEN_MAX` | max open file descriptors |
+| `_SC_PAGESIZE` | default virtual memory page size |
+| `SC_ARG_MAX` | maximum length of command line args in bytes |
+| `_SC_CLK_TCK` | get the number of clock ticks |
+
+#### resource limits
 
 There are two other APIs to get or set the resource limits on the process.
 

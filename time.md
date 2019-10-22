@@ -1,4 +1,4 @@
-# time
+## time
 
 Linux reads time from the RTC hardware clock if its available. The clock runs indefinitely as long as the battery is giving the power \(even though the system is powered down\). Otherwise it starts the system from JAN 1 2000 00:00 hrs. \(As i saw it from the 2.6.23 kernel\) \(Needs updating\)
 
@@ -23,37 +23,46 @@ now = time(0);
 the `now` variable holds the current time in seconds. The `time_t` is typecasted from `long` type. Thus it is printable as the long type.
 
 ```c
-printf("the current
-system time in sec %ld\n", now);
+printf("the current system time in sec %ld\n", now);
 ```
 
 The header file to include when using the `time` system call is `time.h`.
 
 The system call to get the current date and time in human readable format is the `gmtime` and friends \(`asctime` and `localtime`\)
 
-The `gmtime` takes a variable of type `time_t` as an address and returns a data structure of type `struct tm`.
+The `gmtime` takes a variable of type `time_t` as an address and returns a data structure of type `struct tm`. The time value returned in the form of UTC from 1970 Jan 1.
 
 The `struct tm` contains the below fields
 
-```
-    struct tm {
-        int tm_sec;
-        int tm_min;
-        int tm_hour;
-        int tm_mday;
-        int tm_mon;
-        int tm_year;
-        int tm_wday;
-        int tm_yday;
-        int tm_isdst;
-    };
+```c
+struct tm {
+    int tm_sec;
+    int tm_min;
+    int tm_hour;
+    int tm_mday;
+    int tm_mon;
+    int tm_year;
+    int tm_wday;
+    int tm_yday;
+    int tm_isdst;
+};
 ```
 
 A call to the gmtime involve getting the time from the `time` API.
 
+the field `tm_sec` will have a range of 0 to 59.
+the field `tm_min` will have a range of 0 to 59.
+the field `tm_hour` will have a range of 0 to 23.
+the field `tm_mday` is day of the month will have a range of 0 to 31. and depending on the month (for Feb or for leap year).
+the field `tm_mon` will have a range of 0 to 11. 0 being january and 11 being december.
+the field `tm_year` will be subtracted by 1900. usually if its 2018, it will be shown as 118.
+the field `tm_wday` is day of the week.
+
+the field `tm_isdst` represents if the current time has a DST (Day light savings) in use.
+
 the below example gives an idea on how to use the gmtime function in a more basic way.
 
-```
+```c
 struct tm *t;
 time_t cur;
 
@@ -80,11 +89,110 @@ printf("t->year %d\n"
        t->tm_sec);
 ```
 
+Below example provide the `gmtime` API usage. Download [here](https://github.com/DevNaga/gists/blob/master/gmtime.c)
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <time.h>
+#include <sys/time.h>
+
+int main()
+{
+    time_t now;
+    struct tm *t;
+
+    now = time(0);
+
+    t = gmtime(&now);
+    if (!t) {
+        printf("failure to gmtime %s\n", strerror(errno));
+        return -1;
+    }
+
+    printf("%04d:%02d:%02d-%02d:%02d:%02d\n",
+                    t->tm_year + 1900,
+                    t->tm_mon + 1,
+                    t->tm_mday,
+                    t->tm_hour,
+                    t->tm_min,
+                    t->tm_sec);
+
+    return 0;
+}
+
+```
+
+`gmtime` has the structure `struct tm` as static in its code. It is usually not safe to call `gmtime` with threads. A more safer approach is to call the reentrant version of `gmtime`, i.e. `gmtime_r`.
+
+Below example provide the `gmtime_r` API. Download [here](https://github.com/DevNaga/gists/blob/master/gmtime1.c)
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <time.h>
+#include <sys/time.h>
+
+int main()
+{
+    time_t now;
+    struct tm t1;
+    struct tm *t;
+
+    now = time(0);
+
+    t = gmtime_r(&now, &t1);
+    if (!t) {
+        printf("failure to gmtime %s\n", strerror(errno));
+        return -1;
+    }
+
+    printf("%04d:%02d:%02d-%02d:%02d:%02d\n",
+                    t->tm_year + 1900,
+                    t->tm_mon + 1,
+                    t->tm_mday,
+                    t->tm_hour,
+                    t->tm_min,
+                    t->tm_sec);
+
+    return 0;
+}
+
+```
+
+`ctime`  is another API that can return time in calendar time printable format (string) according to the time size.
+
+`ctime` prototype is as follows.
+
+```c
+char *ctime(const time_t *t);
+```
+
+Below is an example of `ctime` API. Download [here](https://github.com/DevNaga/gists/blob/master/ctime.c)
+
+```c
+#include <stdio.h>
+#include <time.h>
+
+int main()
+{
+    time_t now = time(NULL);
+
+    printf("current cal time %s\n", ctime(&now));
+    return 0;
+}
+
+```
+
+
 `mktime` is an API that converts the time in `struct tm` format into `time_t`. The prototype is as follows.
 
 ```c
 time_t mktime(struct tm *t);
 ```
+
 
 ```c
 #include <stdio.h>
@@ -159,7 +267,7 @@ The `t.tm_isdst` is set to -1 as we do not know the timezone.
 
 A more resolution timeout can be obtained from the `gettimeofday` API. The API looks like below:
 
-```
+```c
 int gettimeofday(struct timeval *tv, struct timezone *tz);
 ```
 
@@ -175,6 +283,8 @@ struct timeval {
     suseconds_t tv_usec;
 };
 ```
+
+where the `tv_sec` represents the seconds part of the time and `tv_usec` represents the microseconds part of the time.
 
 We simply use the below code to get the current time in seconds and micro seconds resolution.
 
@@ -219,11 +329,44 @@ void analysis()
 
 ```
 
+
+The above calls would get the current 'wallclock' time. Meaning they are affected by the changes in the time due to clock drift and adjustments. The most important factors include the GPS setting the time into the system, NTP changing the system time syncing with the NTP servers. This would affect programs depending on these API. For example: the timers using the above API would either expire quickly \(due to time moving forward\) or wait forever \(due to time moving backwards to a larger value\).
+
+The header file `sys/time.h` also provides a macro called `timersub`. The `timersub` accepts two `timeval` structures and produces the delta in the third varible that is also of type `timeval`.
+
+Below is the `timersub` prototype looks like,
+
+```c
+timersub(struct timeval *stop, struct timeval *start, struct timeval *delta);
+
+```
+
+with the `timersub` the above diff calculation can be done simply as below, (diff can be replaced with `timersub`)
+
+
+```c
+
+struct timeval before, after;
+struct timeval delta;
+
+...
+
+timersub(&after, &before, &delta);
+
+printf("latency %ld sec %ld usec\n", delta.tv_sec, delta.tv_usec);
+
+```
+
+
+
+
 The `settimeofday` API is used to set the system time. The prototype is as follows..
 
 ```c
 int settimeofday(const struct timeval *tv, const struct timezone *tz);
 ```
+
+just like `gettimeofday`, the `settimeofday` `tz` argument can be set to `NULL` by default.
 
 The settimeofday API can fail in the following cases:
 
@@ -234,9 +377,6 @@ if the user is not privileged user and tries to call this API.
 `ENOSYS`:
 
 If the tz pointer in the call is not null and the os does not supports it.
-
-The above calls would get the current 'wallclock' time. Meaning they are affected by the changes in the time due to clock drift and adjustments. The most important factors include the GPS setting the time into the system, NTP changing the system time syncing with the NTP servers. This would affect programs depending on these API. For example: the timers using the above API would either expire quickly \(due to time moving forward\) or wait forever \(due to time moving backwards to a larger value\).
-
 
 The following code snippet describes the usage of the `settimeofday` system call.
 
@@ -250,12 +390,14 @@ if (ret < 0) {
     return -1;
 }
 
+// set one sec in future
 tv.tv_sec += 1;
 ret = settimeofday(&tv, 0);
 if (ret < 0) {
     perror("failed to settimeofday");
     return -1;
 }
+
 ```
 
 The problem with the `settimeofday` is that the time can go abruptly forward or abruptly backwards. This might affect some programs as we have discussed above that programs using wallclock time might misbehave with the abrupt change of time. To avoid this process we need to use the `adjtime` API which is described as follows.
@@ -282,6 +424,7 @@ if (ret < 0) {
     perror("failed to adjtime");
     return -1;
 }
+
 ```
 
 When we are programming timers, we should avoid any calls to the above API as they are not monotonic or steadily moving forward in the future.
@@ -315,6 +458,7 @@ func_call();
 end = clock();
 
 printf("ticks %d\n", end - start);
+
 ```
 
 There is another API that is used to get the CPU times, called `times`.
@@ -354,7 +498,7 @@ Linux supports the following timer API.
 3. timerfd_create
 ```
 
-The command `hwclock` is very useful to get or set time to the system.
+The command `hwclock` is very useful to get or set time to the system RTC hardware clock.
 
 `hwclock` is also used to correct time drifts with the UTC. A periodic \(deterministic timeout\) set would allow the system to be in sync with the UTC time.
 

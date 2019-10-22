@@ -1,10 +1,10 @@
-# timers
+## timers
 
 A timer counts down to 0 from a specific value. In operating systems, the timer upon expiry, allows a program to perform specific actions. There are two timers, specifically one shot and periodic.
 
 A one shot timer runs only once. A periodic timer repeats itself upon every expiration. Some programs need the timer to be tick at smaller intervals and with lesser resolutions. the `time_t` variable can be used for this purpose. The `time_t` is of resolution in seconds.
 
-## alarm
+### alarm
 
 `alarm()` arranges for a `SIGALRM` signal to be delivered to the calling process. The `alarm` can be thought of as one shot timer.
 
@@ -42,7 +42,7 @@ Removing the `while (1);` would make the program stop instead of waiting in the 
 
 The waiting is done in the `while` statement so as to allow the kernel to trigger the timer for this running process.
 
-## setitimer
+### setitimer
 
 The `setitimer` API provides either a one shot or an interval timer. When the timer fires, the OS activates the SIGALRM signal for each expiry. Before the `setitimer` we register a signal handler for the SIGALRM. The `setitimer` thus invokes the signal handler indirectly upon each expiry.
 
@@ -161,9 +161,9 @@ int main(int argc, char **argv)
 
 The program first registers the SIGALRM signal via `sigaction` and registers the `setitimer` with the given input values. The periodicity of the timeout is controlled via the repeat argument.
 
-## timer\_create
+### timer\_create
 
-## timerfd
+### timerfd
 
 **1. timerfd_create**
 

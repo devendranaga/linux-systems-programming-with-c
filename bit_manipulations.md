@@ -1,14 +1,14 @@
-# bit manipulations
+## bit manipulations
 
 The AND \(&\), OR \(\|\), XOR \(^\), Negate \(~\), Not \(!\) and bit shifts \(&lt;&lt; and &gt;&gt;\) operations are possible in C.
+
+The most common uses of the bit manipulation operations are in the device driver programs where the hardware operations are dependent on the bit values in the shift registers etc.
 
 ### AND operation
 
 The AND operation is used to test if the bit is set or unset. A set is called a 1 and unset or clear is called a 0.
 
 For example consider the following number 128 \(in hex 0x80\).
-
-lets,
 
 ```c
 a = 0x80
@@ -84,15 +84,65 @@ printf("value %d\n", a ^ b);
 
 ### Left shift operation
 
-The left shift operation uses `<<`. 
+The left shift operation uses `<<`. The operation shifts the bits towards left by the given number of positions. The left shift operation is also a pow(2, x) where x is the left shift number. The resulting number is a multiplication of the original number that is being shifted.
+
+For example:
+
+```c
+val = 2 << 2;
+printf("value %d\n", val);
+```
+
+The above example results in the output of **8**.
+
+The original value 2 can be written in binary as
+
+00000010
+
+Shifting by 2 bits left will result in the following.
+
+00001000
+
+
+The above statement is similar to
+
+```c
+val = 2 * pow(2,2);
+printf("value %d\n", val);
+```
 
 ### Right shift operation
 
-The right shift operation uses '>>'.
+The right shift operation uses '>>'. The operations shifts the bits towards right by the given number of positions. The right shift operation is also a pow(2, x) where x is the right shift number. The resulting number is a division of the original number that is being shifted.
+
+For example:
+
+```c
+val = 8 >> 2;
+printf("value %d\n", val);
+```
+
+The above example results in the output of **2**.
+
+The original value 8 can be written in binary as
+
+00001000
+
+Shifting by 2 bits right will result in the following.
+
+00000010
+
+
+The above statement is similar to
+
+```c
+val = 8 / pow(2,2);
+printf("value %d\n", val);
+```
+
 
 ### Negate opertaion
 
 The computer stores the digits in binary form unlike we use them either in decimal or hexadecimal.
 
 This is called the base of a number. The binary number is in base 2, decimal is base 10 and hexadecimal is base 16.
-

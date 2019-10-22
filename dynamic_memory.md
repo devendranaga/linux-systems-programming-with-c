@@ -1,6 +1,11 @@
 # Dynamic memory allocation
 
-Dynamic memory is used at places where the need of memory is scarce, and places where the size of the memory is not known at compile time.
+Dynamic memory is used at places where the need of memory is scarce, and places where the size of the memory is not known at compile time. The advantage is that the run time behavior of the program may change based on its input from various unknown / known sources, and thus the memory allocation. The disadvantage is that the memory allocations often results in a leak when not freed properly. 
+
+In my area of work, (i.e automotive), the usage of dynamic memory allocation at run time is usually prohibited. The cause being that the API are not safe and may prone to errors. Thus, usually, it is recommended to initialise and pre-determine the memory required for the program in the beginning of the program and then use an allocator (malloc, calloc that are described in below..) to allocate once and keep re-using them.
+
+Also, if the memory portion is too large to allocate, (Crossing over 10 MB) it is generally preferred to use mmap than malloc / calloc API.
+
 
 The C library implements some of the dynamic memory allocation functions. Some of the most used functions are as follows.
 
@@ -8,11 +13,11 @@ Include `<stdlib.h>` for the dynamic memory allocation functions.
 
 ## malloc
 
-prototype:
+**prototype**:
 `void *malloc(size_t size);`
 
 
-The `malloc` function allocates size bytes and returns a pointer to the allocated memory. The memory is not initialized.
+The `malloc` function allocates size bytes and returns a pointer (pointing to the byte0) to the allocated memory. The memory is not initialized.
 
 an example of the usage is as follows...
 
@@ -26,6 +31,7 @@ if (!data) {
 }
 
 printf("data pointer %p\n", data);
+free(data);
 ```
 
 The `malloc` API might fail and the memory pointed to may be `NULL` thus it is always recommended to check for the `NULL` before using the memory.
@@ -39,11 +45,11 @@ When allocating space for a string, the argument of `malloc` must be one plus th
 
  # calloc
 
-prototype:
+**prototype**:
 `void *calloc(int n_memb, size_t size);`
 
-The `calloc` function allocates size bytes * n_memb. The allocated memory is set to zero
- and returned. The `calloc` is same as `malloc` + `memset`.
+The `calloc` function allocates size bytes * n_memb. The allocated memory is cleaned
+ and returned. The `calloc` is same as `malloc` + `memset`. The `calloc` is recommented over the `malloc`. The reason being that the value stored at the memory is always zero and thus can be predictive than the garbage values that come after the `malloc` call.
 
 Here is the following example of the `calloc` function usage.
 
@@ -62,13 +68,15 @@ int main()
     }
 
     printf("memory %p\n", array);
+
+    free(array);
     return 0;
 }
 ```
 
 ## realloc
 
-prototype:
+**prototype**:
 `void *realloc(void *ptr, size_t size);`
 
 The `realloc` API changes the size of the `ptr` variable to `size` bytes. The sample
@@ -88,6 +96,7 @@ int main(void)
         return -1;
     }
 
+    free(memory);
     return 0;
 }
 ```
@@ -96,15 +105,47 @@ The `realloc` API when passed `NULL` behaves same as `malloc(size)`. At each cal
 `realloc` API, the size needs to be the older size plus the new size that is to be
 allocated.
 
+The realloc real uses are where the number of elements that needs to be allocated are not known and are dynamic. The following program depicts that scenario.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void)
+{
+    int i;
+    int *var;
+
+    for (i = 0; i < 10; i ++) {
+        if (i == 0)
+            var = realloc(NULL, sizeof(int));
+        else
+            var = realloc(var, sizeof(int) * (i + 1));
+    }
+
+    for (i = 0; i < 10; i ++)
+        var[i] = i;
+
+    for (i = 0; i < 10; i ++)
+        printf("%d\n", var[i]);
+
+    return 0;
+}
+```
+
+The `realloc` with the first argument being **NULL** is nothing but calling `malloc`. Thus in the above program, we try to allocate the memory when the index is 0 and we use `realloc` to expand it.
+
 ## free
 
-prototype:
+**prototype**:
 `void free(void *ptr);`
 
 The `free` API frees up the memory allocated by the memory allocation API.
-If, after the allocation, when `free` is not called, then the program said to be leaking.
+If, after the allocation, when `free` is not called, then the program said to be leaking the memory.
 
 Please be sure to pass a valid pointer to the `free` call.
+
+The `valgrind` is one of the famous tools under linux that detects the memory leaks, memory invalid accesses etc. Please read through the `valgrind` section in this book to understand and use it.
 
 # Advanced memory operations
 
@@ -184,7 +225,7 @@ topmost releasable blocks              135136
 
 ## debugging malloc
 
-malloc_opt and friends ..
+`malloc_opt` and friends ..
 
 ## mtrace
 

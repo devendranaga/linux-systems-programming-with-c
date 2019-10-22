@@ -1,4 +1,4 @@
-# chroot
+## chroot
 
 
 The chroot operation on a system changes the current root directory of the process. It effectively hides the root directory to the process.

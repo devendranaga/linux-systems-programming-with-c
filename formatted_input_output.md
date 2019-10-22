@@ -1,4 +1,9 @@
-# Formatted input and output
+## Formatted input and output
+
+In the previous chapters we have seen a lot of times that `printf` being used in many programs. The `printf` is an API that logs or prints the input on to
+the console. The console in our case is the terminal screen.
+
+`printf` does this in an even nicer way by using format specifiers. They allow the calling program to print the different sets of data types.
 
 The formatted input and output is used to take input and output in a specific format. The header file used for this one is `stdio.h`.
 
@@ -23,7 +28,18 @@ The print format of the data types is as follows. The same can be used for `scan
 | %f | float |
 | %lf | double |
 
-`fprintf` is another API that prints on to the console but to the `stderr`. The difference between the `stdout` and `stderr` is that the later is not buffered and directly the messages will be dumped on to the console. The `stdout` instead buffers the input and dumps it later. This can easily be viewed when debugging a big loop.
+`fprintf` is another API that prints on to a file pointer. In most of the cases, this file pointer is sometimes the console (`stdout`) or the `stderr`.
+
+The `fprintf` usage is same as the `printf` but the first aguement to it is a file.
+
+```c
+FILE *fp = stderr;
+
+fprintf(fp, "value is %d\n", value);
+```
+
+The difference between the `stdout` and `stderr` is that the later is not buffered and directly the messages will be dumped on to the console.
+The `stdout` instead buffers the input and dumps it later. The difference can easily be viewed when debugging a big loop.
 
 There is another API that prints to a buffer in the formatted way just as `printf`. This API we call it `sprintf`. The `sprintf` usage is very simple as below.
 

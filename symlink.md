@@ -1,4 +1,4 @@
-# symlink
+## symlink
 
 symlink is another system call used to create symlinks of a real file. symlinks are many ways useful to shorthand represent a long path, to represent a generic name for paths with random names etc...
 

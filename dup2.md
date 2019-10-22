@@ -1,10 +1,29 @@
-# dup and dup2
+## dup and dup2
 
-The `dup` and `dup2` system calls duplicates the file descriptors. Think of them similar to the pointers in C.
+The `dup` and `dup2` system calls duplicates the file descriptors.
 
 The `dup` system call creates a copy of the file descriptor.
 
+the `dup` system call prototype is as follows:
+
+```c
+int dup(int oldfd);
+```
+
+
 The `dup2` system call on the other hand makes a new copy of the old file descriptor. If the new file descriptor is open it closes and performs a `dup` system call.
+
+The `dup2` system call prototype is as follows:
+
+```c
+int dup2(int olfd, int newfd);
+```
+
+`dup2` closes the file descriptor `newfd` and dups the `oldfd` into `newfd`. The `newfd` is then returned. 
+
+If the `oldfd` and `newfd` are same, then nothing is closed and the `newfd` is returned.
+
+
 
 The following example gives a brief description of the `dup` system call.
 
