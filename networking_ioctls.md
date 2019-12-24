@@ -97,6 +97,10 @@ int main(int argc, char **argv)
     if (ifr.ifr_flags & IFF_MULTICAST) {
         fprintf(stderr, "\t Multicast\n");
     }
+    
+    if (ifr.ifr_flags & IFF_PROMISC) {
+        fprintf(stderr, "\t Promiscuous\n");
+    }
 
     close(sock);
 
