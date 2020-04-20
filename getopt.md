@@ -4,6 +4,15 @@
 
 The `<getopt.h>` header file needs to be included in order to use this API.
 
+The prototype of `getopt` looks as follows.
+
+```c
+
+int getopt(int argc, char *const argv[],
+      const char *optstring);
+
+```
+
 **Example:**
 
 ```c
@@ -39,7 +48,7 @@ int main(int argc, char **argv)
 * We compile and generate the binary as the following:
 
 ```shell
-gcc -Wall getopt\_example.c -o getopt\_example
+gcc -Wall getopt_example.c -o getopt_example
 ```
 
 ```bash
@@ -183,7 +192,17 @@ Such options are parsed using the `getopt_long` API provided by the **libc**.
 
 The option data structure looks as below that is passed as argument to `getopt_long`.
 
-The data structure is as follows...
+The `getopt_long` prototype is as fllows.
+
+```c
+
+int getopt_long(int argc, char *const argv[],
+      const char *optstring,
+      const struct option *longopts, int *longindex);
+
+```
+
+The `option` data structure is as follows...
 
 ```c
 struct option {

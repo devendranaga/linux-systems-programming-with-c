@@ -48,6 +48,17 @@ struct ifreq {
 
 ```
 
+There is a way to create a dummy interface. Here's one way
+
+```bash
+
+sudo modprobe dummy
+sudo ip link add eth10 type dummy
+
+```
+
+This enables an interface `eth10`, by default interface is not up.
+
 below is the example to get the interface flags.
 
 ```c
@@ -96,10 +107,6 @@ int main(int argc, char **argv)
 
     if (ifr.ifr_flags & IFF_MULTICAST) {
         fprintf(stderr, "\t Multicast\n");
-    }
-    
-    if (ifr.ifr_flags & IFF_PROMISC) {
-        fprintf(stderr, "\t Promiscuous\n");
     }
 
     close(sock);
@@ -483,6 +490,52 @@ int main(int argc, char **argv)
 
 ```
 
+The ioctl flag `SIOCGIFADDR` is used to get interface ipv4 address. Below is the example program.
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+
+int main(int argc, char **argv)
+{
+    int fd;
+
+    if (argc != 2) {
+        printf("<%s> <ifname>\n", argv[0]);
+        return -1;
+    }
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) {
+        return -1;
+    }
+
+    struct ifreq ifr;
+    memset(&ifr, 0, sizeof(ifr));
+    ifr.ifr_addr.sa_family = AF_INET;
+    strcpy(ifr.ifr_name, argv[1]);
+
+    int ret;
+
+    ret = ioctl(fd, SIOCGIFADDR, &ifr);
+    if (ret < 0) {
+        printf("failed to ioctl\n");
+        return -1;
+    }
+
+    char *ip_addr = inet_ntoa(((struct sockaddr_in *)(&ifr.ifr_addr))->sin_addr);
+    if (ip_addr)
+        printf("ipaddr %s\n", ip_addr);
+
+    return 0;
+}
+
+```
+
 The function `if_nametoindex` is declared in `net/if.h`.
 
 The ioctl `SIOCGIFBRDADDR` allows to get the broadcast address of network interface.
@@ -685,6 +738,181 @@ The interface is made down using the `SIOCSIFFLAGS` ioctl and sets up the interf
 makes the interface up again using the `SIOCSIFFLAGS`.
 
 ## wireless ioctls
+
+The header file `linux/wireless.h` has the legacy ioctl calls that are used to communicate with the wireless device.
+
+Below are some of the ioctls listed by the header `linux/wireless.h`
+
+
+| S.No | wireless ioctl name | wireless ioctl description |
+|------|---------------------|----------------------------|
+| 1 | `SIOCGIWNAME` | get wireless AP mode (ieee 802.11abg) |
+| 2 | `SIOCGIWESSID` | get AP name |
+| 3 | `SIOCGIWFREQ` | get wireless frequency |
+| 4 | `SIOCGIWRATE` | get AP rate |
+| 5 | `SIOCGIWAP` | get AP mac |
+| 6 | `SIOCGIWNICK` | get nickname |
+
+The header file exposes the below data structure,
+
+```c
+struct iwreq {
+    union {
+        char ifrn_name[IFNAMSIZ];
+    } ifr_ifrn;
+    union iwreq_data u;
+};
+
+```
+
+**1. SIOCGIWNAME**:
+
+`SIOCGIWNAME` gets the wireless AP name, in general IEEE 802.11 a/b/g/n. An example of how its used is described below. Download [here](https://github.com/DevNaga/gists/blob/master/iwname.c)
+
+
+```c
+
+/**
+ * @Author: Devendra NAga (devendra.aaru@gmail.com)
+ * 
+ * Copyright 2014-present All rights reserved
+ * 
+ */
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <linux/wireless.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+
+int main()
+{
+    int sock;
+    int ret;
+
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0) {
+        return -1;
+    }
+
+    struct iwreq req;
+
+    memset(&req, 0, sizeof(req));
+    strcpy(req.ifr_name, "wlxd0374533247a");
+    ret = ioctl(sock, SIOCGIWNAME, &req);
+    if (ret < 0) {
+        return -1;
+    }
+
+    printf("name: %s\n", req.u.name);
+
+    close(sock);
+}
+
+```
+
+
+output is shown below:
+
+```shell
+
+name: IEEE 802.11bgn
+
+```
+
+**2: SIOCGIWESSID**:
+
+`SIOCGIWESSID` gets the network ESSID. Below is an example of getting the ESSID. Download [here](https://github.com/DevNaga/gists/blob/master/iwfreq.c)
+
+```c
+
+/**
+ * @Copyright Devendra Naga (devendra.aaru@gmail.com)
+ * 
+ * 2014-present All rights reserved
+ * 
+ */
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <linux/wireless.h>
+
+int main()
+{
+    int sock;
+    int ret;
+
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0) {
+        return -1;
+    }
+
+    struct iwreq req;
+    char essid[65];
+
+    memset(&req, 0, sizeof(req));
+    strcpy(req.ifr_name, "wlxd0374533247a");
+    req.u.essid.pointer = essid;
+    req.u.essid.length = sizeof(essid);
+    ret = ioctl(sock, SIOCGIWESSID, &req);
+    if (ret < 0) {
+        return -1;
+    }
+
+    printf("Essid: %s\n", essid);
+}
+
+```
+
+**3. SIOCGIWFREQ**:
+
+
+`SIOCGIWFREQ` getes the network frequency. Below is an example of getting the frequency. Download [here](https://github.com/DevNaga/gists/blob/master/iwessid.c)
+
+```c
+
+/**
+ * @Author Devendra Naga (devendra.aaru@gmail.com)
+ * 
+ * @Copyright 2014-present All rights reserved
+ * 
+ */
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <linux/wireless.h>
+
+int main()
+{
+    int sock;
+    int ret;
+
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0) {
+        return -1;
+    }
+
+    struct iwreq req;
+
+    memset(&req, 0, sizeof(req));
+    strcpy(req.ifr_name, "wlxd0374533247a");
+    ret = ioctl(sock, SIOCGIWFREQ, &req);
+    if (ret < 0) {
+        return -1;
+    }
+
+    printf("freq: %f\n", (double)req.u.freq.m/100000000);
+}
+
+```
+
 
 The package [wireless-tools](http://www.labs.hpe.com/personal/Jean_Tourrilhes/Linux/Tools.html#latest) provides the needed API to perform many wireless functions.
 

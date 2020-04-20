@@ -424,6 +424,11 @@ int main(int argc, char **argv)
     int ret;
     char buf[LINE_LEN];
 
+    if (argc != 2) {
+        fprintf(stderr, "<%s> <filename>\n", argv[0]);
+        return -1;
+    }
+        
     fd = open(argv[1], O_CREAT | O_RDWR);
     if (fd < 0) {
         fprintf(stderr, "failed to open %s for writing\n",

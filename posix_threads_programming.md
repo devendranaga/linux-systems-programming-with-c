@@ -98,7 +98,7 @@ Threads are created by default in attached mode, meaning they are joinable and m
 int pthread_join(pthread_t tid, void **retval)
 ```
 
-the `pthread_join` accepts the thread id and then the `retval` is the value output when the thread returns and stops execution. This is catched in the `retval` argument of the `pthread_join` call.
+the `pthread_join` accepts the thread id and then the `retval` is the value output when the thread returns and stops execution. This is caught in the `retval` argument of the `pthread_join` call.
 
 Threads must be joined when they are not created in detach state. The main thread has to wait for the threads to complete their execution. The default thread created is joinable. This can be found via the `pthread_attr_getdetachstate` API.
 
@@ -300,10 +300,44 @@ int main()
         sleep(1);
     }
 
+    pthread_mutex_destroy(&lock);
+
     return 0;
 };
 
 ```
+
+The above example demonstrates the variable `t` that is shared between the main program and the thread. The main program increments the variable and the thread does increment it. Due to this, the varible must be protected from the concurrent access. This is where the mutex is used to protect the access to the variable.
+
+The thread increments the variable `t` and the main thread reads the variable `t`. So while incrementing it, it must be protected.
+
+```c
+pthread_mutex_lock(&lock);
+(*ptr) ++;
+pthread_mutex_unlock(&lock);
+```
+
+while accessing it, the below code adds the lock and unlock while being accessed.
+
+```c
+pthread_mutex_lock(&lock);
+printf("t value %d\n", t);
+pthread_mutex_unlock(&lock);
+```
+
+Below is the prototype of `pthread_mutex_timedlock`.
+
+```c
+int pthread_mutex_timedlock(pthread_mutex_t *mutex, const struct timespec *abstime);
+```
+
+Below is the prototype of `pthread_mutex_destroy`.
+
+```c
+int pthread_mutex_destroy(pthread_mutex_t *mutex);
+```
+
+Every created mutex shall be destroyed with `pthread_mutex_destroy`. The mutex after calling `pthread_mutex_destroy` will be uninitialized.
 
 **condition variables**
 
@@ -323,6 +357,27 @@ pthread_cond_t cond;
 ```
 
 the `pthread_cond_init` initialises the condition variable.
+
+
+the `pthread_cond_signal` prototype is as follows,
+
+```c
+int pthread_cond_signal(pthread_cond_t *cond);
+```
+
+the `pthread_cond_wait` prototype is as follows,
+
+```c
+
+int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex);
+
+```
+
+The `pthread_cond_signal` is used to signal other thread about the availability. It is used in conjunction with the `pthread_cond_wait`.
+
+
+An example of it is the main thread signals the worker threads about the work available. The main thread sets the work object or queues it. It then signals the other worker threads about the work availability. Each thread waiting on the condition, wakes up and executes the work assigned to it.
+
 
 ### thread pools
 
@@ -630,7 +685,7 @@ int main(int argc, char **argv)
 
         ret = pthread_create(&tid, NULL, thread_handle, thr);
         if (ret < 0) {
-            fprintf(stderr, "failed to pthrad_create %s\n", strerror(errno));
+            fprintf(stderr, "failed to pthread_create %s\n", strerror(errno));
             return -1;
         }
     }

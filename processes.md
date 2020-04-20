@@ -104,6 +104,11 @@ When a process is created, the kernel allocates enough resources and stores the 
 
 ## scheduling system calls
 
+Linux defines the following Scheduling system calls.
+
+| Scheduling system call | description |
+|------------------------|-------------|
+
 ## enviornmental variables
 
 The environmental variables allow the system to get some of the items for use in the program.
@@ -139,11 +144,12 @@ something like the below,
 export TEST_C_ENV="hello"
 ```
 
-and doing `env | grep TEST_C_ENV gives,
+and doing `env | grep TEST_C_ENV` gives,
 
 ```shell
 env | grep TEST
 TEST_C_ENV=hello
+
 ```
 
 with the above program having `PATH` replaced with `TEST_C_ENV`, it looks below..

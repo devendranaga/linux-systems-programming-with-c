@@ -10,13 +10,13 @@ The manual page of `mq_overview` defines a set of API.
 
 | API Name | description |
 | -- | -- |
-| mq_open | create / open a message queue |
-| mq_send | write a message to a queue |
-| mq_receive | read a message from a queue |
-| mq_close | close a message queue |
-| mq_unlink | removes a message queue name and marks it for deletion|
-| mq_getattr | get attributes of message queue |
-| mq_setattr | set attributes of message queue |
+| `mq_open` | create / open a message queue |
+| `mq_send` | write a message to a queue |
+| `mq_receive` | read a message from a queue |
+| `mq_close` | close a message queue |
+| `mq_unlink` | removes a message queue name and marks it for deletion|
+| `mq_getattr` | get attributes of message queue |
+| `mq_setattr` | set attributes of message queue |
 
 
 To use the message queues, link with `-lrt`.
@@ -29,9 +29,12 @@ Each message queue is identified by a name of the form /name. The maximum length
 
 The prototype of the `mq_open` is as follows:
 
-    mqd_t mq_open(const char *name, int oflag);
-    mqd_t mq_open(const char *name, int oflag, mode_t mode, struct mq_attr *attr);
-    
+
+```c
+mqd_t mq_open(const char *name, int oflag);
+mqd_t mq_open(const char *name, int oflag, mode_t mode, struct mq_attr *attr);
+```
+
 As we can see that the above are two different API declarations. This means that the `mq_open` must be a variable argument function and the prototypes are given to simply the usage.
 
 Here is the example program that uses the `mq_open` API.

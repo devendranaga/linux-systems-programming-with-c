@@ -161,9 +161,164 @@ int main(int argc, char **argv)
 
 The program first registers the SIGALRM signal via `sigaction` and registers the `setitimer` with the given input values. The periodicity of the timeout is controlled via the repeat argument.
 
-### timer\_create
+### POSIX.1 timer functions (timer\_create, timer\_settime)
+
+POSIX.1 provides the following system calls for timers.
+
+
+1. timer\_create
+2. timer\_delete
+3. timer\_settime
+4. timer\_gettime
+
+The `timer_create` creates a timer and sets the timerid.
+
+The `timer_create` prototype is as follows.
+
+```c
+
+int timer_create(clockid_t clockid, struct sigevent *sevp, timer_t *timerid);
+
+```
+
+The `clockid_t` must be one of the following.
+
+1. CLOCK\_REALTIME
+2. CLOCK\_MONOTONIC
+3. CLOCK\_PROCESS\_CPUTIME\_ID
+4. CLOCK\_THREAD\_CPUTIME\_ID
+5. CLOCK\_BOOTTIME
+6. CLOCK\_REALTIME\_ALARM
+7. CLOCK\_BOOTTIME\_ALARM
+
+The `timer_delete` deletes the timer created by `timer_create`. Its prototype is as follow.
+
+```c
+
+int timer_delete(timer_t timerid);
+
+```
+A timer can be armed with the `timer_settime`. Its prototype is as follows.
+
+```c
+
+int timer_settime(timer_t timerid, int flags, const struct itimerspec *new_value, struct itimerspec *old_value);
+
+```
+
+The first argument is the timerid that is created with above `timer_create`. flags are generally kept 0. `new_value` is set to the timer values.
+
+The `struct itimerspec` is defined as follows,
+
+```c
+struct timespec {
+    time_t tv_sec;
+    long tv_nsec;
+};
+
+struct itimerspec {
+    struct timerspec it_interval;
+    struct timerspec it_value;
+};
+
+```
+
+for a one shot timer, the content of `it_interval` is set to 0. For a periodic timer the `it_interval` must be set to a value.
+
+```c
+struct itimerspec spec;
+
+spec.it_value.tv_sec = 1;
+spec.it_value.tv_nsec = 0;
+spec.it_interval.tv_sec = 0;
+spec.it_interval.tv_nsec = 0;
+
+```
+
+```c
+struct itimerspec spec;
+
+spec.it_value.tv_sec = 1;
+spec.it_value.tv_nsec = 0;
+spec.it_interval.tv_sec = 1;
+spec.it_interval.tv_nsec = 0;
+
+```
+
+Example using the `timer_create` is shown below. Compile it with `-lrt` linker flag.
+
+```cpp
+
+#include <iostream>
+#include <string.h>
+#include <string>
+#include <signal.h>
+#include <time.h>
+#include <unistd.h>
+
+// callback function when the timer expires.. this will be called
+void timer_handle(int sig, siginfo_t *si, void *uc)
+{
+    printf("timer handler function\n");
+}
+
+int main()
+{
+    int ret;
+
+    struct sigevent sev;
+    struct itimerspec its;
+    struct sigaction sa;
+    timer_t timerid;
+    sigset_t mask;
+
+    memset(&sev, 0, sizeof(sev));
+    memset(&its, 0, sizeof(its));
+    memset(&sa, 0, sizeof(sa));
+
+    // set signal mask for the timer
+    sa.sa_flags = SA_SIGINFO;
+    sa.sa_sigaction = timer_handle;
+    sigemptyset(&sa.sa_mask);
+    if (sigaction(SIGRTMIN + 1, &sa, NULL) < 0) {
+        return -1;
+    }
+
+    // set signal mask for sigevent
+    sev.sigev_notify = SIGEV_SIGNAL;
+    sev.sigev_signo = SIGRTMIN + 1;
+    sev.sigev_value.sival_ptr = &timerid;
+    ret = timer_create(CLOCK_REALTIME, &sev, &timerid);
+    if (ret < 0) {
+        return -1;
+    }
+
+    // set timer to tick 1 sec intervals
+    its.it_value.tv_sec = 1;
+    its.it_value.tv_nsec = 0;
+    its.it_interval.tv_sec = 1;
+    its.it_interval.tv_nsec = 0;
+
+    ret = timer_settime(timerid, 0, &its, NULL);
+    if (ret < 0) {
+        return -1;
+    }
+
+    // wait indefinitely
+    while (1) {
+        sleep(1);
+    }
+}
+
+```
+
+The above function sets up a callback function that gets called everytime a timer expired. The callback function setup is done at the `sigaction`. The same signal is set to the `struct sigevent` which then is passed as argument to the `timer_create`. So, an expiry would simply invoke the corresponding signal handler behavior (in this case `SA_SIGINFO`) and calls the callback.
+
+There are more than one timer can be created for a process.
+
 
 ### timerfd
+
 
 **1. timerfd_create**
 

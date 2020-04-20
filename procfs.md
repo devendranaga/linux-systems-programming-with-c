@@ -1,7 +1,7 @@
 
 ## /proc file system
 
-Linux kernel exposes the runtime information of the kernel and each process into the `/proc` file system as a set of files. `/proc` file system contain various information about the current process and the kernel.
+Linux kernel exposes the runtime information of the kernel and each process into the `/proc` file system as a set of files. `/proc` file system contain various information about the current processes and the kernel.
 
 each process information is stored under `/proc/<process-id>` folder. where `process-id` is the id of the process shown in `ps` command or via the call to `getpid` syscall.
 
@@ -110,12 +110,24 @@ int main(int argc, char **argv)
 
     printf("name: %s\n", val);
 
+    fclose(fp);
+    
     return 0;
 }
 
 ```
 
 The folder `/proc/<pid>/fd` contains the list of currently opened files by a specific process.
+
+A sample listing on the `/proc/<pid>/fd` shows the following list.
+
+```bash
+
+0  1  2  3  4
+
+```
+
+The actual files referenced by the above can be listed with the `ls -l` command. In general, `readlink` can be used to read those file descriptor names.
 
 The below program lists the currently opened files by a process.
 
@@ -207,6 +219,7 @@ The files sometimes can be special files, like the tty serial file, socket, or a
 The contents of the `realpath` are then dumped on the screen.
 
 
+### meminfo
 
 the file `/proc/meminfo` contains the information about the memory. The contents of the file looks like below,
 
@@ -357,6 +370,7 @@ memtotal 7.927017 GB memfree 2.774483 GB memused 5.152534 GB
 
 ```
 
+### Hostname
 
 The system hostname is usually  shown under `/proc/sys/kernel/hostname`.
 
@@ -392,7 +406,9 @@ int main()
 
 
 
-the file `/proc/cpuinfo` contain the information about the cpu. For example, the current system information contain the following.
+### CPUINFO
+
+The file `/proc/cpuinfo` contain the information about the cpu. For example, the current system information contain the following.
 
 ```bash
 dev@Hanzo:~$ cat /proc/cpuinfo
@@ -423,3 +439,156 @@ address sizes   : 39 bits physical, 48 bits virtual
 power management:
 
 ```
+
+### modules
+
+The file `/proc/modules` contains the list of kernel modules.
+
+Below is the description of each of the columns.
+
+Column 1 : describe the name of the module
+Column 2 : describe the memory size of the module in bytes
+Column 3 : describe how many instances of the module are currently loaded. 0 represents an unloaded module
+Column 4 : describe if the module depends on the other module to be present in order to work.
+Column 5 : describe one of the three states, `Live`, `Loading`, `Unloading`.
+Column 6 : describe the current kernel memory offset of the module, generally used by debugging programs
+
+### interrupts
+
+The file `/proc/interrupts` contain the stats of kernel interrupts. An example is shown as below.
+
+```bash
+
+a@linux:~$ cat /proc/interrupts
+            CPU0       CPU1       CPU2       CPU3
+   0:          7          0          0          0  IR-IO-APIC    2-edge      timer
+   8:          0          0          0          0  IR-IO-APIC    8-edge      rtc0
+   9:          0       3950          0          0  IR-IO-APIC    9-fasteoi   acpi
+  14:          0          0          0          0  IR-IO-APIC   14-fasteoi   INT344B:00
+  16:          0          0    1988837          0  IR-IO-APIC   16-fasteoi   i2c_designware.0, idma64.0
+  17:          0          0          0          0  IR-IO-APIC   17-fasteoi   i2c_designware.1, idma64.1
+  18:          0          0          0          0  IR-IO-APIC   18-fasteoi   i2c_designware.2, idma64.2
+  19:          0          0          0          0  IR-IO-APIC   19-fasteoi   i2c_designware.3, idma64.3
+  86:          0          0          0      33568  IR-IO-APIC   86-fasteoi   MSHW0030:00
+ 120:          0          0          0          0  DMAR-MSI    0-edge      dmar0
+ 121:          0          0          0          0  DMAR-MSI    1-edge      dmar1
+ 122:          0          0          0          0  IR-PCI-MSI 458752-edge      PCIe PME, pciehp
+ 123:          0          0          0          0  IR-PCI-MSI 475136-edge      PCIe PME
+ 124:          0          0          0          0  IR-PCI-MSI 481280-edge      PCIe PME
+ 125:    3232012     273240      68821          0  IR-PCI-MSI 327680-edge      xhci_hcd
+ 126:         12          0          4          0  IR-PCI-MSI 1048576-edge      nvme0q0
+ 127:       1328     166131      75027     541487  IR-PCI-MSI 32768-edge      i915
+ 128:     132986          0          0          0  IR-PCI-MSI 1048577-edge      nvme0q1
+ 129:          0      95715          0          0  IR-PCI-MSI 1048578-edge      nvme0q2
+ 130:          0          0     107829          0  IR-PCI-MSI 1048579-edge      nvme0q3
+ 131:          0          0          0     100184  IR-PCI-MSI 1048580-edge      nvme0q4
+ 132:         38          0          0          0  IR-PCI-MSI 360448-edge      mei_me
+ 135:          0          0          0          0  als-dev1       als_consumer1
+ 139:          0          0          0          0  accel_3d-dev3       accel_3d_consumer3
+ 141:          0      44161          0          0  IR-PCI-MSI 514048-edge      snd_hda_intel:card0
+ NMI:        186        180        181        179   Non-maskable interrupts
+ LOC:    1401531    1396165    1407250    1412530   Local timer interrupts
+ SPU:          0          0          0          0   Spurious interrupts
+ PMI:        186        180        181        179   Performance monitoring interrupts
+ IWI:        152      31837       9771      44339   IRQ work interrupts
+ RTR:          0          0          0          0   APIC ICR read retries
+ RES:    1155014    1228878    1157503    1164861   Rescheduling interrupts
+ CAL:    2028593    2040548    2011511    1850212   Function call interrupts
+ TLB:    4055975    4075325    4098490    4030782   TLB shootdowns
+ TRM:          0          0          0          0   Thermal event interrupts
+ THR:          0          0          0          0   Threshold APIC interrupts
+ DFR:          0          0          0          0   Deferred Error APIC interrupts
+ MCE:          0          0          0          0   Machine check exceptions
+ MCP:         15         16         16         16   Machine check polls
+ HYP:          0          0          0          0   Hypervisor callback interrupts
+ HRE:          0          0          0          0   Hyper-V reenlightenment interrupts
+ HVS:          0          0          0          0   Hyper-V stimer0 interrupts
+ ERR:          0
+ MIS:          0
+ PIN:          0          0          0          0   Posted-interrupt notification event
+ NPI:          0          0          0          0   Nested posted-interrupt event
+ PIW:          0          0          0          0   Posted-interrupt wakeup event
+
+```
+
+
+Column 1: describe the irq number
+Column 2-5: describe the number of interrupts per CPU (my system has 4 cpus)
+Column 6: Type of the interrupt
+Column 7: The way interrupt is being triggered (i guess, either level triggered or edge triggered etc)
+Column 8: the device driver
+
+### /proc/stat
+
+The file `/proc/stat` represents the stats about the system. An example of it is shown below.
+
+```bash
+
+linux:~$ cat /proc/stat
+cpu  783230 122383 189177 1322985 9902 0 28016 0 0 0
+cpu0 198197 29752 47418 325399 2596 0 12620 0 0 0
+cpu1 194183 31165 48246 331448 2493 0 8150 0 0 0
+cpu2 195223 31839 46619 331334 2386 0 3804 0 0 0
+cpu3 195625 29626 46893 334801 2426 0 3440 0 0 0
+intr 29286570 7 0 0 0 0 0 0 0 0 4971 0 0 0 0 0 0 2501506 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 42423 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3855139 16 1009039 135787 97393 110145 102032 38 0 0 0 0 0 0 0 0 119751 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ctxt 72587926
+btime 1585371666
+processes 15991
+procs_running 3
+procs_blocked 0
+softirq 18887110 592022 4788213 1230 2476370 2575 0 3562475 4456054 38895 2969276
+
+```
+
+
+
+### /proc/<pid>/cmdline
+
+The file `/proc/<pid>/cmdline` shows the current program's command line when being executed. Replace pid with the id from `ps`.
+
+For example, output of `cat /proc/17355/cmdline` shows as follows.
+
+```bash
+
+linux:~$ cat /proc/17355/cmdline
+vimmanuscript/procfs.md
+
+```
+
+### /proc/net/dev
+
+The folder `/proc/net/dev` contain the stats regarding the networking devices in the system.
+
+The command `ifconfig` command lists various networking interfaces. Like below.
+
+
+```bash
+
+enxd03745447deb: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.0.12 netmask 255.255.255.0  broadcast 192.168.0.255
+        inet6 fe80::d237:45ff:fe44:7deb  prefixlen 64  scopeid 0x20<link>
+        ether d0:37:45:44:7d:eb  txqueuelen 1000  (Ethernet)
+        RX packets 3495452  bytes 4574723893 (4.5 GB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 1816643  bytes 184173070 (184.1 MB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 408000  bytes 801938605 (801.9 MB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 408000  bytes 801938605 (801.9 MB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lxcbr0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
+        inet 10.0.3.1  netmask 255.255.255.0  broadcast 0.0.0.0
+        ether 00:16:3e:00:00:00  txqueuelen 1000  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+```
+

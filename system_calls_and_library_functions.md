@@ -403,7 +403,7 @@ int main()
 
 ```
 
-to summarise, the following `sysconf` varialble exists:
+to summarise, the following `sysconf` variables exists:
 
 |variable type | meaning |
 |--------------|---------|
@@ -462,71 +462,27 @@ The limits are 15 provided by the kernel at asm-generic/resource.h.
 The below example illustrates the `rlimit API` uses. Both the `getrlimit` and `setrlimit` are described in the below example.
 
 ```c
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <string.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 
-void get_max_addr_space()
+static void _get_rlimit(char *data, int flag)
 {
     struct rlimit rlim;
     int ret;
 
-    ret = getrlimit(RLIMIT_AS, &rlim);
+    ret = getrlimit(flag, &rlim);
     if (ret < 0) {
         fprintf(stderr, "failed to getrlimit\n");
         return;
     }
 
-    printf("soft : %lu hard : %lu\n",
-                            rlim.rlim_cur, rlim.rlim_max);
+    printf("[item %s]: soft: %lu hard: %lu\n", data, rlim.rlim_cur, rlim.rlim_max);
 }
 
-void get_max_file_size()
-{
-    struct rlimit rlim;
-    int ret;
-
-    ret = getrlimit(RLIMIT_FSIZE, &rlim);
-    if (ret < 0) {
-        fprintf(stderr, "failed to getrlimit\n");
-        return;
-    }
-
-    printf("soft: %lu hard: %lu\n",
-                            rlim.rlim_cur, rlim.rlim_max);
-}
-
-void get_max_stack_size()
-{
-    struct rlimit rlim;
-    int ret;
-
-    ret = getrlimit(RLIMIT_STACK, &rlim);
-    if (ret < 0) {
-        fprintf(stderr, "failed to getrlimit\n");
-        return;
-    }
-
-    printf("soft: %lu hard: %lu\n",
-                            rlim.rlim_cur, rlim.rlim_max);
- }
- 
-void get_max_cpu_time()
-{
-    struct rlimit rlim;
-    int ret;
-
-    ret = getrlimit(RLIMIT_CPU, &rlim);
-    if (ret < 0) {
-        fprintf(stderr, "failed to getrlimit\n");
-        return;
-    }
-
-    printf("soft: %lu hard: %lu\n",
-                            rlim.rlim_cur, rlim.rlim_max);
-}
 
 void set_max_stack_size(int n, char **argv)
 {
@@ -550,13 +506,25 @@ void set_max_stack_size(int n, char **argv)
 
 struct rlimit_list {
     char *string;
-    void (*get_callback)(void);
+    int flag;
+    void (*get_callback)(char *, int);
     void (*set_callback)(int n, char **rem_args);
 } rlimit_list[] = {
-    {"max_addr_space", get_max_addr_space, NULL},
-    {"max_file_size", get_max_file_size, NULL},
-    {"max_stack_size", get_max_stack_size, set_max_stack_size},
-    {"max_cpu_time", get_max_cpu_time, NULL},
+    {"max_addr_space", RLIMIT_AS, _get_rlimit, NULL},
+    {"max_file_size", RLIMIT_FSIZE, _get_rlimit, NULL},
+    {"max_stack_size", RLIMIT_STACK, _get_rlimit, set_max_stack_size},
+    {"max_cpu_time", RLIMIT_CPU, _get_rlimit, NULL},
+    {"max_data_size", RLIMIT_DATA, _get_rlimit, NULL},
+    {"max_core_size", RLIMIT_CORE, _get_rlimit, NULL},
+    {"max_process", RLIMIT_NPROC, _get_rlimit, NULL},
+    {"max_files", RLIMIT_NOFILE, _get_rlimit, NULL},
+    {"max_memlock", RLIMIT_MEMLOCK, _get_rlimit, NULL},
+    {"max_locks", RLIMIT_LOCKS, _get_rlimit, NULL},
+    {"max_sigpending", RLIMIT_SIGPENDING, _get_rlimit, NULL},
+    {"max_msgqueue", RLIMIT_MSGQUEUE, _get_rlimit, NULL},
+    {"max_nice", RLIMIT_NICE, _get_rlimit, NULL},
+    {"max_rtprio", RLIMIT_RTPRIO, _get_rlimit, NULL},
+    {"max_rt_timeout", RLIMIT_RTTIME, _get_rlimit, NULL},
 };
 
 int main(int argc, char **argv)
@@ -565,9 +533,7 @@ int main(int argc, char **argv)
 
     if (!strcmp(argv[1], "get")) {
         for (i = 0; i < sizeof(rlimit_list) / sizeof(rlimit_list[0]); i ++) {
-            if (!strcmp(rlimit_list[i].string, argv[2])) {
-                rlimit_list[i].get_callback();
-            }
+            rlimit_list[i].get_callback(rlimit_list[i].string, rlimit_list[i].flag);
         }
     } else if (!strcmp(argv[1], "set")) {
         for (i = 0; i < sizeof(rlimit_list) / sizeof(rlimit_list[0]); i ++) {
@@ -580,5 +546,6 @@ int main(int argc, char **argv)
 
     return 0;
 }
+
 ```
 

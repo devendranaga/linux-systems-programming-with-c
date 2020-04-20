@@ -48,10 +48,77 @@ Signals are asynchornous and must be handled. So the system call interface provi
 prototype:
 
 ```c
+
 sighandler_t signal(int signum, sighandler_t handler);
+
 ```
 
+The first argument is the signal number. The second argument is the signal handler callback.
+
+An example of system call is shown below.
+
+
+```c
+
+void signal_callback(int sig)
+{
+    printf("signal handler\n);
+}
+
+int main()
+{
+    signal(SIGINT, signal_callback);
+
+    sleep(2);
+}
+
+```
+
+above program registers `SIGINT` that's `ctrl + c` combination. A `ctrl + c` key combination is pressed when the program is running, it invokes the `signal_callback`.
+
+
+to set the signal to default we must use `SIG_DFL` in the callback argument. Such as,
+
+```c
+
+signal(SIGINT, SIG_DFL);
+
+```
+
+
 #### Sigaction
+
+
+The `sigaction` system call is more sophisticated system call for signal handling. The prototype of `sigaction` system call is as follows,
+
+```c
+
+int sigaction(int signum, const struct sigaction *act,
+                struct sigaction *oldact);
+
+```
+
+The structure `sigaction` is shown as below,
+
+```c
+
+struct sigaction {
+    void (*sa_handler)(int);
+    void (*sa_sigaction)(int, siginfo_t *, void *);
+    sigset_t sa_mask;
+    int sa_flags;
+    void (*sa_restorer)(void);
+}
+
+```
+
+The first argument is the signal number.
+The second argument is the structure `sigaction`.
+
+The `sa_flags` contain the following information. It provides a various set of flags but only the following list is useful.
+
+1. `SA_SIGINFO` - the callback `sa_sigaction` is used when flags are set to this.
+2. 0 - a default `sa_handler` should be set
 
 #### Key differences
 
@@ -66,6 +133,18 @@ A very good [stackoverflow question](http://stackoverflow.com/questions/231912/w
 ### sigtimedwait
 
 ### sigwait
+
+The system call `sigwait` is used to wait for signal until one of the signals specified in the signal mask are pending.
+
+```c
+
+int sigwait(const sigset_t *set, int *sig);
+
+```
+
+the second argument `sig` contain the returned signal number.
+
+The `sigwait` returns 0 on success and returns a positive error on failure.
 
 ### signalfd
 

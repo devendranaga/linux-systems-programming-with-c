@@ -26,11 +26,11 @@ ar rcs libstatic.a 1.o 2.o
 
 The dynamic loading allows program to load a library at run time into the memory, retrieve the address of functions and variables, can perform actions and unload the library. This adds an extended functionality to the program and allows methods to inject code into the program.
 
-dlopen: open the dynamic object
+`dlopen`: open the dynamic object
 
-dlsym: obtain the address of a symbol from a dlopen object
+`dlsym`: obtain the address of a symbol from a `dlopen` object
 
-dladdr: find the shared object containing a given address
+`dladdr`: find the shared object containing a given address
 
 include the header file `<dlfcn.h>` to use the dynamic library. The `dladdr` function prototype is as follows:
 

@@ -24,6 +24,19 @@ Linked lists can be created with the simple data structure below.
     struct linked_list *head, *tail;
 ```
 
+We will describe the following API.
+
+
+| linked list API | description |
+|-----------------|-------------|
+| `list_add` | add an element to the list |
+| `list_add_head` | add an element before the head of the list |
+| `list_add_tail` | add an element after the tail of the list |
+| `list_for_each` | iterate over every list node |
+| `list_delete` | delete an element in the list |
+| `list_free` | free the linked lists |
+
+
 The `data` part is a pointer that pointing to a data structure. A user can point their data structure to this pointer.
 
 The `tail` pointer is used to point to always the end of the list. The end pointer is used to chain the newly created element in the list at the end of the list. The end pointer is then made point to the newly created element.
@@ -343,6 +356,8 @@ void dllist_for_each_reverse(void (*callback)(void *data))
 }
 ```
 
+the `dlist_delete_elem` deletes the element at the head, tail or in the middle anywhere. A callback is called if a match is performed. Otherwise, failure and -1 is returned.
+
 ```c
 int dllist_delete_elem(void *data, void (*callback)(void *data))
 {
@@ -375,6 +390,8 @@ int dllist_delete_elem(void *data, void (*callback)(void *data))
     return -1;
 }
 ```
+
+the `dlist_destroy` deletes all the doubly linked list chain and calls a user specific callback for each doubly linked node.
 
 ```c
 int dllist_destroy(void (*callback)(void *data))
@@ -410,6 +427,16 @@ struct circular_linked_list {
 
 struct circular_linked_list *head, *tail;
 ```
+
+Below are some of the API described in the circular list.
+
+| Circular linked list API | description |
+|--------------------------|-------------|
+| `circular_list_add` | add elements to the circular list |
+| `circular_list_del` | delete elements from the circular list |
+| `circular_list_foreach` | iterate over circular list |
+| `circular_list_free` | free elements of circular list |
+
 
 Adding an element to the circular list is same as adding an element to the linked list, but the last element points to the head back.
 
@@ -455,13 +482,76 @@ int circular_list_for_each(void (*func)(void *data))
 
 The callback function is called at each element traversal.
 
+The API `circular_list_del` removes an element from the list. It could be a head node, tail node or any node in between. Below is the API implementation.
+
+The logic follows the same as that of the linked list.
+
+```c
+
+int circular_list_del(void *content, void (*callback_ptr)(void *data))
+{
+    struct circular_linked_list *elem, *prev;
+
+    if (!callback_ptr) {
+        return -1;
+    }
+
+    elem = prev = head;
+
+    if (elem->data == content) {
+        head = elem->next;
+        callback_ptr(elem->data);
+        free(elem);
+        tail->next = head;
+        return 0;
+    }
+
+    elem = elem->next;
+
+    while (elem != head) {
+        if (elem->data == content) {
+            prev->next = elem->next;
+            callback_ptr(elem->data);
+            free(elem);
+            return 0;
+        } else {
+            prev = elem;
+            elem = elem->next;
+        }
+    }
+
+    return 0;
+}
+
+```
+
+The API `circular_list_free` frees the circular list. Below is the implementation. The logic follow the similar implementation as that of Linked list.
+
+```c
+
+int circular_list_free()
+{
+   struct circular_linked_list *elem, *prev;
+
+   elem = prev = head;
+
+   do {
+      prev = elem;
+      elem = elem->next;
+      free(prev);
+   } while (eleme != head);
+}
+
+```
+
+
 ### 3.2 Circular doubly lists
 
 1. The doubly linked list's last element points to the head instead of NULL. Making it the circular doubly linked list.
 
 the circular doubly linked list looks as the following.
 
-```
+```c
 struct ciruclar_doubly_linked_list {
     void *data;
     struct circular_doubly_linked_list *next;
@@ -473,7 +563,7 @@ struct circular_doubly_linked_list *head, *tail;
 
 ## 4. Queues
 
-1. Same as linked list.
+1. Queues are Same as linked list.
 2. new entries are added at the last. Also called enqueue.
 3. the elements are retrieved at the front. Also called dequeue.
 4. The queue is also called FIFO \(first in first out\).
@@ -484,52 +574,81 @@ struct circular_doubly_linked_list *head, *tail;
         struct queue *next;
     };
 
-    struct queue *front, *rear;
+    struct queue *head, *tail;
+    static int count = 0;
 ```
+
+Below are the following APIs described. The design and implementation is much consolidated.
+
+
+| Queue function  | description |
+|-----------------|-------------|
+| `enqueue` | enqueue an item into the queue |
+| `dequeue` | dequeue an item from the queue |
+| `get_count` | get the count of elements in queue |
+
 
 The queue front and rear are initialised when a new element is added. The addition of new element is as the following.
 
-```
-int enqueue(void *data)
-{
-    struct queue *node;
 
-    node = calloc(1, sizeof(struct queue));
-    if (!node) {
+```c
+
+int enqueue(void *content)
+{
+    struct queue *item;
+
+    item = calloc(1, sizeof(struct queue));
+    if (!item) {
         return -1;
     }
 
-    node->data = data;
-    if (!rear) {
-        rear = node;
-        front = node;
+    item->data = content;
+
+    if (!head) {
+        head = item;
+        tail = item;
     } else {
-        rear->next = node;
-        rear = node;
+        tail->next = item;
+        tail = item;
     }
+
+    count ++;
 
     return 0;
 }
+
 ```
+
 
 The dequeue is performed by taking one element out of the front end.
 
-```
-int dequeue(void (*dequeue_func)(void *data))
+```c
+
+int dequeue(void (*callback_ptr)(void *data))
 {
-    struct queue *node;
+    struct queue *item;
 
-    node = front;
-
-    if (!node)
+    if (!callback_ptr) {
         return -1;
+    }
 
-    front = node->next;
-    dequeue_func(node->data);
+    if (head) {
+        count --;
+        item = head;
+        callback_ptr(head->data);
+        head = head->next;
+        free(item);
+    } else {
+        return -1;
+    }
 
     return 0;
 }
+
 ```
+
+The `callback_ptr` is called when a dequeue is performed and the data gets copied to the argument of `callback_ptr`.
+
 
 The queues above are dynamic lists. Meaning, there is no limit on the number of elements that be added. Only the memory limit would be the limitting factor.
 
