@@ -655,6 +655,62 @@ int main(int argc, char **argv)
 ```
 
 
+Below is an example to get the network interface list (that have the ipv4 address).
+
+```cpp
+struct interface_info {
+    char ifname[24];
+    char ifaddr[80];
+};
+
+int get_interfaces(std::vector<interface_info> &ifinfo)
+{
+    struct ifconf ifc;
+    struct ifreq *req;
+    char data[4096];
+    int ret;
+    int fd;
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) {
+        return -1;
+    }
+
+    ifc.ifc_len = sizeof(data);
+    ifc.ifc_buf = (caddr_t)(data);
+    ret = ioctl(fd, SIOCGIFCONF, &ifc);
+    if (ret < 0) {
+        goto err;
+    }
+
+    req = (struct ifreq *)data;
+    while ((char *)req < data + ifc.ifc_len) {
+        switch (req->ifr_addr.sa_family) {
+            case AF_INET:
+                interface_info ifi;
+                char *intf_addr;
+
+                strcpy(ifi.ifname, req->ifr_name);
+                intf_addr = inet_ntoa(((struct sockaddr_in *)(&req->ifr_addr))->sin_addr);
+                if (!intf_addr) {
+                    return -1;
+                }
+                strcpy(ifi.ifaddr, intf_addr);
+                ifinfo.push_back(ifi);
+            break;
+        }
+        req = (struct ifreq *)((char *)req + sizeof(*req));
+    }
+
+    ret = 0;
+
+    close(fd);
+
+err:
+    return ret;
+}
+
+```
 
 
 There is also a way to change the interface name. This is done using the `SIOCSIFNAME` ioctl.
