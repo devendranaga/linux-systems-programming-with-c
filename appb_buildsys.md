@@ -1,6 +1,6 @@
 # Appendix. B  Build systems
 
-###1. [OpenWRT](https://openwrt.org) build system
+### 1. [OpenWRT](https://openwrt.org) build system
 
 * The most popular router based OS platform. Runs linux kernel as the main OS.
 * Used by many router vendors in their production systems.
@@ -18,7 +18,7 @@
 * The `opkg` system is the OpenWRT packaging system. Allows the binary and configs etc.. into one single compressed package.
 * Has a very good community to support any issues with the OpenWRT.
 
-####1.1 OpenWRT packages
+#### 1.1 OpenWRT packages
 
 * The OpenWRT's most powerful feature is the packages. Packages add or remove a functionality to the final image.
 * They are useful to build a tiny system to a very large miniature computer system. The packages can selectively be chosen to fit the needs of the software project / product.
@@ -66,7 +66,7 @@ endef
 $(eval $(call BuildPackage,bridge))
 ```
 
-###2. LTIB (Linux Target Image builder)
+### 2. LTIB (Linux Target Image builder)
 
 requirements:
 
