@@ -16,9 +16,11 @@
 
 the `select` from the manual page looks like below:
 
-`int select(int nfd, FD_SET *rdfd, FD_SET *wrfd, FD_SET *exfd, struct timeval *timeout);`
+```c
+int select(int nfd, FD_SET *rdfd, FD_SET *wrfd, FD_SET *exfd, struct timeval *timeout);
+```
 
-The select returns greater than 0 and sets the file descriptors that are ready in the 3 file descriptor sets. and returns `0` if there is a timeout.
+The `select` returns greater than 0 and sets the file descriptors that are ready in the 3 file descriptor sets. and returns `0` if there is a timeout.
 
 A TCP server using the select loop is demonstrated below:
 

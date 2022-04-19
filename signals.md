@@ -453,3 +453,110 @@ In the above example, the signal set of type `sigset_t` is created with `sigempt
 
 The `sigprocmask` system call is made with `SIG_BLOCK` that effectively blocks the signal `SIGINT` till the loop below executes. The loop is created only for testing purposes to see if the `SIGINT` is actually blocked by holding down `ctrl +c` combination on the keyboard. Till the count of 5, the signal is blocked and a call to the `sigprocmask` with `SIG_UNBLOCK` is made to unblock the signal.
 
+
+The use case of `sigprocmask` is useful when we have multiple threads and we need to handle signals specifically in one of the threads / main thread.
+
+since the signals are inherited by the threads / child processes, the signal might be delivered to any thread.
+
+To do this, block signals in all the threads except the thread that signal needs to be handled.
+
+for example, a below code can be used.
+
+```c
+
+static void block_term_signals()
+{
+    sigset_t set;
+    int ret;
+
+    sigemptyset(&set);
+    sigaddset(&set, SIGINT);
+    sigaddset(&set, SIGTERM);
+
+    ret = sigprocmask(SIG_BLOCK, &set, NULL);
+    if (ret < 0) {
+        return;
+    }
+}
+
+```
+
+Simple demonstration of this is as follows:
+
+```c
+#include <stdio.h>
+#include <signal.h>
+#include <unistd.h>
+#include <pthread.h>
+
+static void block_term_signals()
+{
+    sigset_t set;
+    int ret;
+
+    sigemptyset(&set);
+    sigaddset(&set, SIGINT);
+    sigaddset(&set, SIGTERM);
+
+    ret = sigprocmask(SIG_BLOCK, &set, NULL);
+    if (ret < 0) {
+        return;
+    }
+}
+
+void *thread_callback(void *data)
+{
+    block_term_signals();
+
+    while (1) {
+        sleep(1);
+        printf("in %d %s\n", __LINE__, __func__);
+    }
+}
+
+void *thread_callback_(void *data)
+{
+    block_term_signals();
+
+    while (1) {
+        sleep(1);
+        printf("in %d %s\n", __LINE__, __func__);
+    }
+}
+
+void signal_handler(int sig)
+{
+    printf("in signal handler\n");
+    signal(sig, SIG_DFL);
+    raise(sig);
+}
+
+int main()
+{
+    pthread_t tid1, tid2;
+    sigset_t set;
+    int ret;
+
+    signal(SIGINT, signal_handler);
+
+    ret = pthread_create(&tid1, NULL, thread_callback, NULL);
+    if (ret < 0) {
+        return -1;
+    }
+
+    ret = pthread_create(&tid2, NULL, thread_callback_, NULL);
+    if (ret < 0) {
+        return -1;
+    }
+
+    while (1) {
+        printf("in main thread\n");
+        sleep(1);
+    }
+}
+```
+
+in the program, the main program creates two threads and in each thread the signals are blocked except in main thread. main thread registers the signal handler for the particular signal.
+
+
+
