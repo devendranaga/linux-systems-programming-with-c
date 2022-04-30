@@ -813,6 +813,113 @@ The programs makes the interface go down, otherwise we cannot change the name of
 The interface is made down using the `SIOCSIFFLAGS` ioctl and sets up the interface name and
 makes the interface up again using the `SIOCSIFFLAGS`.
 
+### VLANs
+
+VLANs are used to logically divide the network into many interfaces although there is only one physical interface available.
+In linux VLANs can be created on with the `vlan` utility or programmatically.
+
+We will look at programmatically creating VLANs here.
+
+VLANs are generally associated with the physical name and an ID. There can be 0 4095 VLAN Ids. The interface must be a real interface in order to create a VLAN.
+
+Below program is used to add a VLAN interface.
+
+```c
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <linux/if_vlan.h>
+#include <linux/sockios.h>
+
+int main(int argc, char **argv)
+{
+    struct vlan_ioctl_args ioctl_args;
+    int sock;
+    int ret;
+
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        return -1;
+    }
+
+    memset(&ioctl_args, 0, sizeof(ioctl_args));
+    strcpy(ioctl_args.device1, argv[1]);
+    ioctl_args.u.VID = atoi(argv[2]);
+    ioctl_args.cmd = ADD_VLAN_CMD;
+
+    ret = ioctl(sock, SIOCSIFVLAN, &ioctl_args);
+    if (ret < 0) {
+        perror("ioctl");
+        return -1;
+    }
+
+    close(sock);
+
+    return 0;
+}
+
+```
+
+running `./a.out enp2s0 4` creates an interface `enp2s0.4`.
+
+```bash
+enp2s0.4: flags=4098<BROADCAST,MULTICAST>  mtu 1500
+        ether 58:8a:5a:0a:6b:2e  txqueuelen 1000  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+```
+
+
+VLANs can be deleted programmatically:
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <linux/if_vlan.h>
+#include <linux/sockios.h>
+
+int main(int argc, char **argv)
+{
+    struct vlan_ioctl_args ioctl_args;
+    int sock;
+    int ret;
+
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        return -1;
+    }
+
+    memset(&ioctl_args, 0, sizeof(ioctl_args));
+    strcpy(ioctl_args.device1, argv[1]);
+    ioctl_args.cmd = DEL_VLAN_CMD;
+
+    ret = ioctl(sock, SIOCSIFVLAN, &ioctl_args);
+    if (ret < 0) {
+        perror("ioctl");
+        return -1;
+    }
+
+    close(sock);
+
+    return 0;
+}
+
+
+```
+
+running `./a.out enp2s0.4` deletes the VLAN interface.
+
+
+
 ## wireless ioctls
 
 The header file `linux/wireless.h` has the legacy ioctl calls that are used to communicate with the wireless device.
