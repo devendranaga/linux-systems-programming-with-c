@@ -1,5 +1,10 @@
 # Systems Programming under Linux
 
+#### I Am restarting the development of this book ####
+
+Appreciate it if you want to support the development: https://leanpub.com/linuxsystemprogrammingwithc/
+
+
 Hello. Welcome to the Preface.
 
 The book tries to cover the systems programming under linux based operating systems in **C**. The most of the part in this book is my personal experience with programming in the systems level of the linux operating system.
