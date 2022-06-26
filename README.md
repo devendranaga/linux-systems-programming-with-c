@@ -1,9 +1,5 @@
 # Systems Programming under Linux
 
-#### I Am restarting the development of this book ####
-
-Appreciate it if you want to support the development: https://leanpub.com/linuxsystemprogrammingwithc/
-
 
 Hello. Welcome to the Preface.
 
