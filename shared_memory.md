@@ -327,6 +327,9 @@ gcc -Wall mmap.c
 ./a.out test
 ```
 
+
+`MAP_SHARED` is required on regular files when writing. If doing `MAP_PRIVATE`, the syncs to the underlying file will not happen.
+
 if there is no file that is available or the file is not a text file, the visualisation of the data is not possible.
 
 There is also a way to write the data stored at the memory back to the file using the `msync` API. `msync` allows the memory written at the address to be flushed down to the file either synchronously or asynchronously.

@@ -61,6 +61,8 @@ This enables an interface `eth10`, by default interface is not up.
 
 below is the example to get the interface flags.
 
+### interface flags
+
 ```c
 #include <stdio.h>
 #include <stdint.h>
@@ -135,6 +137,8 @@ ifflags details:
          Multicast
 ```
 
+### MTU
+
 Now we have gotten the method to get the interface flags, let's move to `MTU` field in the `ifconfig` output.
 
 MTU is the largest size of the packet or frame specified in octets. For ethernet, it is mostly 1500 octets.
@@ -193,6 +197,8 @@ A sample output is shown below:
 MTU of the device is 1500
 
 ```
+
+### Get Mac Address
 
 Now let us look at the mac address field of the `ifconfig` output. The mac address is the unique 6 byte address that represents
 a device in the Layer2. To get this field we should perform `SIOCGIFHWADDR` ioctl.
@@ -261,6 +267,8 @@ The sample output of the program is shown below:
 HWAddress: 68:f7:28:9a:b9:6d
 
 ```
+
+### Set Mac Address
 
 The set of hardware address is also possible via the `SIOCSIFHWADDR` ioctl. Here is the example
 
@@ -350,6 +358,8 @@ enp0s25: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
 
 ```
 
+### Get Interface Index
+
 To get the interface index of a particular network interface, `SIOCGIFINDEX` is used.
 
 Below is an example of getting an index from a particular interface. Download [here](https://github.com/DevNaga/gists/blob/master/getifindex.c)
@@ -398,6 +408,8 @@ int main(int argc, char **argv)
 }
 
 ```
+
+### Set Interface Flags
 
 Below example is another one of `SIOCGIFFLAGS`. Download [here](https://github.com/DevNaga/gists/blob/master/siocgifflags.c)
 
@@ -490,6 +502,8 @@ int main(int argc, char **argv)
 
 ```
 
+### Get IPv4 Address
+
 The ioctl flag `SIOCGIFADDR` is used to get interface ipv4 address. Below is the example program.
 
 ```c
@@ -537,6 +551,8 @@ int main(int argc, char **argv)
 ```
 
 The function `if_nametoindex` is declared in `net/if.h`.
+
+### Get Broadcast Address
 
 The ioctl `SIOCGIFBRDADDR` allows to get the broadcast address of network interface.
 
@@ -598,6 +614,8 @@ int main(int argc, char **argv)
 
 ```
 
+### Get Network Mask
+
 when the network interface does not have an IP address the above ioctl might fail with an error `cannot assign requested address`.  It may be useful in cases of diagnostics.
 
 The ioctl `SIOCGIFNETMASK` is used to get the network mask of an interface.
@@ -654,6 +672,7 @@ int main(int argc, char **argv)
 
 ```
 
+### Get Network Interface List
 
 Below is an example to get the network interface list (that have the ipv4 address).
 
@@ -712,6 +731,7 @@ err:
 
 ```
 
+### Set Interface Name
 
 There is also a way to change the interface name. This is done using the `SIOCSIFNAME` ioctl.
 
@@ -792,6 +812,113 @@ int main(int argc, char **argv)
 The programs makes the interface go down, otherwise we cannot change the name of the interface.
 The interface is made down using the `SIOCSIFFLAGS` ioctl and sets up the interface name and
 makes the interface up again using the `SIOCSIFFLAGS`.
+
+### VLANs
+
+VLANs are used to logically divide the network into many interfaces although there is only one physical interface available.
+In linux VLANs can be created on with the `vlan` utility or programmatically.
+
+We will look at programmatically creating VLANs here.
+
+VLANs are generally associated with the physical name and an ID. There can be 0 4095 VLAN Ids. The interface must be a real interface in order to create a VLAN.
+
+Below program is used to add a VLAN interface.
+
+```c
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <linux/if_vlan.h>
+#include <linux/sockios.h>
+
+int main(int argc, char **argv)
+{
+    struct vlan_ioctl_args ioctl_args;
+    int sock;
+    int ret;
+
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        return -1;
+    }
+
+    memset(&ioctl_args, 0, sizeof(ioctl_args));
+    strcpy(ioctl_args.device1, argv[1]);
+    ioctl_args.u.VID = atoi(argv[2]);
+    ioctl_args.cmd = ADD_VLAN_CMD;
+
+    ret = ioctl(sock, SIOCSIFVLAN, &ioctl_args);
+    if (ret < 0) {
+        perror("ioctl");
+        return -1;
+    }
+
+    close(sock);
+
+    return 0;
+}
+
+```
+
+running `./a.out enp2s0 4` creates an interface `enp2s0.4`.
+
+```bash
+enp2s0.4: flags=4098<BROADCAST,MULTICAST>  mtu 1500
+        ether 58:8a:5a:0a:6b:2e  txqueuelen 1000  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+```
+
+
+VLANs can be deleted programmatically:
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <linux/if_vlan.h>
+#include <linux/sockios.h>
+
+int main(int argc, char **argv)
+{
+    struct vlan_ioctl_args ioctl_args;
+    int sock;
+    int ret;
+
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        return -1;
+    }
+
+    memset(&ioctl_args, 0, sizeof(ioctl_args));
+    strcpy(ioctl_args.device1, argv[1]);
+    ioctl_args.cmd = DEL_VLAN_CMD;
+
+    ret = ioctl(sock, SIOCSIFVLAN, &ioctl_args);
+    if (ret < 0) {
+        perror("ioctl");
+        return -1;
+    }
+
+    close(sock);
+
+    return 0;
+}
+
+
+```
+
+running `./a.out enp2s0.4` deletes the VLAN interface.
+
+
 
 ## wireless ioctls
 
