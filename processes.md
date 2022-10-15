@@ -100,6 +100,67 @@ When a process is created, the kernel allocates enough resources and stores the 
 
 ## setsid system call
 
+The `setsid` system call creates a new session if the calling process is not the process group leader. When called, the calling process becomes the process group leader. This means that the session id will be same as that of the process id.
+
+Generally `setsid` is called right after the call to `fork` system call in the child process.
+
+`setsid` is mainly used when daemonizing a process. 
+
+### Daemonize
+
+Daemons or system daemons detach from the controlling terminal and have the parent as the init process. Daemons always run in the background.
+
+Below are few steps in becoming a daemon.
+
+1. `fork` and exit parent.
+2. call `setsid` in child process.
+3. move `stdin`, `stdout` and `stderr` to `/dev/null`.
+4. change the working directory to `/`.
+
+Below is an example of such in C.
+
+```c
+int daemonize()
+{
+    pid_t pid;
+    int ret;
+
+    pid = fork();
+    if (pid < 0) {
+        fprintf(stderr, "failed to fork\n");
+        return -1;
+    } else if (pid > 0) {
+        exit(0); // parent process exits
+    }
+
+    ret = setsid();
+    if (ret < 0) {
+        fprintf(stderr, "failed to setsid\n");
+        return -1;
+    }
+
+    int fd;
+
+    fd = open("/dev/null", O_RDWR);
+    if (fd >= 0) {
+        dup2(fd, 0); // 0 is stdin
+        dup2(fd, 1); // 1 is stdout
+        dup2(fd, 2); // 2 is stderr
+
+        close(fd);
+    }
+
+    ret = chdir("/");
+    if (ret < 0) {
+        fprintf(stderr, "failed to chdir\n");
+        return -1;
+    }
+
+    return 0;
+}
+
+```
+
 ## getpriority and setpriority system calls
 
 ## scheduling system calls
