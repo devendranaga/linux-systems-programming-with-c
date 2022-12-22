@@ -6,6 +6,67 @@
 
 In this section of the book, i am going to describe some of the hidden and very nice features of the linux OS as a whole.
 
+
+## Modifying pid_max
+
+`pid_max` represents the max value of the pid. Path of this file is `/proc/sys/kernel/pid_max`.
+
+Below is an example that changes `pid_max`.
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+
+#define PID_MAX_PATH "/proc/sys/kernel/pid_max"
+
+int main()
+{
+    char str[20];
+    uint32_t val = 1234567;
+    uint32_t max_pid = 0;
+    FILE *fd;
+    int ret;
+
+    fd = fopen(PID_MAX_PATH, "w");
+    if (fd == NULL) {
+        perror("fopen");
+        return -1;
+    }
+
+    sprintf(str, "%u", val);
+    printf("%s\n", str);
+
+    ret = fprintf(fd, "%s", str);
+    if (ret > 0) {
+        printf("successfully written %u as max pid\n", ret);
+    } else {
+        printf("failed to write %d\n", ret);
+        perror("write");
+    }
+
+    fclose(fd);
+
+    fd = fopen(PID_MAX_PATH, "r");
+    if (fd == NULL) {
+        perror("fopen");
+        return -1;
+    }
+
+    void *res = fgets(str, sizeof(str), fd);
+    if (res == NULL) {
+        printf("failed to read back max pid\n");
+    } else {
+        printf("max_pid %s\n", str);
+    }
+
+    fclose(fd);
+    return 0;
+}
+```
+
+Note that beyond a max level, `pid_max` cannot be set beyond the limit.
+
 ## AF_ALG
 
 `AF_ALG` is an interface provided by the kernel to perform the crypto operations.

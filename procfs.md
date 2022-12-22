@@ -557,7 +557,7 @@ vimmanuscript/procfs.md
 
 ### /proc/net/dev
 
-The folder `/proc/net/dev` contain the stats regarding the networking devices in the system.
+The file `/proc/net/dev` contain the stats regarding the networking devices in the system.
 
 The command `ifconfig` command lists various networking interfaces. Like below.
 
@@ -590,5 +590,17 @@ lxcbr0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
         TX packets 0  bytes 0 (0.0 B)
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
+```
+
+### /proc/net/arp
+
+The file `/proc/net/arp` contain the stats regarding the arp table in the system.
+
+The command `arp` command lists the learnt mac addresses by the device. Like below.
+
+
+```bash
+IP address       HW type     Flags       HW address            Mask     Device
+192.168.0.1      0x1         0x2         70:4f:57:60:46:55     *        wlp4s0
 ```
 
