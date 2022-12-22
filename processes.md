@@ -13,7 +13,7 @@ In linux `stdin` is described as file descriptor 0, `stdout` is described as fil
 
 Each process is identified by a pid (called process identifier). Process ids are 16 bit numbers (Signed numbers). The program can obtain its pid using `getpid()` call. The parent process id is obtained by using `getppid()`. 
 
-**NOTE**: In linux the process 1 is always the init process.
+**NOTE**: In linux the process 1 is always the init process. Kernel calls the `/sbin/init` soon after the kernel initialization is successful. If the init process dies, the system brings down to shutdown / halt. Init manages the system and starts the rest of the processes within the system.
 
 The below program gets the pid and parent pid.
 
@@ -110,7 +110,7 @@ Generally `setsid` is called right after the call to `fork` system call in the c
 
 Daemons or system daemons detach from the controlling terminal and have the parent as the init process. Daemons always run in the background.
 
-Below are few steps in becoming a daemon.
+Below are few steps to make a process, a daemon.
 
 1. `fork` and exit parent.
 2. call `setsid` in child process.
