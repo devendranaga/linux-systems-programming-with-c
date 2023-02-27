@@ -7,8 +7,8 @@ The following options are useful while using the `gcc`.
 |--------|-------------------|
 | `-Wall` | enable all warnings |
 | `-Werror` | enable all errors |
-| `-Os` | enable optimistaion |
-| `-Wformat` | enable format of the arguments `printf`, `scanf` etc.. |
+| `-Os` | enable optimisation |
+| `-Wformat` | enable format scanning on `printf`, `scanf` etc.. |
 | `-pipe` | write to pipe instaed of file for faster compilation |
 | `-Wimplicit-function-declaration` | warn if function is not declared |
 | `-Wshadow` | enable detection of shadow variables |
@@ -32,9 +32,9 @@ some of the above options are detailed below..
 
 3. the option `-mtune=` is used to specify the target CPU architecture. In some cases, it is simply used as `-mtune=native`.
 
-4. `On` is an optimisation flag that is useful in the code optimisation at the compilation stage. it goes with 1, 2, 3 or s. where each number specify the optimisation level. if given s, it means that the compiler can choose what optimisation can be applied. This is better than programmer choosing what optimisation better for the program. Sometimes, the optimisation level higher does not mean the generated code be high performance. So leaving this option to the compiler is better.
+4. `-On` is an optimisation flag that is useful in the code optimisation at the compilation stage. it goes with 1, 2, 3 or s. where each number specify the optimisation level. if given s, it means that the compiler can choose what optimisation can be applied. This is better than programmer choosing what optimisation better for the program. Sometimes, the optimisation level higher does not mean the generated code be high performance. So leaving this option to the compiler is better.
 
-At each optimisation levels, gcc try to become more smarter. for example, if the loops are present in the program, gcc figures if the value of the final count in a `for` loop can be predicted. Such as the following.
+At each optimisation levels, gcc tries to optimize the program for more efficiency. for example, if the loops are present in the program, gcc figures if the value of the final count in a `for` loop can be predicted. Such as the following.
 
 ```c
 
@@ -48,7 +48,7 @@ printf("\n");
 
 ```
 
-gcc sees that the loop above can be optimised by simply replacing the `for` loop with 6 printf statements than extra jump statements that may stall pipeline in the CPU or add up more instructions.
+gcc sees that the loop above can be optimised by simply replacing the `for` loop with 6 `printf` statements than extra jump statements that may stall pipeline in the CPU or add up more instructions.
 
 
 4. `pipe` is used to faster the process of compilation. The `pipe` option makes the compiler to write to a pipe instead of writing to temporary files. The `pipe` is then used as a means of communication to the other programs in the subsequent sections of the compilation.
