@@ -415,7 +415,7 @@ int dllist_destroy(void (*callback)(void *data))
 
 ### 3.1 Circular linked lists
 
-1. The linked list's last element points to the head instead of NULL. Making it the circular linked list.
+The linked list's last element points to the head instead of NULL, thus making it the circular linked list.
 
 the circular linked list looks as the following.
 
@@ -458,6 +458,7 @@ int circular_list_add(void *elem)
         tail = new;
     }
 
+    // point the end of the element to the head.
     new->next = head;
     return 0;
 }
@@ -592,6 +593,11 @@ The queue front and rear are initialised when a new element is added. The additi
 
 
 ```c
+
+int get_count()
+{
+    return count;
+}
 
 int enqueue(void *content)
 {
