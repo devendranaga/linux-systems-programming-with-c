@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 
 above example, operates on a file descriptor setting the file in read + write + execute mode (this is the mode usually operated by the executable files). After setting permissions, the file permissions are verified with the `stat` system call.
 
-trying the same program on `/dev/null` gets into permissions denied error. (`EPERM`)
+Trying the same program on `/dev/null` gets into permissions denied error. (`EPERM`)
 
 ```bash
 ./a.out /dev/null 
@@ -126,7 +126,19 @@ The below permission bits describe the mode settings when setting them for a fil
 | S_IWOTH | 00002 |
 | S_IXOTH | 00001 |
 
-to give acess to user READ , WRITE and EXEC, then we need `S_IRUSR | S_IWUSR | S_IXUSR`.
+To give acess to user READ , WRITE and EXEC, then we need `S_IRUSR | S_IWUSR | S_IXUSR`.
+
+Remember that when giving the permissions, understand first if the certain user / group really require the permissions.
+
+1. For example, not every file needs to have execute permissions. So default mode could become 0666 for non executable files.
+2. For example, not every file needs to be accessed by the group and others in write mode. So the default mode could further optimized to 0644.
+3. For example, not every user need to read certain system level files. So the default mode could even become 0640.
+4. Executable files does not have to be group and other accessible when run by certain users. So permissions become 0100.
+
+Reasoning behind this is that, system permissions can be exploited by the unprivileged users such as others (everyone else) and could potentially lead to
+faults or privilege escalations or code execute in privilege modes. Avoid this by explicitly defining permission bits on each and every file in the system.
+
+Now, one cannot simply define permission bits on every file, but build systems such as openwrt, yocto or the buildroot can provide such configurability while creating the root file system.
 
 ## chown system call
 
