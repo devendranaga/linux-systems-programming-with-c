@@ -101,6 +101,8 @@ above example, operates on a file descriptor setting the file in read + write + 
 
 Trying the same program on `/dev/null` gets into permissions denied error. (`EPERM`)
 
+This simply defines that the `open` system call creates this file in 0700 mode.
+
 ```bash
 ./a.out /dev/null 
 fchmod failure Operation not permitted
@@ -127,6 +129,31 @@ The below permission bits describe the mode settings when setting them for a fil
 | S_IXOTH | 00001 |
 
 To give acess to user READ , WRITE and EXEC, then we need `S_IRUSR | S_IWUSR | S_IXUSR`.
+
+
+The `open` system call provides such provisioning of permissions when creating a file. Such as,
+
+```c
+int fd;
+
+fd = open("./file", O_CREATE | O_RDWR, S_IRWXU);
+if (fd < 0) {
+    printf("failed to open file\n");
+    return -1;
+}
+```
+
+However, using `S_IRWXU` simply means that we are providing execute permissions on the file. As we understand, shell / python scripts or binary files are the only ones that require execute permissions. Ideal use of the permissions filed could become `S_IRUSR | S_IWUSR`. 
+
+```c
+int fd;
+
+fd = open("./file", O_CREATE | O_RDWR, S_IRUSR | S_IWUSR);
+if (fd < 0) {
+    printf("failed to open file\n");
+    return -1;
+}
+```
 
 Remember that when giving the permissions, understand first if the certain user / group really require the permissions.
 
