@@ -204,7 +204,9 @@ devnaga@Hanzo:~/gists$
 
 ```
 
-Below is an example that demos the `EADDRINUSE`. Download [here](https://github.com/DevNaga/gists/blob/master/eaddrinuse.c)
+**3. Below is an example that demos the `EADDRINUSE`.**
+
+Download [here](https://github.com/DevNaga/gists/blob/master/eaddrinuse.c)
 
 
 ```c
