@@ -537,12 +537,11 @@ processes 15991
 procs_running 3
 procs_blocked 0
 softirq 18887110 592022 4788213 1230 2476370 2575 0 3562475 4456054 38895 2969276
-
 ```
 
 
 
-### /proc/<pid>/cmdline
+### /proc/pid/cmdline
 
 The file `/proc/<pid>/cmdline` shows the current program's command line when being executed. Replace pid with the id from `ps`.
 
@@ -563,7 +562,6 @@ The command `ifconfig` command lists various networking interfaces. Like below.
 
 
 ```bash
-
 enxd03745447deb: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         inet 192.168.0.12 netmask 255.255.255.0  broadcast 192.168.0.255
         inet6 fe80::d237:45ff:fe44:7deb  prefixlen 64  scopeid 0x20<link>
@@ -589,7 +587,6 @@ lxcbr0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
         RX errors 0  dropped 0  overruns 0  frame 0
         TX packets 0  bytes 0 (0.0 B)
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
-
 ```
 
 ### /proc/net/arp
@@ -604,3 +601,46 @@ IP address       HW type     Flags       HW address            Mask     Device
 192.168.0.1      0x1         0x2         70:4f:57:60:46:55     *        wlp4s0
 ```
 
+## File systems
+
+List of file systems are present under `/proc/filesystems`.
+
+```c
+cat /proc/filesystems 
+nodev	sysfs
+nodev	tmpfs
+nodev	bdev
+nodev	proc
+nodev	cgroup
+nodev	cgroup2
+nodev	cpuset
+nodev	devtmpfs
+nodev	configfs
+nodev	debugfs
+nodev	tracefs
+nodev	securityfs
+nodev	sockfs
+nodev	bpf
+nodev	pipefs
+nodev	ramfs
+nodev	hugetlbfs
+nodev	devpts
+	ext3
+	ext2
+	ext4
+nodev	autofs
+nodev	efivarfs
+nodev	mqueue
+nodev	selinuxfs
+nodev	binder
+nodev	resctrl
+	btrfs
+nodev	pstore
+	fuseblk
+nodev	fuse
+nodev	fusectl
+	squashfs
+	vfat
+nodev	rpc_pipefs
+nodev	binfmt_misc
+```
