@@ -351,4 +351,26 @@ That is if the `umask` is not cleared off and the previous umask of the process 
 
 ## lstat system call
 
+The `lstat` system call is similar to the `stat` system call, however if the argument to it is a symlink, then information about the symlink is returned.
+
+The prototype of `lstat` system call is as follows.
+
+```c
+  int lstat(const char *restrict pathname,
+                struct stat *restrict statbuf);
+
+```
+
+Note that to find a symlink, one can check on the file with `lstat` and then checking for `S_IFLINK` flag.
+
 ## fstat system call
+
+The `fstat` system call is similar to the `stat` system call, except that the argument is a file descriptor. 
+
+The prototype of `fstat` system call is as follows.
+
+```c
+int fstat(int fd, struct stat *statbuf);
+```
+
+`fstat` could be used in cases where the file descriptor of the file in question is already open.
