@@ -385,6 +385,55 @@ int main(int argc, char **argv)
 }
 ```
 
+File timestamps can be changed by using the `utime` system call. This system call can be run on the files with access controls equals or greater.
+
+
+```c
+#include <stdio.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <utime.h>
+
+int main(int argc, char **argv)
+{
+    struct utimbuf buf;
+    time_t now = time(0);
+    int ret;
+
+    if (argc != 2) {
+        printf("%s <filename>\n", argv[0]);
+        return -1;
+    }
+
+    buf.actime = now - 200;
+    buf.modtime = now - 200;
+
+    ret = utime(argv[1], &buf);
+    if (ret < 0) {
+        perror("utime");
+        return -1;
+    }
+
+    return 0;
+}
+```
+
+Above program sets the timestamp 3 mins in the past.
+
+Before running the above program gives,
+
+```bash
+ls -l utime.c
+-rw-r--r--. 1 devnaga devnaga 468 Mar  4 06:20 utime.c
+```
+
+After running the above program gives,
+
+```bash
+ls -l utime.c
+-rw-r--r--. 1 devnaga devnaga 468 Mar  4 06:17 utime.c
+```
 
 ## lstat system call
 

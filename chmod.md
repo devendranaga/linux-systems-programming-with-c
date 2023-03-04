@@ -169,6 +169,64 @@ Now, one cannot simply define permission bits on every file, but build systems s
 
 ## chown system call
 
+`chown` system call changes the uid and gid of the user to he new user.
+
+The uid and gid can be known by using the `getpwnam` system call.
+
+Below is the example of the `chown` system call.
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <pwd.h>
+
+int main(int argc, char **argv)
+{
+    struct passwd *pw = NULL;
+    int ret;
+
+    if (argc != 3) {
+        printf("%s <filename> <username>\n", argv[0]);
+        return -1;
+    }
+
+    pw = getpwnam(argv[1]);
+    if (pw == NULL) {
+        perror("getpwnam");
+        return -1;
+    }
+
+    ret = chown(argv[2], pw->pw_uid, pw->pw_gid);
+    if (ret < 0) {
+        perror("chown");
+        return -1;
+    }
+
+    printf("Chmod of [%s] with user [%s] ok\n", argv[1], argv[2]);
+}
+```
+
+Change the permissions on chown.c:
+
+```bash
+sudo chown root:root chown.c
+[devnaga@fedora cpp]$ ls -l chown.c
+-rw-r--r--. 1 root root 553 Mar  4 07:58 chown.c
+```
+
+Now run the above program shows,
+
+```bash
+sudo ./a.out devnaga chown.c
+Chmod of [devnaga] with user [chown.c] ok
+
+ls -l chown.c
+-rw-r--r--. 1 devnaga devnaga 528 Mar  4 07:57 chown.c
+```
+
+chown system call requires special permissions on some files.
+
 ## access system call
 
 The `access` system call prototype is as follows.
