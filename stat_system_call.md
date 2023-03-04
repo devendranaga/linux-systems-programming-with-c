@@ -348,6 +348,43 @@ In the above example, `umask` permission bits are cleared off with `mode` bits s
 
 That is if the `umask` is not cleared off and the previous umask of the process is `002` then the permission bits of the resulting operation that is `0666 ~ 002` produce `0664`. That is the file always be opened in `S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH` than the default asked for. the `S_IWOTH` is missed from the new file.
 
+Below example describe a bit more about checking the `UID`, `GID` and `sticky` bits.
+It also describe the number of hardlinks and the block sizes and number of blocks.
+
+```c
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int main(int argc, char **argv)
+{
+    struct stat st;
+    int ret;
+
+    if (argc != 2) {
+        printf("%s <filename>\n", argv[0]);
+        return -1;
+    }
+
+    ret = stat(argv[1], &st);
+    if (ret < 0) {
+        return -1;
+    }
+
+    printf("set uid %d set gid %d sticky %d\n",
+            st.st_mode & S_ISUID,
+            st.st_mode & S_ISGID,
+            st.st_mode & S_ISVTX);
+
+    printf("number of hardlinks %d\n", st.st_nlink);
+
+    printf("block size %d\n", st.st_blksize);
+    printf("n_512 byte blocks %d\n", st.st_blocks);
+
+    return 0;
+}
+```
+
 
 ## lstat system call
 
