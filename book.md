@@ -1,3 +1,26 @@
+# Linux Systems Programming with C and C++
+
+This book explains details about the systems programming language in C and C++.
+
+This is a newer version of the book. For C and C++ programming refer [here](https://github.com/devendranaga/programming-in-C-and-Cpp).
+
+Author: Devendra Naga
+
+## Revision History
+
+Update : 28/7/2023
+==================
+
+* Consolidate all md into one md file.
+* Remove the C programming language documentation.
+* Generate book.pdf
+
+## Introduction
+
+Systems programming deals about writing systems software that utilizes the software and hardware services offered by the OS and Hardware.
+
+This book mainly explains about the Lnux userspace. This book does not explain or does not go much detail into the kernel space. Although, some relative concepts are explained.
+
 ## System calls and library functions
 
 The differences are:
@@ -684,73 +707,7 @@ When we execute the resultant `a.out` file it prints the following:
 function 0x7f05b82d46e0
 function a is defined
 ```
-## Makefiles
 
-Makefile is a different language, is a group of instructions that when executed using the command ```make``` generates the output binaries.
-
-The binary names, how to generate them, the optimizations are specified in the Makefile.
-
-
-Makefiles are useful to organize and compile a large set of C, C++ or any other source file into different sets in different ways like customization.
-
-The command ```make``` is available in the ```automake``` package of any linux distribution.
-
-To install ```make``` on Ubuntu:
-
-```bash
-sudo apt-get install make automake
-```
-
-on Fedora (as root):
-
-```bash
-dnf install make automake
-```
-
-
-To compile our gist example hash.c using the makefile, we put it in a file called, `Makefile`.
-
-`cat Makefile`
-
-```makefile
-hash:
-    gcc hash.c -o hash
-```
-  
-  
-a `make` command is issued in the same directory gives us the `hash` binary.
-  
-Now, we can add more things to the Makefile as the following.
-  
-```makefile
-all:
-    gcc hash.c -o hash
-  
-clean:
-    rm -rf hash.o hash
-
-```
-  
-We have two subcommands now for the make argument. They are `all` and `clean`.
-  
-Issuing `make clean` would remove the binary `hash` and the object file `hash.o`.
-  
-Issuing `make all` would compile the binary and generate the `hash`.
-  
-Let us define the variable `CC` which can either be assigned with in the makefile to the C compiler `gcc` or passed via a command line argument. The command line argument is mostly used in cases where the compiler can be an architectural dependent compiler (in case of cross compilation) or a proprietary compiler.
-  
-The makefile now looks as below.
-  
-```makefile
-CC=gcc
-  
-all:
-    $(CC) hash.c -o hash
-clean:
-    rm -rf hash.o hash
-```
-  
-We can pass the `CC` variable via the command line as following `make CC=gcc`.
 ## Error codes
 
 Linux system calls returns errors in the form of code stored in `errno` variable. This variable is referenced using the header file `<errno.h>`. The variable is global and be used in safe if the program is using threads.
@@ -1011,8 +968,7 @@ int main()
 
 compile and run the above program on one console. Run it again on the other console, observe the output of the failure in `bind` system call.
 
-# Third Chapter
-## Contents
+## Processes
 
 #### 1. Processes
 
@@ -1023,6 +979,7 @@ compile and run the above program on one console. Run it again on the other cons
 #### 4. Better way to handle the SIGCHLD without signal() call
 
 #### 5. Process manager
+
 ## Memory layout of a program
 ## processes
 
@@ -1602,16 +1559,10 @@ There is another way to do the same waiting. by creating pipes.
 
 below is the procedure:
 
-```
-for each child a  pipe is created, the parent closes the write end of the pipe and the child closes the read end of the pipe.
-
-parent then sets the read end of the file descriptor to the `fd_set` for each children.
-
-parent waits in `select` system call to monitor the `fd_set`.
-
-if any children die, reported as a close of socket that is write end on the child end, since parent is on the `read` end, the `select` will wake up causing the parent to call `waitpid`.
-
-```
+1. For each child a  pipe is created, the parent closes the write end of the pipe and the child closes the read end of the pipe.
+2. Parent then sets the read end of the file descriptor to the `fd_set` for each children.
+3. Parent waits in `select` system call to monitor the `fd_set`.
+4. If any children die, reported as a close of socket that is write end on the child end, since parent is on the `read` end, the `select` will wake up causing the parent to call `waitpid`.
 
 Below is the source code for the above algorithm. Download [here](https://github.com/DevNaga/gists/blob/master/selfpipe.c)
 
