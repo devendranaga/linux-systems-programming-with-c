@@ -167,10 +167,11 @@ The `system` function returns -1 on error and returns the value returned by comm
 
 However the `system` system call has some serious vulnerabilities and should not be used. [Here](https://www.securecoding.cert.org/confluence/pages/viewpage.action?pageId=2130132) is the link.
 
-### Exec family of calls
+In all the cases, prefer using `exec` family of system calls that are discussed below.
+
+### Exec family of system calls
 
 The exec family of functions create a new process image from the given binary file or a script and replaces the contents of the original program with the contents of the given binary file or a script. These functions only return in case of a failure such as when the path to the binary \/ script file is not found or the kernel cannot resever any more memory for the program to execute.
-
 the following are the exec functions.
 
 ```c
@@ -835,7 +836,7 @@ int main(int argc, char **argv)
 
 The output looks like the following
 
-```shell
+```bash
 
 devnaga@Hanzo:~/gists$ ./a.out
 error 9 : Bad file descriptor
@@ -893,7 +894,7 @@ int main()
 
 Running the above program without **sudo**:
 
-```shell
+```bash
 
 devnaga@Hanzo:~/gists$ ./a.out
 error: 13 Permission denied
@@ -905,7 +906,7 @@ devnaga@Hanzo:~/gists$
 
 Running the above program with **sudo**:
 
-```shell
+```bash
 
 devnaga@Hanzo:~/gists$ sudo ./a.out
 [sudo] password for devnaga:
@@ -970,17 +971,8 @@ compile and run the above program on one console. Run it again on the other cons
 
 ## Processes
 
-#### 1. Processes
-
-#### 2. Fork
-
-#### 3. Waiting for child processes
-
-#### 4. Better way to handle the SIGCHLD without signal() call
-
-#### 5. Process manager
-
 ## Memory layout of a program
+
 ## processes
 
 
