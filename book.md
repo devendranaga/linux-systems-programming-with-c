@@ -98,6 +98,8 @@ void error(int status, int errno, const char *format, ...);
 The `status` variable is usually set to 0. The `errno` variable is the `errno`.
 The format is any message that the program wants to print.
 
+If you set the `status` to any other value the `error` calls `exit` to terminate the program with the passed status value.
+
 The below example provides an idea of the `error` function.
 
 ```c
@@ -110,7 +112,7 @@ int main(void)
     int fd = -1;
     
     close(fd);
-    error(0, errno, "failed to closed fd\n");
+    error(0, errno, "failed to close fd\n");
     
     return 0;
 }
@@ -172,7 +174,8 @@ In all the cases, prefer using `exec` family of system calls that are discussed 
 ### Exec family of system calls
 
 The exec family of functions create a new process image from the given binary file or a script and replaces the contents of the original program with the contents of the given binary file or a script. These functions only return in case of a failure such as when the path to the binary \/ script file is not found or the kernel cannot resever any more memory for the program to execute.
-the following are the exec functions.
+
+The following are the exec functions.
 
 ```c
 int execl(const char *path, const char *arg, ...);
@@ -183,7 +186,7 @@ int execvp(const char *file, char *const argv[]);
 
 ```
 
-the `execl` function executes the program by its `path` and given `arg` set. The `execl` must be terminated with `NULL`.
+The `execl` function executes the program by its `path` and given `arg` set. The `execl` must be terminated with `NULL`.
 
 Below is an example of `execl` system call. Download [here](https://github.com/DevNaga/gists/blob/master/execl.c)
 
@@ -230,10 +233,10 @@ the above command would produce a list of contents with in the directory that th
 
 ```
 
-this means that the `execl` always require a full path of the program to execute.
+This means that the `execl` always require a full path of the program to execute.
 
 
-similar to the `execl` the `execlp` accepts the filename that is the program name. The path is not required as long as it stays with in the standard directory (as in `PATH` variable current executable directory).
+Similar to the `execl` the `execlp` accepts the filename that is the program name. The path is not required as long as it stays with in the standard directory (as in `PATH` variable current executable directory).
 
 Below is an example of the `execlp`. Download [here](https://github.com/DevNaga/gists/blob/master/execlp.c)
 
@@ -352,7 +355,7 @@ int main()
 
 ```
 
-max priority of the message queue can be obtained by using the `_SC_MQ_PRIO_MAX`. Below is an example, Download [here](https://github.com/DevNaga/gists/blob/master/mq_prio_max.c)
+Maximum priority of the message queue can be obtained by using the `_SC_MQ_PRIO_MAX`. Below is an example, Download [here](https://github.com/DevNaga/gists/blob/master/mq_prio_max.c)
 
 ```c
 #include <stdio.h>
@@ -427,7 +430,7 @@ int main()
 
 ```
 
-to summarise, the following `sysconf` variables exists:
+To summarise, the following `sysconf` variables exists:
 
 |variable type | meaning |
 |--------------|---------|
@@ -578,8 +581,8 @@ int main(int argc, char **argv)
 
 1. The static libraries are denoted with `.a` extension while the dynamic libraries are denoted with `.so` extension.
 2. The static libraries, when linked they directly add the code into the resulting executable. Thus allowing the program to directly resolve the function references at the linker time. This also meaning that the program size is greatly increased.
-3. The dynamic libraries, when linked they only add the symbol references and addresses where the symbol can be found. So that when the program is run on the target system, the symbols will be resolved at the target system (mostly by the ld loader). Thus, the dynamic library does not add any code to the resulting binary.
-4. The dynamic library poses a problem with the un-resolved symbols when the program is run on the target system.
+3. The dynamic libraries, when linked they only add the symbol references and addresses where the symbol can be found. So that when the program is run on the target system, the symbols will be resolved at the target system (by the ld loader). Thus, the dynamic library does not add any code to the resulting binary.
+4. The dynamic library poses a problem with the un-resolved symbols when the program is run on the target system. Cases when the dynamic loading or pluggable modules are used, results in a undefined symbol reference error.
 5. The Program binary versions can be changed or incremented irrespective with the dynamic library linkage as long as the dynamic library provides the same APIs to the user program. Thus introducing the modularity.
 
 To create a shared library:
@@ -589,7 +592,7 @@ gcc -shared -o libshared.so -fPIC 1.c 2.c ..
 ```
     
 
-when creating the shared library using the -fPIC is most important. The position independent operation allows the program to load the address at the different address.
+When creating the shared library using the -fPIC is most important. The position independent operation allows the program to load the address at the different address.
 
 To create a static library:
 
@@ -5131,8 +5134,6 @@ The package [wireless-tools](http://www.labs.hpe.com/personal/Jean_Tourrilhes/Li
 # Time and timers
 
 
-#### Time
-#### Timer
 ## time
 
 Linux reads time from the RTC hardware clock if its available. The clock runs indefinitely as long as the battery is giving the power \(even though the system is powered down\). Otherwise it starts the system from JAN 1 2000 00:00 hrs. \(As i saw it from the 2.6.23 kernel\) \(Needs updating\)
@@ -5164,6 +5165,8 @@ printf("the current system time in sec %ld\n", now);
 The header file to include when using the `time` system call is `time.h`.
 
 The system call to get the current date and time in human readable format is the `gmtime` and friends \(`asctime` and `localtime`\)
+
+**gmtime**
 
 The `gmtime` takes a variable of type `time_t` as an address and returns a data structure of type `struct tm`. The time value returned in the form of UTC from 1970 Jan 1.
 
@@ -5297,6 +5300,8 @@ int main()
 
 ```
 
+**ctime**
+
 `ctime`  is another API that can return time in calendar time printable format (string) according to the time size.
 
 `ctime` prototype is as follows.
@@ -5321,6 +5326,7 @@ int main()
 
 ```
 
+**mktime**
 
 `mktime` is an API that converts the time in `struct tm` format into `time_t`. The prototype is as follows.
 
@@ -5493,7 +5499,7 @@ printf("latency %ld sec %ld usec\n", delta.tv_sec, delta.tv_usec);
 ```
 
 
-
+**settimeofday**
 
 The `settimeofday` API is used to set the system time. The prototype is as follows..
 
@@ -5543,7 +5549,7 @@ The `adjtime` looks as follows
 int adjtime(const struct timeval *delta, struct timeval *olddelta);
 ```
 
-The `adjtime` API speeds up or slows down the time in monotonically. If the `delta` argument is positive, then the system time is speeded up till the `delta` value and if the `delta` argument is negative, then the system time is slowed down till the `delta` value.
+The `adjtime` API speeds up or slows down the time in monotonic manner. If the `delta` argument is positive, then the system time is speeded up till the `delta` value and if the `delta` argument is negative, then the system time is slowed down till the `delta` value.
 
 The below code sample shows the usage of `adjtime`.
 
@@ -5564,6 +5570,8 @@ if (ret < 0) {
 
 When we are programming timers, we should avoid any calls to the above API as they are not monotonic or steadily moving forward in the future.
 
+**difftime**
+
 The `time.h` provides a macro called `difftime` that is used to find the difference of time between two variables of type `time_t` (Although one can subtract the two from each other on linux system).
 
 The `difftime` looks as follows.
@@ -5571,6 +5579,8 @@ The `difftime` looks as follows.
 ```c
 double difftime(time_t time0, time_t time1);
 ```
+
+**clock**
 
 `clock` is another API that measures the CPU time perfectly. As we looked at one of the usage of `gettimeofday` call, we provided an example of using the `gettimeofday` to measure the time it takes to execute the function. However, this incurs the scheduling and other jobs with in the system and is not the effective way to find out only the CPU time. `clock` function provides us to do just this.
 
@@ -5595,6 +5605,8 @@ end = clock();
 printf("ticks %d\n", end - start);
 
 ```
+
+**times**
 
 There is another API that is used to get the CPU times, called `times`.
 
@@ -5621,6 +5633,8 @@ struct tms {
 `tms_cstime` is the amount of time spent by the children executing the instructions in system.
 
 All the above times are units of clock ticks.
+
+**Performance measurement using timers**
 
 
 ### Timer APIs
